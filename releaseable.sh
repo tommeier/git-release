@@ -79,8 +79,19 @@ if [ ! $SKIP_EXECUTE ]; then
   VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
 
   last_tag_name=$(get_last_tag_name)
-  next_tag_name=$(get_next_tag_name)
+  next_tag_name=$(get_next_tag_name $last_tag_name)
 
-  echo 'Script Run'
+  #TODO : Changelog generation (diff between last release)
+  #     : Get pull request bodies or optionally all commit messages
+  #     : TODO : Tagging for changelog generation
+
+  #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
+  #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
+  # --> Create new tag with deploy prefix?
+  # --> Generate changelog in the same way
+
+  #     : TODO : Email deploy notificatiion with changelog generation
+
+  #TODO : (Commit changes & Push tag)
 fi;
 
