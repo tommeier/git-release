@@ -2,7 +2,7 @@
 source ./spec/scripts/script_spec_helper.sh
 source ./script/support/releaseable.sh
 
-describe "releaseable : unit"
+describe "releaseable - unit"
 
 after() {
   remove_sandbox
@@ -45,14 +45,6 @@ it_passes_on_ensure_git_directory_with_git_directory() {
 
   should_succeed $(ensure_git_directory)
 }
-
-# function versioning_prefix() {
-#   if [[ $2 ]]; then
-#     echo "${1}/{2}"
-#   else
-#     echo "${1}"
-#   fi;
-# }
 
 #versioning_prefix()
 
