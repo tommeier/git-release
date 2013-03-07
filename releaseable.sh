@@ -6,6 +6,7 @@ set -e
 ### Pure bash script for handling git release versioning ###
 ############################################################
 
+
 ############################################################
 #####                   DEFAULTS                       #####
 ############################################################
@@ -35,28 +36,9 @@ usage example:
     Tag generated : our-releases/REL1.1.4
 "
 
-############################################################
-#####                  FUNCTIONS                       #####
-############################################################
-
-function validate_inputs() {
-  #Confirm version type is in the accepted types
-  local v="${VERSION_TYPE}"
-
-  if [[ $v != 'major' && $v != 'minor' && $v != 'patch' ]]; then
-    printf "incorrect versioning type: '%s'\n" "$v" >&2
-    echo "Please set to one of 'major', 'minor' or 'patch'" >&2
-    echo "$USAGE_OUTPUT" >&2
-    exit 1
-  fi;
-}
-
-function ensure_git_directory() {
-  if [[ ! -d  '.git' ]]; then
-    echo "Error - Not a git repository please run from the base of your git repo." >&2
-    exit 1
-  fi;
-}
+#Supporting functions
+script_source=$( dirname "${BASH_SOURCE[0]}" )
+source $script_source/support/releaseable.sh
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
@@ -82,23 +64,6 @@ do
 done
 shift $((OPTIND - 1))
 
-############################################################
-#####                TAG FUNCTIONS                     #####
-############################################################
-
-function get_release_tags() {
-  # refs=`git log --date-order --simplify-by-decoration --pretty=format:%H`
-  # ref_list=$(IFS=' '; echo "${refs[*]}")
-  tag_pattern="${RELEASE_PREFIX}${VERSION_PREFIX}"
-  tag_names=`git tag -l $tag_pattern*`
-  #git name-rev --tags --all
-  #00003b0ff9826fc1a8a2e6cd904e8a7d3ef5b9c6 tags/20110818_1_ultimate_warrior~1^2
-  #0800aaa7cf30a6645108800931291b2bbff0be2e tags/20120213_1103_hulk_hogan~5^2
-  #0900e412938f81238593e59247536ce116379d7c tags/20110812_1_release_ultimate_warrior~73
-
-  #<ref> tags/<release_prefix>/<version_prefix><version_number>
-  echo $tag_names
-}
 
 if [ ! $SKIP_EXECUTE ]; then
 
@@ -106,8 +71,16 @@ if [ ! $SKIP_EXECUTE ]; then
   #####                  VALIDATION                      #####
   ############################################################
 
-  validate_inputs
-  ensure_git_directory
+  validate_version_type $VERSION_TYPE $USAGE_OUTPUT
+  ensure_git_directory $VERSIONING_PREFIX
+
+  ############################################################
+  #####                   RELEASE                        #####
+  ############################################################
+  VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
+
+  last_tag_name=$(get_last_tag_name)
+  next_tag_name=$(get_next_tag_name)
 
   echo 'Script Run'
 fi;
