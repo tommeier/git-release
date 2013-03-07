@@ -22,7 +22,7 @@ function should_succeed() {
 }
 
 function should_fail() {
-  ! is_successful
+  ! should_succeed
 }
 
 function enter_sandbox() {
@@ -50,6 +50,7 @@ function generate_sandbox_tags() {
                     'release/production/v1.0.9'
                     'release/staging/v2.0.3'
                     'release/staging/v1.0.2'
+                    'release/production/v3.1.9'
                     'release/production/v3.0.9'
                     'random_tag_3'
   )
