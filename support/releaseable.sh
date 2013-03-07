@@ -56,3 +56,55 @@ function get_release_tags() {
   #<ref> tags/<release_prefix>/<version_prefix><version_number>
   echo "$tag_names"
 }
+
+
+function get_last_tag_name() {
+  local versioning_prefix=$1
+
+  tags=$(get_release_tags $versioning_prefix)
+  echo "$tags" | tail -1
+}
+
+#get_next_tag_name major release/production/v 1.0.4.3
+function get_next_tag_name() {
+  local versioning_type=$1
+  local version_prefix=$2
+  local last_tag_name=$3
+
+  if [[ "$versioning_type" = "" ]]; then
+    echo "Error : Versioning type required. eg. major"
+    exit 1;
+  fi;
+
+  if [[ $last_tag_name = '' ]]; then
+    last_tag_name=$(get_last_tag_name $version_prefix)
+
+    if [[ $last_tag_name = '' ]]; then
+      #No original tag name for version prefix - start increment
+      last_tag_name="0.0.0"
+    fi;
+  fi;
+
+  regex="([0-9]+)\.([0-9]+)\.([0-9]+)$"
+  if [[ $last_tag_name =~ $regex ]]; then
+    local full_version=$BASH_REMATCH
+    local major_version="${BASH_REMATCH[1]}"
+    local minor_version="${BASH_REMATCH[2]}"
+    local patch_version="${BASH_REMATCH[3]}"
+  else
+    echo "Error : Unable to determine version number from '${last_tag_name}'"
+    exit 1;
+  fi;
+
+  #Increment version
+  case "$versioning_type" in
+    'major' )
+        major_version=$(( $major_version + 1 ));;
+    'minor' )
+        minor_version=$(( $minor_version + 1 ));;
+    'patch' )
+        patch_version=$(( $patch_version + 1 ));;
+  esac
+
+  echo "${version_prefix}${major_version}.${minor_version}.${patch_version}"
+}
