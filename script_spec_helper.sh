@@ -36,12 +36,16 @@ function remove_sandbox() {
   rm -rf .sandbox
 }
 
-function generate_sandbox_tags() {
+function generate_git_repo() {
   enter_sandbox
   git init
   touch 'commit_1'
   git add -A
   git commit -am "Initial Commit"
+}
+
+function generate_sandbox_tags() {
+  generate_git_repo
 
   local tag_names=( 'random_tag_1'
                     'release/v1.0.5'
@@ -60,4 +64,14 @@ function generate_sandbox_tags() {
     git commit -m "Change : ${i}" &>/dev/null
     git tag "${tag_names[$i]}" &>/dev/null
   done;
+}
+
+function check_tag_exists() {
+  local filtered_tags=$(git tag -l $1)
+  local search_for_tag=$(search_substring "$filtered_tags" "$1")
+  if [[ "$search_for_tag" = "found" ]]; then
+    return 0;
+  else
+    return 1;
+  fi;
 }
