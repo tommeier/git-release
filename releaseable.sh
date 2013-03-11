@@ -44,7 +44,7 @@ source $script_source/support/releaseable.sh
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts htv:rpe option
+while getopts ht:v:r:p:e option
 do
         case "${option}"
         in
@@ -53,8 +53,10 @@ do
                   exit 0
                   ;;
                 t) SKIP_EXECUTE=true;;
-                v) VERSION_TYPE=$OPTARG;;
-
+                v) VERSION_TYPE="$OPTARG";;
+                r) RELEASE_PREFIX="$OPTARG";;
+                p) VERSION_PREFIX="$OPTARG";;
+                e) APP_ENV="$OPTARG";;
                 ?)
                   printf "illegal option: '%s'\n" "$OPTARG" >&2
                   echo "$USAGE_OUTPUT" >&2
@@ -78,8 +80,8 @@ if [ ! $SKIP_EXECUTE ]; then
   ############################################################
   VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
 
-  last_tag_name=$(get_last_tag_name)
-  next_tag_name=$(get_next_tag_name $last_tag_name)
+  last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX)
+  next_tag_name=$(get_next_tag_name $VERSION_TYPE $VERSIONING_PREFIX)
 
   #TODO : Changelog generation (diff between last release)
   #     : Get pull request bodies or optionally all commit messages
@@ -92,6 +94,12 @@ if [ ! $SKIP_EXECUTE ]; then
 
   #     : TODO : Email deploy notificatiion with changelog generation
 
-  #TODO : (Commit changes & Push tag)
+  #TODO : Ask for confirmation unless -f (force) is passed
+  set +e
+  git add -A
+  git commit -m "Release : ${next_tag_name}"
+  set -e
+  git tag $next_tag_name
+  #TODO : Confirm/force push of tag
 fi;
 
