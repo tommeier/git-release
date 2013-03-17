@@ -171,4 +171,94 @@ it_uses_get_next_tag_name_to_succeed_incrementing_each_type() {
   test $output = "release/v1.0.7"
 }
 
+#get_commits_between_points
+
+it_uses_get_commits_between_points_to_raise_an_error_with_nothing_passed() {
+  enter_sandbox
+  should_fail $(get_commits_between_points)
+}
+
+it_uses_get_commits_between_points_to_raise_an_error_with_no_end_point() {
+  enter_sandbox
+  local output=""
+  should_fail output=$(get_commits_between_points 'somestartpoint')
+}
+
+it_uses_get_commits_between_points_to_get_nothing_when_no_commits_exists() {
+  generate_git_repo
+  should_succeed $(get_commits_between_points 'anyTagName' 'anotherTagName')
+}
+
+it_uses_get_commits_between_points_to_return_commits_with_no_start_point() {
+  generate_sandbox_tags
+
+  local start_point=""
+  local end_point="release/v1.0.6"
+  output=$(get_commits_between_points "$start_point" "$end_point")
+
+  #Ordered by creation date
+  local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
+  local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
+  local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
+  local older_sha_3=$(get_sha_for_tag_name 'random_tag_1')
+  local initial_commit=$(get_sha_for_first_commit)
+
+  test "$output" = "$target_tag_sha
+$older_sha_1
+$older_sha_2
+$older_sha_3
+$initial_commit"
+}
+
+it_uses_get_commits_between_points_to_return_all_commits_between_points_with_filter() {
+  generate_sandbox_tags
+
+  local start_point="release/production/v1.0.9"
+  local end_point="release/production/v3.0.9"
+
+  local commit_message=$(get_commit_message_for_latest_commit 'release/production/v3.0.9')
+  local target_tag_sha=$(get_sha_for_tag_name 'release/production/v3.0.9')
+
+  output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
+
+  test "$output" = "$target_tag_sha"
+}
+
+it_uses_get_commits_between_points_to_return_all_commits_with_no_start_point_with_filter() {
+  generate_sandbox_tags
+
+  local start_point=""
+  local end_point="release/production/v3.0.9"
+
+  local commit_message=$(get_commit_message_for_latest_commit 'release/production/v3.1.9')
+  local target_tag_sha=$(get_sha_for_tag_name 'release/production/v3.1.9')
+
+  output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
+
+  test "$output" = "$target_tag_sha"
+}
+
+it_uses_get_commits_between_points_to_return_all_commits_between_points() {
+  generate_sandbox_tags
+
+  local start_point="release/v1.0.5"
+  local end_point="release/v1.0.6"
+  output=$(get_commits_between_points "$start_point" "$end_point")
+
+  #Ordered by creation date
+  local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
+  local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
+  local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
+
+  test "$output" = "$target_tag_sha
+$older_sha_1
+$older_sha_2"
+}
+
+
+#generate_changelog
+
+#it should error without an endpoint
+#it should pass without a starting point
+
 
