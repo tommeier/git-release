@@ -25,6 +25,20 @@ function should_fail() {
   ! should_succeed
 }
 
+function file_should_exist() {
+  if [[ -f $1 ]];
+  then
+    return 0;
+  else
+    return 1;
+  fi;
+}
+
+function file_should_not_exist() {
+  ! file_should_exist $1
+}
+
+
 function enter_sandbox() {
   __DIR__="$PWD"
   rm -rf .sandbox

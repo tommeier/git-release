@@ -5,7 +5,9 @@ source ./script/support/releaseable.sh
 describe "releaseable - unit"
 
 after() {
-  remove_sandbox
+  if [[ $MAINTAIN_SANDBOX != true ]]; then
+    remove_sandbox
+  fi;
 }
 #validate_inputs()
 
@@ -258,7 +260,64 @@ $older_sha_2"
 
 #generate_changelog
 
-#it should error without an endpoint
-#it should pass without a starting point
+it_uses_generate_changelog_to_exit_with_errors_without_endpoint() {
+  enter_sandbox
+
+  should_fail $(generate_changelog)
+  should_fail $(generate_changelog 'anything')
+}
+
+it_uses_generate_changelog_to_succeed_without_a_startpoint() {
+  enter_sandbox
+
+  should_succeed $(generate_changelog '' 'anything')
+}
+
+it_uses_generate_changelog_to_create_a_custom_changelog_file() {
+  enter_sandbox
+
+  file_should_not_exist "MYCHANGELOG"
+
+  output=$(generate_changelog 'anything' 'anything' 'MYCHANGELOG')
+
+  file_should_exist "MYCHANGELOG"
+}
+
+it_uses_generate_changelog_to_create_a_default_changelog_file() {
+  enter_sandbox
+
+  file_should_not_exist "CHANGELOG"
+
+  output=$(generate_changelog 'anything' 'anything')
+
+  file_should_exist "CHANGELOG"
+}
+
+it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages(){
+  generate_sandbox_tags
+  file_should_not_exist "CHANGELOG"
+
+  local start_point="release/v1.0.5"
+  local end_point="release/v1.0.6"
+
+  local output=$(generate_changelog "$start_point" "$end_point")
+  local contents=`cat CHANGELOG`
+
+  file_should_exist "CHANGELOG"
+  test "$contents" = "$(changelog_header)"
+
+#   #Ordered by creation date
+#   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
+#   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
+#   local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
+
+#   test "$output" = "$target_tag_sha
+# $older_sha_1
+# $older_sha_2"
+}
+
+# it_uses_generate_changelog_create_create_a_changelog_file_scoped_to_pull_requests(){
+
+# }
 
 
