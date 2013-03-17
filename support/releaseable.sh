@@ -10,7 +10,7 @@ function validate_version_type() {
   local error_output="$2"
 
   if [[ $v != "major" && $v != 'minor' && $v != 'patch' ]]; then
-    printf "incorrect versioning type: '%s'\n" "$v" >&2
+    printf "incorrect versioning type: '%s'\\n" "$v" >&2
     echo "Please set to one of 'major', 'minor' or 'patch'" >&2
     echo "$error_output" >&2
     exit 1
@@ -78,7 +78,7 @@ function get_next_tag_name() {
     fi;
   fi;
 
-  regex="([0-9]+)\.([0-9]+)\.([0-9]+)$"
+  regex="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
   if [[ $last_tag_name =~ $regex ]]; then
     local full_version=$BASH_REMATCH
     local major_version="${BASH_REMATCH[1]}"
@@ -154,15 +154,44 @@ function get_commits_between_points() {
 #####            CHANGELOG FUNCTIONS                   #####
 ############################################################
 
+function changelog_header() {
+local output=""
+! read -d '' output <<"EOF"
++=========================================================+
+||    _____ _                            _               ||
+||   / ____| |                          | |              ||
+||  | |    | |__   __ _ _ __   __ _  ___| | ___   __ _   ||
+||  | |    | '_ \\ / _` | '_ \\ / _` |/ _ \\ |/ _ \\ / _` |  ||
+||  | |____| | | | (_| | | | | (_| |  __/ | (_) | (_| |  ||
+||   \\_____|_| |_|\\__,_|_| |_|\\__, |\\___|_|\\___/ \\__, |  ||
+||                             __/ |              __/ |  ||
+||                            |___/              |___/   ||
+||                                                       ||
++=========================================================+
+EOF
+echo "$output"
+}
+
 #generate_changelog "$last_tag_name" "$next_tag_name"
 function generate_changelog() {
-  local starting_point=$1
-  local end_point=$2
+  local starting_point="$1"
+  local end_point="$2"
+  local changelog_file="CHANGELOG"
+
+  if [[ "$3" != '' ]]; then
+    changelog_file="$3"
+  fi;
 
   if [[ "$end_point" = "" ]]; then
     echo "Error : End point for changelog generation required."
     exit 1;
   fi;
+
+  #Replace file -> TODO: Make optional/append
+  rm -rf $changelog_file
+  touch $changelog_file
+
+  echo "$(changelog_header)" >> $changelog_file
 
   #Get commits between 2 points
   #Scope to only pull requests optionally
