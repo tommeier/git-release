@@ -106,3 +106,6 @@ if [ ! $SKIP_EXECUTE ]; then
   #TODO : Test mode should display process
 fi;
 
+
+#TODO : Refactor specs to pass set of tags to create, with optional commit messages
+#       So it reduces the number of tags generated for each spec
