@@ -74,6 +74,7 @@ if [ ! $SKIP_EXECUTE ]; then
 
   validate_version_type $VERSION_TYPE $USAGE_OUTPUT
   ensure_git_directory $VERSIONING_PREFIX
+  #TODO : Error if git in dirty state
 
   ############################################################
   #####                   RELEASE                        #####
@@ -83,6 +84,7 @@ if [ ! $SKIP_EXECUTE ]; then
   last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX)
   next_tag_name=$(get_next_tag_name $VERSION_TYPE $VERSIONING_PREFIX)
 
+  generate_changelog "$last_tag_name" "$next_tag_name"
   #TODO : Changelog generation (diff between last release)
   #     : Get pull request bodies or optionally all commit messages
   #     : TODO : Tagging for changelog generation
@@ -95,11 +97,12 @@ if [ ! $SKIP_EXECUTE ]; then
   #     : TODO : Email deploy notificatiion with changelog generation
 
   #TODO : Ask for confirmation unless -f (force) is passed
-  set +e
+  set +e #Allow commit to fail if no files have changed
   git add -A
   git commit -m "Release : ${next_tag_name}"
   set -e
+
   git tag $next_tag_name
-  #TODO : Confirm/force push of tag
+  #TODO : Test mode should display process
 fi;
 

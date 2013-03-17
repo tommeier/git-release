@@ -37,21 +37,14 @@ function versioning_prefix() {
 ############################################################
 
 function get_release_tags() {
-  # refs=`git log --date-order --simplify-by-decoration --pretty=format:%H`
-  # ref_list=$(IFS=' '; echo "${refs[*]}")
-  #tag_pattern="${RELEASE_PREFIX}/${VERSION_PREFIX}"
-
   local filter=""
+  local tag_names=""
+
   if [[ $1 ]]; then
-    tag_pattern=$1
+    local tag_pattern=$1
     filter="${tag_pattern}*"
   fi;
   tag_names=$(git tag -l $filter)
-
-  #git name-rev --tags --all
-  #00003b0ff9826fc1a8a2e6cd904e8a7d3ef5b9c6 tags/20110818_1_ultimate_warrior~1^2
-  #0800aaa7cf30a6645108800931291b2bbff0be2e tags/20120213_1103_hulk_hogan~5^2
-  #0900e412938f81238593e59247536ce116379d7c tags/20110812_1_release_ultimate_warrior~73
 
   #<ref> tags/<release_prefix>/<version_prefix><version_number>
   echo "$tag_names"
@@ -107,4 +100,77 @@ function get_next_tag_name() {
   esac
 
   echo "${version_prefix}${major_version}.${minor_version}.${patch_version}"
+}
+
+function get_sha_for_tag_name() {
+  local result=$(git show-ref --tags --hash $1)
+  echo "$result"
+}
+
+function get_sha_for_first_commit() {
+  local filter=$1
+  local result=$(git log --reverse --format="%H" $filter | head -1)
+  echo "$result"
+}
+
+function get_commit_message_for_first_commit() {
+  local filter=$1
+  local result=$(git log --reverse --format="%s" $filter | head -1)
+  echo "$result"
+}
+
+function get_commit_message_for_latest_commit() {
+  local filter=$1
+  local result=$(git log -n1 --format="%s" $filter)
+  echo "$result"
+}
+
+function get_commits_between_points() {
+  local starting_point="$1"
+  local end_point="$2"
+  local log_filter="$3" #optional
+
+  local git_command="git log";
+  local log_options="--no-notes --format=%H"
+  local git_range=""
+
+  if [[ "$log_filter" != '' ]]; then
+    log_options="$log_options --grep="'"'"$log_filter"'"'""
+  fi;
+  if [[ "$starting_point" != '' && "$end_point" != '' ]]; then
+    git_range="${starting_point}^1..${end_point}";
+  elif [[ "$end_point" != '' ]]; then
+    git_range="${end_point}"
+  else
+    echo "Error : Require starting and end points to calculate commits between points."
+    exit 1;
+  fi;
+
+  local result=`eval $git_command $log_options $git_range`
+  echo "$result"
+}
+
+############################################################
+#####            CHANGELOG FUNCTIONS                   #####
+############################################################
+
+#generate_changelog "$last_tag_name" "$next_tag_name"
+function generate_changelog() {
+  local starting_point=$1
+  local end_point=$2
+
+  if [[ "$end_point" = "" ]]; then
+    echo "Error : End point for changelog generation required."
+    exit 1;
+  fi;
+
+  #Get commits between 2 points
+  #Scope to only pull requests optionally
+  #If scoped to pull requests:
+  #   = Capture body of each commit
+  #else
+  #   # print raw title of each commit
+  #fi/
+  #Save output to CHANGELOG file (append to start)
+
 }
