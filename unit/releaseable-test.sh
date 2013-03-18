@@ -293,31 +293,78 @@ it_uses_generate_changelog_to_create_a_default_changelog_file() {
   file_should_exist "CHANGELOG"
 }
 
-it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages(){
-  generate_sandbox_tags
-  file_should_not_exist "CHANGELOG"
+# MAINTAIN_SANDBOX=true
+# it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages(){
+#   generate_sandbox_tags
+#   file_should_not_exist "CHANGELOG"
 
-  local start_point="release/v1.0.5"
-  local end_point="release/v1.0.6"
+#   local start_point="release/v1.0.5"
+#   local end_point="release/v1.0.6"
 
-  local output=$(generate_changelog "$start_point" "$end_point")
-  local contents=`cat CHANGELOG`
+#   local output=$(generate_changelog "$start_point" "$end_point")
+#   local contents=`cat CHANGELOG`
 
-  file_should_exist "CHANGELOG"
-  test "$contents" = "$(changelog_header)"
+#   file_should_exist "CHANGELOG"
+#   test "$contents" = "$(changelog_header)
+# || Generated on $(date)
+# $(changelog_divider)"
 
-#   #Ordered by creation date
-#   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
-#   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
-#   local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
+# #   #Ordered by creation date
+# #   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
+# #   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
+# #   local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
 
-#   test "$output" = "$target_tag_sha
-# $older_sha_1
-# $older_sha_2"
-}
+# #   test "$output" = "$target_tag_sha
+# # $older_sha_1
+# # $older_sha_2"
+# }
 
 # it_uses_generate_changelog_create_create_a_changelog_file_scoped_to_pull_requests(){
 
 # }
+
+it_uses_get_changelog_text_for_commits_to_return_titles_by_default() {
+  generate_sandbox_tags
+
+  local start_point="release/v1.0.5"
+  local end_point="release/v1.0.6"
+
+  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+
+  local commit_message_1=$(get_commit_message_for_latest_commit 'release/v1.0.6')
+  local commit_message_2=$(get_commit_message_for_latest_commit 'random_tag_2')
+  local commit_message_3=$(get_commit_message_for_latest_commit 'release/v1.0.5')
+
+  output=$(get_changelog_text_for_commits "$commit_shas")
+
+
+  test "$output" = "${commit_message_1}
+${commit_message_2}
+${commit_message_3}"
+}
+
+# it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags() {}
+
+# it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_insensitive() {}
+
+it_uses_get_changelog_text_for_commits_to_return_titles_with_a_custom_format() {
+  generate_sandbox_tags
+
+  local start_point="release/v1.0.5"
+  local end_point="release/v1.0.6"
+
+  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+
+  local commit_message_1=$(get_commit_message_for_latest_commit 'release/v1.0.6')
+  local commit_message_2=$(get_commit_message_for_latest_commit 'random_tag_2')
+  local commit_message_3=$(get_commit_message_for_latest_commit 'release/v1.0.5')
+
+  output=$(get_changelog_text_for_commits "--format=%H--%s" "$commit_shas")
+
+  local sha_array=($commit_shas)
+  test "$output" = "${sha_array[0]}--${commit_message_1}
+${sha_array[1]}--${commit_message_2}
+${sha_array[2]}--${commit_message_3}"
+}
 
 

@@ -38,7 +38,6 @@ function file_should_not_exist() {
   ! file_should_exist $1
 }
 
-
 function enter_sandbox() {
   __DIR__="$PWD"
   rm -rf .sandbox
