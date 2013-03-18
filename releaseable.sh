@@ -89,6 +89,7 @@ if [ ! $SKIP_EXECUTE ]; then
   #     : Get pull request bodies or optionally all commit messages
   #     : TODO : Tagging for changelog generation
 
+  #TODO : Create VERSION file with latest version number
   #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
   #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
   # --> Create new tag with deploy prefix?
