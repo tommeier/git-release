@@ -154,10 +154,13 @@ function get_commits_between_points() {
 #####            CHANGELOG FUNCTIONS                   #####
 ############################################################
 
+function changelog_divider() {
+  echo "+=========================================================+"
+}
+
 function changelog_header() {
 local output=""
 ! read -d '' output <<"EOF"
-+=========================================================+
 ||    _____ _                            _               ||
 ||   / ____| |                          | |              ||
 ||  | |    | |__   __ _ _ __   __ _  ___| | ___   __ _   ||
@@ -167,9 +170,41 @@ local output=""
 ||                             __/ |              __/ |  ||
 ||                            |___/              |___/   ||
 ||                                                       ||
-+=========================================================+
 EOF
-echo "$output"
+echo "$(changelog_divider)
+$output
+$(changelog_divider)"
+}
+
+function get_changelog_text_for_commits() {
+  #Pass in commits array of SHA's
+  #Return formatted changelog text, with tags handled
+
+  local commit_shas=($@)
+  local general_release_lines=""
+  local log_format="--format=%s"
+  local log_format_matcher="\-\-format\="
+
+  #Capture line by line unless first argument provides a custom format
+  for i in "${!commit_shas[@]}"; do
+    if [[ "${i}" = '0' ]]; then
+      if echo "${commit_shas[$i]}" | grep -q "${log_format_matcher}"; then
+        log_format="${commit_shas[$i]}";
+        continue;
+      fi;
+    fi;
+    general_release_lines+="`git show -s ${log_format} ${commit_shas[$i]}`\n"
+  done;
+
+
+  #1. Get text of commmits with author in brackets and list
+  #2. Group by fixed tags (Feature --> Bug --> Others)
+  #3. Ignore size & shape differences of tags (case insensitive ignore optional s within square brackets)
+  #4. Optional format ( allow it to pass the format so only print the body)
+  #Test Test Test
+  #Optional args for this method, assume everything is SHA unless -f is passed
+  echo "$general_release_lines"
+  #"HOWDY"
 }
 
 #generate_changelog "$last_tag_name" "$next_tag_name"
@@ -187,12 +222,36 @@ function generate_changelog() {
     exit 1;
   fi;
 
+  local commits=$(get_commits_between_points $starting_point $end_point)
+  local commit_output=$(get_changelog_text_for_commits $commits)
+
+  #TAGS
+  #[Feature]
+  #[Bug]
+  #[Security]
+
+
   #Replace file -> TODO: Make optional/append
   rm -rf $changelog_file
   touch $changelog_file
 
-  echo "$(changelog_header)" >> $changelog_file
+  echo "$(changelog_header)"    >> $changelog_file
+  echo "* Generated on $(date)" >> $changelog_file
+  echo "$(changelog_divider)"   >> $changelog_file
 
+  # local output_lines=(
+  #   "* Generated on $(date)"
+  #   $commit_output
+  #   )
+  for line in "${commit_output[@]}"
+  do
+    echo "|| ${line}" >> $changelog_file
+  done
+  # echo "$(changelog_header)" >> $changelog_file
+
+
+
+  #echo '' >> $changelog_file
   #Get commits between 2 points
   #Scope to only pull requests optionally
   #If scoped to pull requests:
