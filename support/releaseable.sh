@@ -126,9 +126,9 @@ function get_commit_message_for_latest_commit() {
 }
 
 function get_commits_between_points() {
-  local starting_point="$1"
-  local end_point="$2"
-  local log_filter="$3" #optional
+  local starting_point="$1" #optional
+  local end_point="$2"      #optional
+  local log_filter="$3"     #optional
 
   local git_command="git log";
   local log_options="--no-notes --format=%H"
@@ -141,13 +141,11 @@ function get_commits_between_points() {
     git_range="${starting_point}^1..${end_point}";
   elif [[ "$end_point" != '' ]]; then
     git_range="${end_point}"
-  else
-    echo "Error : Require starting and end points to calculate commits between points."
-    exit 1;
+  elif [[ "$starting_point" != '' ]]; then
+    git_range="${starting_point}^1..HEAD"
   fi;
 
-  local result=`eval $git_command $log_options $git_range`
-  echo "$result"
+  eval $git_command $log_options $git_range
 }
 
 ############################################################
@@ -214,9 +212,11 @@ function get_changelog_text_for_commits() {
       #Tagged entry
       local full_tag=$BASH_REMATCH
       local tag_type="${BASH_REMATCH[1]}"
-      local tag_content="${BASH_REMATCH[2]##*( )}" #Remove leading spaces (regex in bash capturing always)
-      tag_content="  ${tag_content%%*( )}\n" #Add leading 2 spaces for tagged line prefix and remove trailing spaces
-
+      #Remove leading spaces (regex in bash capturing always)
+      local tag_content="${BASH_REMATCH[2]##*( )}"
+      #Add leading 2 spaces for tagged line prefix and remove trailing spaces
+      tag_content="  ${tag_content%%*( )}\n"
+      #Sort matching tags
       case "$tag_type" in
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
               feature_tag_lines+="${tag_content}";;
@@ -251,38 +251,40 @@ function get_changelog_text_for_commits() {
 
 #generate_changelog "$last_tag_name" "$next_tag_name"
 function generate_changelog() {
-  local starting_point="$1"
-  local end_point="$2"
-  local changelog_file="CHANGELOG"
+  local release_name="$1"
+  local starting_point="$2"        #optional
+  local end_point="$3"             #optional
+  local changelog_file="CHANGELOG" #optional
 
-  if [[ "$3" != '' ]]; then
-    changelog_file="$3"
+  if [[ "$4" != '' ]]; then
+    changelog_file="$4"
   fi;
 
-  if [[ "$end_point" = "" ]]; then
-    echo "Error : End point for changelog generation required."
+  if [[ "$release_name" = "" ]]; then
+    echo "Error : Release name required for changelog generation."
     exit 1;
   fi;
 
   local commits=$(get_commits_between_points $starting_point $end_point)
   local commit_output=$(get_changelog_text_for_commits $commits)
 
-  #Replace file -> TODO: Make optional/append with header
+  #Replace file -> TODO: Make optional/append after any existing header
   rm -rf $changelog_file
   touch $changelog_file
 
-  echo "$(changelog_header)"    >> $changelog_file
-  echo "* Generated on $(date)" >> $changelog_file
-  echo "$(changelog_divider)"   >> $changelog_file
+  echo "$(changelog_header)"          >> $changelog_file
+  echo "|| Release: ${release_name}"  >> $changelog_file
+  echo "|| Released on $(date)"       >> $changelog_file
+  echo "$(changelog_divider)"         >> $changelog_file
 
   # local output_lines=(
   #   "* Generated on $(date)"
   #   $commit_output
   #   )
-  for line in "${commit_output[@]}"
-  do
-    echo "|| ${line}" >> $changelog_file
-  done
+  # for line in "$commit_output"
+  # do
+    echo "${commit_output}" >> $changelog_file
+  # done
   # echo "$(changelog_header)" >> $changelog_file
 
 
