@@ -233,6 +233,7 @@ function get_changelog_text_for_commits() {
     fi;
   done;
 
+  #Return previous setup for bash
   eval $previous_shopt_extglob
   eval $existing_shopt_nocasematch
 
@@ -266,13 +267,7 @@ function generate_changelog() {
   local commits=$(get_commits_between_points $starting_point $end_point)
   local commit_output=$(get_changelog_text_for_commits $commits)
 
-  #TAGS
-  #[Feature]
-  #[Bug]
-  #[Security]
-
-
-  #Replace file -> TODO: Make optional/append
+  #Replace file -> TODO: Make optional/append with header
   rm -rf $changelog_file
   touch $changelog_file
 
