@@ -177,17 +177,16 @@ $(changelog_divider)"
 }
 
 function get_changelog_text_for_commits() {
-  #For trimming spaces
-  local previous_shopt_extglob=$(shopt -p extglob)
-  #local existing_shopt_nocasematch=$(shopt -p nocasematch)
-
-  #shopt -s nocasematch
   #Pass in commits array of SHA's
   #Return formatted changelog text, with tags handled
+  #Optional first argument for the format "--format=%H"
   #TODO : Make tagging dynamic with features/bugs at top
   #TODO : Make changelog read in optional template to apply logic to view
-  #TODO : Fix regex matching to not capture leading spaces, removes shopt requirement
-  #TODO : TEST with multiple square brackets
+
+  local previous_shopt_extglob=$(shopt -p extglob)
+  local existing_shopt_nocasematch=$(shopt -p nocasematch)
+  shopt -s nocasematch
+  shopt -s extglob
 
   local commit_shas=($@)
 
@@ -212,7 +211,6 @@ function get_changelog_text_for_commits() {
 
     regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
     if [[ $body_result =~ $regex ]]; then
-      shopt -s extglob
       #Tagged entry
       local full_tag=$BASH_REMATCH
       local tag_type="${BASH_REMATCH[1]}"
@@ -233,22 +231,11 @@ function get_changelog_text_for_commits() {
       #Normal entry
       general_release_lines+="$body_result\n"
     fi;
-
-    #TODO : Make case insensitive
-    #to revert to original state : result of `shopt -p nocasematch`
-    #to enable case insensitive matching : `shopt -s nocasematch`
-    #general_release_lines+=
-    eval $previous_shopt_extglob
-    #eval $previous_shopt_nocasematch
   done;
 
+  eval $previous_shopt_extglob
+  eval $existing_shopt_nocasematch
 
-  #1. Get text of commmits with author in brackets and list
-  #2. Group by fixed tags (Feature --> Bug --> Others)
-  #3. Ignore size & shape differences of tags (case insensitive ignore optional s within square brackets)
-  #4. Optional format ( allow it to pass the format so only print the body)
-  #Test Test Test
-  #Optional args for this method, assume everything is SHA unless -f is passed
   if [[ $feature_tag_lines != '' ]]; then
     echo "Features:\n${feature_tag_lines}"
   fi;
