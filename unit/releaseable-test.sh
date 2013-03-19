@@ -63,23 +63,32 @@ it_uses_versioning_prefix_to_generate_singular_prefix() {
 #get_release_tags()
 
 it_uses_get_release_tags_to_return_all_tags_with_no_pattern_ordered_by_alpha() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "random_tag_2"
+    "random_tag_3"
+    "release/production/v1.0.9"
+    "release/production/v3.0.9"
+  )
+  generate_sandbox_tags tags[@]
 
   output=$(get_release_tags)
   test "$output" = "random_tag_1
 random_tag_2
 random_tag_3
 release/production/v1.0.9
-release/production/v3.0.9
-release/production/v3.1.9
-release/staging/v1.0.2
-release/staging/v2.0.3
-release/v1.0.5
-release/v1.0.6"
+release/production/v3.0.9"
 }
 
 it_uses_get_release_tags_to_return_tags_matching_a_given_pattern() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "random_tag_2"
+    "random_tag_3"
+    "release/production/v1.0.9"
+    "release/production/v3.0.9"
+  )
+  generate_sandbox_tags tags[@]
 
   output=$(get_release_tags random)
   test "$output" = "random_tag_1
@@ -88,17 +97,21 @@ random_tag_3"
 
   output=$(get_release_tags release/production)
   test "$output" = "release/production/v1.0.9
-release/production/v3.0.9
-release/production/v3.1.9"
+release/production/v3.0.9"
 }
 
 #get_last_tag_name()
 
 it_uses_get_last_tag_name_to_find_the_last_tag_scoped_by_pattern() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "release/production/v1.0.9"
+    "release/production/v3.0.9"
+  )
+  generate_sandbox_tags tags[@]
 
   output=$(get_last_tag_name "release/production/v")
-  test "$output" = "release/production/v3.1.9"
+  test "$output" = "release/production/v3.0.9"
 }
 
 it_uses_get_last_tag_name_to_return_nothing_with_no_tags() {
@@ -107,7 +120,11 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_tags() {
 }
 
 it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "release/production/v3.0.9"
+  )
+  generate_sandbox_tags tags[@]
 
   output=$(get_last_tag_name "no/matches/atall")
   test "$output" = ""
@@ -138,7 +155,11 @@ it_uses_get_next_tag_name_to_succeed_with_no_existing_tags() {
 }
 
 it_uses_get_next_tag_name_to_succeed_with_no_matching_tags() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "release/production/v3.0.9"
+  )
+  generate_sandbox_tags tags[@]
 
   output=$(get_next_tag_name major releases/nomatches/v 1.0.40)
   test $output = "releases/nomatches/v2.0.40"
@@ -150,7 +171,11 @@ it_uses_get_next_tag_name_to_succeed_incrementing_with_no_last_version() {
 }
 
 it_uses_get_next_tag_name_to_succeed_incrementing_with_found_last_version() {
-  generate_sandbox_tags
+  local tags=(
+    "release/production/v3.1.9"
+    "random_tag_1"
+  )
+  generate_sandbox_tags tags[@]
 
   #Last tag : release/production/v3.1.9
   output=$(get_next_tag_name minor release/production/v)
@@ -158,7 +183,18 @@ it_uses_get_next_tag_name_to_succeed_incrementing_with_found_last_version() {
 }
 
 it_uses_get_next_tag_name_to_succeed_incrementing_each_type() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "release/v1.0.5"
+    "random_tag_2"
+    "release/v1.0.6"
+    "random_tag_3"
+    "release/production/v1.0.9"
+    "release/production/v3.1.9"
+    "release/staging/v2.0.3"
+    "release/staging/v1.0.2"
+  )
+  generate_sandbox_tags tags[@]
 
   #Last tag : release/production/v3.1.9
   output=$(get_next_tag_name major release/production/v)
@@ -192,7 +228,14 @@ it_uses_get_commits_between_points_to_get_nothing_when_no_commits_exists() {
 }
 
 it_uses_get_commits_between_points_to_return_commits_with_no_start_point() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "release/v1.0.5"
+    "random_tag_2"
+    "release/v1.0.6"
+    "random_tag_3"
+  )
+  generate_sandbox_tags tags[@]
 
   local start_point=""
   local end_point="release/v1.0.6"
@@ -213,7 +256,15 @@ $initial_commit"
 }
 
 it_uses_get_commits_between_points_to_return_all_commits_between_points_with_filter() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "random_tag_2"
+    "release/production/v1.0.9"
+    "release/production/v3.0.9"
+    "release/production/v3.1.9"
+    "release/staging/v2.0.3"
+  )
+  generate_sandbox_tags tags[@]
 
   local start_point="release/production/v1.0.9"
   local end_point="release/production/v3.0.9"
@@ -227,10 +278,18 @@ it_uses_get_commits_between_points_to_return_all_commits_between_points_with_fil
 }
 
 it_uses_get_commits_between_points_to_return_all_commits_with_no_start_point_with_filter() {
-  generate_sandbox_tags
+  local tags=(
+    "random_tag_1"
+    "random_tag_2"
+    "release/production/v1.0.9"
+    "release/production/v3.0.9"
+    "release/production/v3.1.9"
+    "release/staging/v2.0.3"
+  )
+  generate_sandbox_tags tags[@]
 
   local start_point=""
-  local end_point="release/production/v3.0.9"
+  local end_point="release/production/v3.1.9"
 
   local commit_message=$(get_commit_message_for_latest_commit 'release/production/v3.1.9')
   local target_tag_sha=$(get_sha_for_tag_name 'release/production/v3.1.9')
@@ -241,7 +300,13 @@ it_uses_get_commits_between_points_to_return_all_commits_with_no_start_point_wit
 }
 
 it_uses_get_commits_between_points_to_return_all_commits_between_points() {
-  generate_sandbox_tags
+  local tags=(
+    'random_tag_1'
+    'release/v1.0.5'
+    'random_tag_2'
+    'release/v1.0.6'
+  )
+  generate_sandbox_tags tags[@]
 
   local start_point="release/v1.0.5"
   local end_point="release/v1.0.6"
@@ -324,19 +389,28 @@ it_uses_generate_changelog_to_create_a_default_changelog_file() {
 # }
 
 it_uses_get_changelog_text_for_commits_to_return_titles_by_default() {
-  generate_sandbox_tags
+  local tags=(
+    'random_tag_1'
+    'release/v1.0.5'
+    'random_tag_2'
+    'release/v1.0.6'
+  )
 
-  local start_point="release/v1.0.5"
-  local end_point="release/v1.0.6"
+  local commit_message_1="Release 1.0.6"
+  local commit_message_2="Random Release 2"
+  local commit_message_3="Older Release 1.0.5"
 
-  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+  local commit_messages=(
+    "Random Release numero uno"
+    "$commit_message_3"
+    "$commit_message_2"
+    "$commit_message_1"
+  )
+  generate_sandbox_tags tags[@] commit_messages[@]
 
-  local commit_message_1=$(get_commit_message_for_latest_commit 'release/v1.0.6')
-  local commit_message_2=$(get_commit_message_for_latest_commit 'random_tag_2')
-  local commit_message_3=$(get_commit_message_for_latest_commit 'release/v1.0.5')
+  local commit_shas=$(get_commits_between_points "release/v1.0.5" "release/v1.0.6")
 
   output=$(get_changelog_text_for_commits "$commit_shas")
-
 
   test "$output" = "${commit_message_1}
 ${commit_message_2}
@@ -344,20 +418,30 @@ ${commit_message_3}"
 }
 
 it_uses_get_changelog_text_for_commits_to_return_titles_with_a_custom_format() {
-  generate_sandbox_tags
+  local tags=(
+    'random_tag_1'
+    'release/v1.0.5'
+    'random_tag_2'
+    'release/v1.0.6'
+  )
 
-  local start_point="release/v1.0.5"
-  local end_point="release/v1.0.6"
+  local commit_message_1="Release 1.0.6"
+  local commit_message_2="Random Release 2"
+  local commit_message_3="Older Release 1.0.5"
 
-  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+  local commit_messages=(
+    "Random Release numero uno"
+    "$commit_message_3"
+    "$commit_message_2"
+    "$commit_message_1"
+  )
+  generate_sandbox_tags tags[@] commit_messages[@]
 
-  local commit_message_1=$(get_commit_message_for_latest_commit 'release/v1.0.6')
-  local commit_message_2=$(get_commit_message_for_latest_commit 'random_tag_2')
-  local commit_message_3=$(get_commit_message_for_latest_commit 'release/v1.0.5')
+  local commit_shas=$(get_commits_between_points "release/v1.0.5" "release/v1.0.6")
+  local sha_array=($commit_shas)
 
   output=$(get_changelog_text_for_commits "--format=%H--%s" "$commit_shas")
 
-  local sha_array=($commit_shas)
   test "$output" = "${sha_array[0]}--${commit_message_1}
 ${sha_array[1]}--${commit_message_2}
 ${sha_array[2]}--${commit_message_3}"
