@@ -381,11 +381,7 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags() {
     "Some random tweak fix"
   )
   generate_sandbox_tags tags[@] commit_messages[@]
-
-  local start_point="releases/v0.0.3"
-  local end_point="releases/v1.1.6"
-
-  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[5]}")
 
   output=$(get_changelog_text_for_commits "$commit_shas")
 
@@ -414,11 +410,7 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_ins
     "[fEaTuRes]     OMG. I had time to write something of use"
   )
   generate_sandbox_tags tags[@] commit_messages[@]
-
-  local start_point="releases/v0.0.3"
-  local end_point="releases/v1.1.6"
-
-  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[2]}")
 
   output=$(get_changelog_text_for_commits "$commit_shas")
 
@@ -441,11 +433,7 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_with_mul
     "[fEaTuRes][Additonal Tag one] Another referenced feature"
   )
   generate_sandbox_tags tags[@] commit_messages[@]
-
-  local start_point="releases/v0.0.3"
-  local end_point="releases/v1.1.6"
-
-  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[1]}")
 
   output=$(get_changelog_text_for_commits "$commit_shas")
 
