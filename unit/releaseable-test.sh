@@ -428,8 +428,31 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_ins
 
 Bugs:
   Argh, I fixed a bug here
-  Start of the project
-"
+  Start of the project"
 }
 
+it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_with_multiple_brackets() {
+  local tags=(
+    "releases/v0.0.3"
+    "releases/v1.1.6"
+  )
+  local commit_messages=(
+    "[BUGS] [QC Some Reference][More Custom References] Fixed the tagged bugs"
+    "[fEaTuRes][Additonal Tag one] Another referenced feature"
+  )
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local start_point="releases/v0.0.3"
+  local end_point="releases/v1.1.6"
+
+  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+
+  output=$(get_changelog_text_for_commits "$commit_shas")
+
+  test "$output" = "Features:
+  [Additonal Tag one] Another referenced feature
+
+Bugs:
+  [QC Some Reference][More Custom References] Fixed the tagged bugs"
+}
 
