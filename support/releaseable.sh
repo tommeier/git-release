@@ -177,11 +177,23 @@ $(changelog_divider)"
 }
 
 function get_changelog_text_for_commits() {
+  #For trimming spaces
+  local previous_shopt_extglob=$(shopt -p extglob)
+  #local existing_shopt_nocasematch=$(shopt -p nocasematch)
+
+  #shopt -s nocasematch
   #Pass in commits array of SHA's
   #Return formatted changelog text, with tags handled
-
+  #TODO : Make tagging dynamic with features/bugs at top
+  #TODO : Make changelog read in optional template to apply logic to view
+  #TODO : Fix regex matching to not capture leading spaces, removes shopt requirement
   local commit_shas=($@)
+
+  local feature_tag_lines=""
+  local bug_tag_lines=""
+  local security_tag_lines=""
   local general_release_lines=""
+
   local log_format="--format=%s"
   local log_format_matcher="\-\-format\="
 
@@ -193,7 +205,39 @@ function get_changelog_text_for_commits() {
         continue;
       fi;
     fi;
-    general_release_lines+="`git show -s ${log_format} ${commit_shas[$i]}`\n"
+
+    local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
+
+    regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
+    if [[ $body_result =~ $regex ]]; then
+      shopt -s extglob
+      #Tagged entry
+      local full_tag=$BASH_REMATCH
+      local tag_type="${BASH_REMATCH[1]}"
+      local tag_content="${BASH_REMATCH[2]##*( )}" #Remove leading spaces (regex in bash capturing always)
+      tag_content="  ${tag_content%%*( )}\n" #Add leading 2 spaces for tagged line prefix and remove trailing spaces
+
+      case "$tag_type" in
+          [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
+              feature_tag_lines+="${tag_content}";;
+          [bB][uU][gG] | [bB][uU][gG][sS] )
+              bug_tag_lines+="$tag_content";;
+          [sS][eE][cC][uU][rR][iI][tT][yY] )
+              security_tag_lines+="$tag_content";;
+          * )
+              general_release_lines+="$tag_content";;
+      esac;
+    else
+      #Normal entry
+      general_release_lines+="$body_result\n"
+    fi;
+
+    #TODO : Make case insensitive
+    #to revert to original state : result of `shopt -p nocasematch`
+    #to enable case insensitive matching : `shopt -s nocasematch`
+    #general_release_lines+=
+    eval $previous_shopt_extglob
+    #eval $previous_shopt_nocasematch
   done;
 
 
@@ -203,8 +247,16 @@ function get_changelog_text_for_commits() {
   #4. Optional format ( allow it to pass the format so only print the body)
   #Test Test Test
   #Optional args for this method, assume everything is SHA unless -f is passed
+  if [[ $feature_tag_lines != '' ]]; then
+    echo "Features:\n${feature_tag_lines}"
+  fi;
+  if [[ $security_tag_lines != '' ]]; then
+    echo "Security:\n${security_tag_lines}"
+  fi;
+  if [[ $bug_tag_lines != '' ]]; then
+    echo "Bugs:\n${bug_tag_lines}"
+  fi;
   echo "$general_release_lines"
-  #"HOWDY"
 }
 
 #generate_changelog "$last_tag_name" "$next_tag_name"
