@@ -34,9 +34,12 @@ it_will_display_error_when_no_git_directory_exists() {
 ### Success cases
 
 it_will_genereate_a_new_tag_for_next_release() {
-  generate_sandbox_tags
+  local tags=(
+    "release/v1.0.5"
+    "release/production/v3.1.9"
+  )
+  generate_sandbox_tags tags[@]
 
-  #Last tag : 'release/production/v3.1.9'
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "release/production/v3.1.10")
 
@@ -46,9 +49,13 @@ it_will_genereate_a_new_tag_for_next_release() {
 }
 
 it_will_genereate_a_new_tag_for_next_release_with_defaults() {
-  generate_sandbox_tags
+  local tags=(
+    "release/v1.0.5"
+    "random_tag_2"
+    "release/v1.0.6"
+  )
+  generate_sandbox_tags tags[@]
 
-  #Last tag : 'release/v1.0.6'
   should_succeed $(check_tag_exists "release/v1.0.6")
   should_fail $(check_tag_exists "release/v1.1.6")
 
