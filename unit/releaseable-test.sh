@@ -343,8 +343,6 @@ ${commit_message_2}
 ${commit_message_3}"
 }
 
-# it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_insensitive() {}
-
 it_uses_get_changelog_text_for_commits_to_return_titles_with_a_custom_format() {
   generate_sandbox_tags
 
@@ -376,9 +374,9 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags() {
   )
   local commit_messages=(
     "Start of the project"
-    "[bug]Argh, I fixed a bug here"
+    "[bugs]Argh, I fixed a bug here"
     "[feature] OMG. I had time to write something of use"
-    "[feature]Its so exciting writing useful things!!"
+    "[features]Its so exciting writing useful things!!"
     "[bug] What comes up, must come down"
     "Some random tweak fix"
   )
@@ -402,6 +400,36 @@ Bugs:
 
 Some random tweak fix
 Start of the project"
+}
+
+it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_insensitive() {
+  local tags=(
+    "releases/v0.0.3"
+    "releases/v1.1.5"
+    "releases/v1.1.6"
+  )
+  local commit_messages=(
+    "[Bug] Start of the project"
+    "[BUGS]   Argh, I fixed a bug here"
+    "[fEaTuRes]     OMG. I had time to write something of use"
+  )
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local start_point="releases/v0.0.3"
+  local end_point="releases/v1.1.6"
+
+  local commit_shas=$(get_commits_between_points "$start_point" "$end_point")
+
+  output=$(get_changelog_text_for_commits "$commit_shas")
+
+  local sha_array=($commit_shas)
+  test "$output" = "Features:
+  OMG. I had time to write something of use
+
+Bugs:
+  Argh, I fixed a bug here
+  Start of the project
+"
 }
 
 
