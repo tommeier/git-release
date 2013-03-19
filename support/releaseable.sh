@@ -187,6 +187,8 @@ function get_changelog_text_for_commits() {
   #TODO : Make tagging dynamic with features/bugs at top
   #TODO : Make changelog read in optional template to apply logic to view
   #TODO : Fix regex matching to not capture leading spaces, removes shopt requirement
+  #TODO : TEST with multiple square brackets
+
   local commit_shas=($@)
 
   local feature_tag_lines=""
