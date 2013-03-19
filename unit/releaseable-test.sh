@@ -211,20 +211,32 @@ it_uses_get_next_tag_name_to_succeed_incrementing_each_type() {
 
 #get_commits_between_points
 
-it_uses_get_commits_between_points_to_raise_an_error_with_nothing_passed() {
-  enter_sandbox
-  should_fail $(get_commits_between_points)
+it_uses_get_commits_between_points_to_list_all_commits_with_nothing_passed() {
+  generate_git_repo
+
+  test "$(get_commits_between_points)" = "$(get_sha_for_first_commit)"
 }
 
-it_uses_get_commits_between_points_to_raise_an_error_with_no_end_point() {
-  enter_sandbox
-  local output=""
-  should_fail output=$(get_commits_between_points 'somestartpoint')
+it_uses_get_commits_between_points_to_list_all_commits_from_a_start_point() {
+  local tags=(
+    "random_tag_1"
+    "release/v1.0.5"
+    "random_tag_2"
+    "release/v1.0.6"
+    "random_tag_3"
+  )
+  generate_sandbox_tags tags[@]
+
+  output=$(get_commits_between_points 'random_tag_2')
+  test "$output" = "$(get_sha_for_tag_name 'random_tag_3')
+$(get_sha_for_tag_name 'release/v1.0.6')
+$(get_sha_for_tag_name 'random_tag_2')"
 }
 
 it_uses_get_commits_between_points_to_get_nothing_when_no_commits_exists() {
   generate_git_repo
-  should_succeed $(get_commits_between_points 'anyTagName' 'anotherTagName')
+
+  should_fail $(get_commits_between_points 'anyTagName' 'anotherTagName')
 }
 
 it_uses_get_commits_between_points_to_return_commits_with_no_start_point() {
@@ -325,64 +337,89 @@ $older_sha_2"
 
 #generate_changelog
 
-it_uses_generate_changelog_to_exit_with_errors_without_endpoint() {
-  enter_sandbox
+it_uses_generate_changelog_to_exit_with_errors_without_release_name() {
+  generate_git_repo
 
   should_fail $(generate_changelog)
-  should_fail $(generate_changelog 'anything')
+  should_succeed $(generate_changelog 'AnyOldReleaseName')
 }
 
 it_uses_generate_changelog_to_succeed_without_a_startpoint() {
-  enter_sandbox
+  generate_git_repo
 
-  should_succeed $(generate_changelog '' 'anything')
+  should_succeed $(generate_changelog 'v0.0.5' '' 'releases/end/v02.34')
+}
+
+it_uses_generate_changelog_to_succeed_without_an_endpoint() {
+  generate_git_repo
+
+  should_succeed $(generate_changelog 'v0.0.5' 'releases/v1.0.45')
 }
 
 it_uses_generate_changelog_to_create_a_custom_changelog_file() {
-  enter_sandbox
+  generate_git_repo
 
   file_should_not_exist "MYCHANGELOG"
 
-  output=$(generate_changelog 'anything' 'anything' 'MYCHANGELOG')
+  output=$(generate_changelog 'v0.0.5' 'anythingstart' 'anythingend' 'MYCHANGELOG')
+
+  file_should_exist "MYCHANGELOG"
+}
+
+it_uses_generate_changelog_to_create_a_custom_changelog_file_with_no_endpoints() {
+  generate_git_repo
+
+  file_should_not_exist "MYCHANGELOG"
+
+  output=$(generate_changelog 'v0.0.5' '' '' 'MYCHANGELOG')
 
   file_should_exist "MYCHANGELOG"
 }
 
 it_uses_generate_changelog_to_create_a_default_changelog_file() {
-  enter_sandbox
+  generate_git_repo
 
   file_should_not_exist "CHANGELOG"
 
-  output=$(generate_changelog 'anything' 'anything')
+  output=$(generate_changelog 'v0.0.5')
 
   file_should_exist "CHANGELOG"
 }
 
-# MAINTAIN_SANDBOX=true
-# it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages(){
-#   generate_sandbox_tags
-#   file_should_not_exist "CHANGELOG"
+# MAINTAIN_SANDBOX=false
+it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages(){
+  local tags=(
+    'random_tag_1'
+    'release/v1.0.5'
+    'random_tag_2'
+    'release/v1.0.6'
+  )
+  local commit_messages=(
+    'Message For Random Tag 1'
+    '[Any Old] Message for 1.0.5'
+    'Lots of changes in this commit for random tag 2'
+    'latest release to 1.0.6'
+  )
 
-#   local start_point="release/v1.0.5"
-#   local end_point="release/v1.0.6"
+  generate_sandbox_tags tags[@] commit_messages[@]
 
-#   local output=$(generate_changelog "$start_point" "$end_point")
-#   local contents=`cat CHANGELOG`
+  file_should_not_exist "CHANGELOG"
 
-#   file_should_exist "CHANGELOG"
-#   test "$contents" = "$(changelog_header)
-# || Generated on $(date)
-# $(changelog_divider)"
+  local custom_release_name="v1.0.7"
+  local output=$(generate_changelog "$custom_release_name")
+  local contents=`cat CHANGELOG`
 
-# #   #Ordered by creation date
-# #   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
-# #   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
-# #   local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
-
-# #   test "$output" = "$target_tag_sha
-# # $older_sha_1
-# # $older_sha_2"
-# }
+  file_should_exist "CHANGELOG"
+  test "$contents" = "$(changelog_header)
+|| Release: ${custom_release_name}
+|| Released on $(date)
+$(changelog_divider)
+${commit_messages[3]}
+${commit_messages[2]}
+${commit_messages[1]}
+${commit_messages[0]}
+$(get_commit_message_for_first_commit)"
+}
 
 # it_uses_generate_changelog_create_create_a_changelog_file_scoped_to_pull_requests(){
 
