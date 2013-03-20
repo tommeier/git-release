@@ -82,9 +82,11 @@ if [ ! $SKIP_EXECUTE ]; then
   VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
 
   last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX)
-  next_tag_name=$(get_next_tag_name $VERSION_TYPE $VERSIONING_PREFIX)
+  next_version_number=$(get_next_version_number $last_tag_name)
+  next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
 
-  generate_changelog "$last_tag_name" "$next_tag_name"
+  generate_version_file "$VERSION_TYPE" "$next_tag_name"
+  generate_changelog "$next_tag_name" ":all" "$last_tag_name"
   #TODO : Changelog generation (diff between last release)
   #     : Get pull request bodies or optionally all commit messages
   #     : TODO : Tagging for changelog generation

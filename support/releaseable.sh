@@ -58,11 +58,9 @@ function get_last_tag_name() {
   echo "$tags" | tail -1
 }
 
-#get_next_tag_name major release/production/v 1.0.4.3
-function get_next_tag_name() {
+function get_next_version_number() {
   local versioning_type=$1
-  local version_prefix=$2
-  local last_tag_name=$3
+  local last_tag_name=$2
 
   if [[ "$versioning_type" = "" ]]; then
     echo "Error : Versioning type required. eg. major"
@@ -70,12 +68,8 @@ function get_next_tag_name() {
   fi;
 
   if [[ $last_tag_name = '' ]]; then
-    last_tag_name=$(get_last_tag_name $version_prefix)
-
-    if [[ $last_tag_name = '' ]]; then
-      #No original tag name for version prefix - start increment
-      last_tag_name="0.0.0"
-    fi;
+    #No original tag name for version prefix - start increment
+    last_tag_name="0.0.0"
   fi;
 
   regex="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
@@ -99,7 +93,7 @@ function get_next_tag_name() {
         patch_version=$(( $patch_version + 1 ));;
   esac
 
-  echo "${version_prefix}${major_version}.${minor_version}.${patch_version}"
+  echo "${major_version}.${minor_version}.${patch_version}"
 }
 
 function get_sha_for_tag_name() {
@@ -151,6 +145,10 @@ function get_commits_between_points() {
 ############################################################
 #####            CHANGELOG FUNCTIONS                   #####
 ############################################################
+
+function get_current_release_date() {
+  echo $( date "+%A %d %B, %Y %l:%M%p" )
+}
 
 function changelog_divider() {
   echo "+=========================================================+"
@@ -288,10 +286,12 @@ function generate_changelog() {
   rm -rf $changelog_file
   touch $changelog_file
 
-  echo "$(changelog_header)"          >> $changelog_file
-  echo "|| Release: ${release_name}"  >> $changelog_file
-  echo "|| Released on $(date)"       >> $changelog_file
-  echo "$(changelog_divider)"         >> $changelog_file
+  local release_date=$(get_current_release_date)
+
+  echo "$(changelog_header)"            >> $changelog_file
+  echo "|| Release: ${release_name}"    >> $changelog_file
+  echo "|| Released on ${release_date}" >> $changelog_file
+  echo "$(changelog_divider)"           >> $changelog_file
 
   echo "${commit_output}" >> $changelog_file
 }
