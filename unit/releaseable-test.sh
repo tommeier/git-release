@@ -604,10 +604,6 @@ ${commit_messages[2]}
 ${commit_messages[1]}"
 }
 
-# c7365e5 Merge pull request #706 from Ferocia/bug/modal-error-rendering (Tom Meier, 16 hours ago)
-# 85f614a Merge pull request #712 from Ferocia/refactor/use-unicorn (Gareth Townsend, 17 hours ago)
-# 8226242 Merge pull request #705 from Ferocia/bug/limit-payment-description-length (Gareth Townsend, 17 hours ago)
-# 58aee6d Merge pull request #722 from Ferocia/bug/running-balance-field (Anthony Langhorne, 18 hours ago)
 it_uses_generate_changelog_to_create_a_changelog_file_scoped_to_only_pull_requests(){
   local tags=(
     'tag_with_pulls_1'
