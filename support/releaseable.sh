@@ -214,7 +214,7 @@ function get_changelog_text_for_commits() {
       local tag_type="${BASH_REMATCH[1]}"
       #Remove leading spaces (regex in bash capturing always)
       local tag_content="${BASH_REMATCH[2]##*( )}"
-      #Add leading 2 spaces for tagged line prefix and remove trailing spaces
+      #Add leading 2 spaces with bullet point for tagged line prefix & remove trailing spaces
       tag_content="  ${tag_content%%*( )}\n"
       #Sort matching tags
       case "$tag_type" in
@@ -293,26 +293,5 @@ function generate_changelog() {
   echo "|| Released on $(date)"       >> $changelog_file
   echo "$(changelog_divider)"         >> $changelog_file
 
-  # local output_lines=(
-  #   "* Generated on $(date)"
-  #   $commit_output
-  #   )
-  # for line in "$commit_output"
-  # do
   echo "${commit_output}" >> $changelog_file
-  # done
-  # echo "$(changelog_header)" >> $changelog_file
-
-
-
-  #echo '' >> $changelog_file
-  #Get commits between 2 points
-  #Scope to only pull requests optionally
-  #If scoped to pull requests:
-  #   = Capture body of each commit
-  #else
-  #   # print raw title of each commit
-  #fi/
-  #Save output to CHANGELOG file (append to start)
-
 }
