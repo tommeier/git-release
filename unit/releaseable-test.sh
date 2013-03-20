@@ -478,23 +478,35 @@ Bugs:
 
 #generate_changelog
 
-it_uses_generate_changelog_to_exit_with_errors_without_release_name() {
+it_uses_generate_changelog_to_exit_with_errors_without_release_name_or_commit_filter() {
   generate_git_repo
 
   should_fail $(generate_changelog)
-  should_succeed $(generate_changelog 'AnyOldReleaseName')
+  should_fail $(generate_changelog 'AnyOldReleaseName')
+  should_succeed $(generate_changelog 'AnyOldReleaseName' ':all')
+}
+
+it_uses_generate_changelog_to_exit_with_errors_with_invalid_commit_filter() {
+  generate_git_repo
+
+  should_fail $(generate_changelog 'AnyOldReleaseName' '')
+  should_fail $(generate_changelog 'AnyOldReleaseName' ':unknown')
+  should_fail $(generate_changelog 'AnyOldReleaseName' ':anything')
+
+  should_succeed $(generate_changelog 'AnyOldReleaseName' ':all')
+  should_succeed $(generate_changelog 'AnyOldReleaseName' ':pulls_only')
 }
 
 it_uses_generate_changelog_to_succeed_without_a_startpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog 'v0.0.5' '' 'releases/end/v02.34')
+  should_succeed $(generate_changelog 'v0.0.5' ':all' '' 'releases/end/v02.34')
 }
 
 it_uses_generate_changelog_to_succeed_without_an_endpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog 'v0.0.5' 'releases/v1.0.45')
+  should_succeed $(generate_changelog 'v0.0.5' ':all' 'releases/v1.0.45')
 }
 
 it_uses_generate_changelog_to_create_a_custom_changelog_file() {
@@ -502,7 +514,7 @@ it_uses_generate_changelog_to_create_a_custom_changelog_file() {
 
   file_should_not_exist "MYCHANGELOG"
 
-  output=$(generate_changelog 'v0.0.5' 'anythingstart' 'anythingend' 'MYCHANGELOG')
+  output=$(generate_changelog 'v0.0.5' ':all' 'anythingstart' 'anythingend' 'MYCHANGELOG')
 
   file_should_exist "MYCHANGELOG"
 }
@@ -512,7 +524,7 @@ it_uses_generate_changelog_to_create_a_custom_changelog_file_with_no_endpoints()
 
   file_should_not_exist "MYCHANGELOG"
 
-  output=$(generate_changelog 'v0.0.5' '' '' 'MYCHANGELOG')
+  output=$(generate_changelog 'v0.0.5' ':all' '' '' 'MYCHANGELOG')
 
   file_should_exist "MYCHANGELOG"
 }
@@ -522,12 +534,11 @@ it_uses_generate_changelog_to_create_a_default_changelog_file() {
 
   file_should_not_exist "CHANGELOG"
 
-  output=$(generate_changelog 'v0.0.5')
+  output=$(generate_changelog 'v0.0.5' ':all')
 
   file_should_exist "CHANGELOG"
 }
 
-# MAINTAIN_SANDBOX=false
 it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages(){
   local tags=(
     'random_tag_1'
@@ -547,7 +558,7 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages()
   file_should_not_exist "CHANGELOG"
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog "$custom_release_name")
+  local output=$(generate_changelog "$custom_release_name" ':all')
   local contents=`cat CHANGELOG`
 
   file_should_exist "CHANGELOG"
@@ -581,7 +592,7 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages_for_a
   file_should_not_exist "CHANGELOG"
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog "$custom_release_name" 'release/v1.0.5' 'random_tag_2')
+  local output=$(generate_changelog "$custom_release_name" ':all' 'release/v1.0.5' 'random_tag_2')
   local contents=`cat CHANGELOG`
 
   file_should_exist "CHANGELOG"
@@ -593,7 +604,59 @@ ${commit_messages[2]}
 ${commit_messages[1]}"
 }
 
-# it_uses_generate_changelog_create_create_a_changelog_file_scoped_to_pull_requests(){
+# c7365e5 Merge pull request #706 from Ferocia/bug/modal-error-rendering (Tom Meier, 16 hours ago)
+# 85f614a Merge pull request #712 from Ferocia/refactor/use-unicorn (Gareth Townsend, 17 hours ago)
+# 8226242 Merge pull request #705 from Ferocia/bug/limit-payment-description-length (Gareth Townsend, 17 hours ago)
+# 58aee6d Merge pull request #722 from Ferocia/bug/running-balance-field (Anthony Langhorne, 18 hours ago)
+it_uses_generate_changelog_to_create_a_changelog_file_scoped_to_only_pull_requests(){
+  local tags=(
+    'tag_with_pulls_1'
+    'tag_witout_pull'
+    'tag_with_pulls_2'
+    'another_tag_without'
+    'tag_with_pulls_3'
+    'tag_with_pulls_4'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from Ferocia/bug/limit-payment-description-length
 
-# }
+[BUG] Pay anyone from the accounts screen"
+    " This commit is not a pull request and should be ignored"
+    "Merge pull request #722 from Ferocia/feature/running-balance-field (Anthony Langhorne, 18 hours ago)
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    " Yet another commit,that isn't a pull request"
+    "Merge pull request #714 from Ferocia/fix-customer-login
+
+Fixing the customer login but no tag displayed."
+    "Merge pull request #685 from Ferocia/bug/modal-new-payee
+
+[Security] Commit fixing the modal with security flaw"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local custom_release_name="v2.0.5"
+  local output=$(generate_changelog "$custom_release_name" ':pulls_only')
+  local contents=`cat CHANGELOG`
+
+  file_should_exist "CHANGELOG"
+  test "$contents" = "$(changelog_header)
+|| Release: ${custom_release_name}
+|| Released on $(date)
+$(changelog_divider)
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing
+
+Security:
+  Commit fixing the modal with security flaw
+
+Bugs:
+  Pay anyone from the accounts screen
+
+Fixing the customer login but no tag displayed."
+}
+
 
