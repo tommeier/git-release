@@ -130,83 +130,50 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
   test "$output" = ""
 }
 
-#get_next_tag_name()
+#get_next_version_number()
 
-it_uses_get_next_tag_name_to_error_on_missing_version_type() {
-  should_fail $(get_next_tag_name)
+it_uses_get_next_version_number_to_error_on_missing_version_type() {
+  should_fail $(get_next_version_number)
 }
 
-it_uses_get_next_tag_name_to_error_with_an_invalid_last_tag_name() {
-  should_fail $(get_next_tag_name major releases invalidx.x.x)
-  should_fail $(get_next_tag_name major '' invalid1.0)
-  should_fail $(get_next_tag_name major '' invalid0)
+it_uses_get_next_version_number_to_error_with_an_invalid_last_tag_name() {
+  should_fail $(get_next_version_number major invalidx.x.x)
+  should_fail $(get_next_version_number major invalid1.0)
+  should_fail $(get_next_version_number major invalid0)
 }
 
-it_uses_get_next_tag_name_to_succeed_with_an_empty_version_prefix() {
-  should_succeed $(get_next_tag_name major '')
+it_uses_get_next_version_number_to_succeed_with_an_empty_version_prefix() {
+  should_succeed $(get_next_version_number major)
 }
 
-it_uses_get_next_tag_name_to_succeed_with_a_custom_version_prefix() {
-  should_succeed $(get_next_tag_name major releases/production/v)
+it_uses_get_next_version_number_to_succeed_with_no_existing_tags() {
+  should_succeed $(get_next_version_number major v1.0.40)
 }
 
-it_uses_get_next_tag_name_to_succeed_with_no_existing_tags() {
-  should_succeed $(get_next_tag_name major releases/production/v 1.0.40)
+it_uses_get_next_version_number_to_succeed_with_no_matching_tags() {
+  output=$(get_next_version_number major some/old/release/v1.0.40)
+  test $output = "2.0.40"
 }
 
-it_uses_get_next_tag_name_to_succeed_with_no_matching_tags() {
-  local tags=(
-    "random_tag_1"
-    "release/production/v3.0.9"
-  )
-  generate_sandbox_tags tags[@]
-
-  output=$(get_next_tag_name major releases/nomatches/v 1.0.40)
-  test $output = "releases/nomatches/v2.0.40"
+it_uses_get_next_version_number_to_succeed_incrementing_with_no_last_version() {
+  output=$(get_next_version_number major)
+  test $output = "1.0.0"
 }
 
-it_uses_get_next_tag_name_to_succeed_incrementing_with_no_last_version() {
-  output=$(get_next_tag_name major release/no_prev_version/v)
-  test $output = "release/no_prev_version/v1.0.0"
+it_uses_get_next_version_number_to_succeed_incrementing_with_found_last_version() {
+  output=$(get_next_version_number minor release/production/v3.1.9)
+  test $output = "3.2.9"
 }
 
-it_uses_get_next_tag_name_to_succeed_incrementing_with_found_last_version() {
-  local tags=(
-    "release/production/v3.1.9"
-    "random_tag_1"
-  )
-  generate_sandbox_tags tags[@]
+it_uses_get_next_version_number_to_succeed_incrementing_each_type() {
+  output=$(get_next_version_number major release/production/v3.1.9)
+  test $output = "4.1.9"
 
-  #Last tag : release/production/v3.1.9
-  output=$(get_next_tag_name minor release/production/v)
-  test $output = "release/production/v3.2.9"
-}
+  output=$(get_next_version_number minor release/staging/v2.0.3)
+  test $output = "2.1.3"
 
-it_uses_get_next_tag_name_to_succeed_incrementing_each_type() {
-  local tags=(
-    "random_tag_1"
-    "release/v1.0.5"
-    "random_tag_2"
-    "release/v1.0.6"
-    "random_tag_3"
-    "release/production/v1.0.9"
-    "release/production/v3.1.9"
-    "release/staging/v2.0.3"
-    "release/staging/v1.0.2"
-  )
-  generate_sandbox_tags tags[@]
-
-  #Last tag : release/production/v3.1.9
-  output=$(get_next_tag_name major release/production/v)
-  test $output = "release/production/v4.1.9"
-
-  #Last tag : release/staging/v2.0.3
-  output=$(get_next_tag_name minor release/staging/v)
-  test $output = "release/staging/v2.1.3"
-
-  #Last tag : release/v1.0.6
-  output=$(get_next_tag_name patch release/v)
-  test $output = "release/v1.0.7"
+  output=$(get_next_version_number patch release/v1.0.6)
+  test $output = "1.0.7"
 }
 
 #get_commits_between_points
@@ -564,7 +531,7 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages()
   file_should_exist "CHANGELOG"
   test "$contents" = "$(changelog_header)
 || Release: ${custom_release_name}
-|| Released on $(date)
+|| Released on $(get_current_release_date)
 $(changelog_divider)
 ${commit_messages[3]}
 ${commit_messages[2]}
@@ -598,7 +565,7 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages_for_a
   file_should_exist "CHANGELOG"
   test "$contents" = "$(changelog_header)
 || Release: ${custom_release_name}
-|| Released on $(date)
+|| Released on $(get_current_release_date)
 $(changelog_divider)
 ${commit_messages[2]}
 ${commit_messages[1]}"
@@ -640,7 +607,7 @@ Fixing the customer login but no tag displayed."
   file_should_exist "CHANGELOG"
   test "$contents" = "$(changelog_header)
 || Release: ${custom_release_name}
-|| Released on $(date)
+|| Released on $(get_current_release_date)
 $(changelog_divider)
 Features:
   This is a pull request merging a feature across multiple
