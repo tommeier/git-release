@@ -252,12 +252,15 @@ function get_changelog_text_for_commits() {
 #generate_changelog "$last_tag_name" "$next_tag_name"
 function generate_changelog() {
   local release_name="$1"
-  local starting_point="$2"        #optional
-  local end_point="$3"             #optional
-  local changelog_file="CHANGELOG" #optional
+  local commit_filter="$2"
+  local starting_point="$3"        #optional
+  local end_point="$4"             #optional
+  local changelog_format="--format=%s" #default -> display title
 
-  if [[ "$4" != '' ]]; then
-    changelog_file="$4"
+  if [[ "$5" != '' ]]; then
+    local changelog_file="$5"
+  else
+    local changelog_file="CHANGELOG" #optional
   fi;
 
   if [[ "$release_name" = "" ]]; then
@@ -265,8 +268,21 @@ function generate_changelog() {
     exit 1;
   fi;
 
-  local commits=$(get_commits_between_points $starting_point $end_point)
-  local commit_output=$(get_changelog_text_for_commits $commits)
+  case "$commit_filter" in
+    ':all' | 'all' )
+      #No filter
+      commit_filter='';;
+    ':pulls_only' | 'pulls_only' )
+      #Filter by merged pull requests only
+      commit_filter=$'^Merge pull request #.* from .*';
+      changelog_format="--format=%b";; #use body of pull requests
+    * )
+      echo "Error : Commit filter required. Please specify :all or :pulls_only."
+      exit 1;
+  esac
+
+  local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
+  local commit_output=$(get_changelog_text_for_commits "$changelog_format" $commits)
 
   #Replace file -> TODO: Make optional/append after any existing header
   rm -rf $changelog_file
@@ -283,7 +299,7 @@ function generate_changelog() {
   #   )
   # for line in "$commit_output"
   # do
-    echo "${commit_output}" >> $changelog_file
+  echo "${commit_output}" >> $changelog_file
   # done
   # echo "$(changelog_header)" >> $changelog_file
 
