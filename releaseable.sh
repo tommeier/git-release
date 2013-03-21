@@ -84,7 +84,7 @@ if [ ! $SKIP_EXECUTE ]; then
 
   generate_version_file "$next_version_number"
 
-  generate_changelog "$next_tag_name" ":all" "$last_tag_name"
+  generate_changelog_content "$next_tag_name" ":all_commits" "$last_tag_name"
 
   #TODO : Optionally apply pull requests only
   #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
