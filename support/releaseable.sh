@@ -247,6 +247,23 @@ function get_changelog_text_for_commits() {
   echo "$general_release_lines"
 }
 
+#generate_version_file "$version_number" "$optional_file_name"
+function generate_version_file(){
+  local version_number="$1"
+  if [[ "$version_number" = "" ]]; then
+    echo "Error : Version number required for version file generation."
+    exit 1;
+  fi;
+  if [[ "$2" != '' ]]; then
+    local version_file="$2"
+  else
+    local version_file="VERSION" #optional
+  fi;
+
+  touch $version_file
+  echo "${version_number}" > $version_file
+}
+
 #generate_changelog "$last_tag_name" "$next_tag_name"
 function generate_changelog() {
   local release_name="$1"
@@ -282,7 +299,8 @@ function generate_changelog() {
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
   local commit_output=$(get_changelog_text_for_commits "$changelog_format" $commits)
 
-  #Replace file -> TODO: Make optional/append after any existing header
+  #TODO: Make optional/append after any existing header
+  #Replace file ->
   rm -rf $changelog_file
   touch $changelog_file
 
