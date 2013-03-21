@@ -622,4 +622,51 @@ Bugs:
 Fixing the customer login but no tag displayed."
 }
 
+#generate_version_file
+
+it_uses_generate_version_file_to_fail_with_no_version_number_passed() {
+  should_fail $(generate_version_file)
+}
+
+it_uses_generate_version_file_to_create_a_version_file() {
+  enter_sandbox
+
+  file_should_not_exist "VERSION"
+
+  output=$(generate_version_file 'v12.03.23')
+
+  file_should_exist "VERSION"
+
+  local contents=`cat VERSION`
+  test "$contents" = "v12.03.23"
+}
+
+it_uses_generate_version_file_to_create_a_custom_version_file() {
+  enter_sandbox
+
+  file_should_not_exist "CUSTOM_VERSION"
+
+  output=$(generate_version_file 'v12.03.23' 'CUSTOM_VERSION')
+
+  file_should_exist "CUSTOM_VERSION"
+
+  test "`cat CUSTOM_VERSION`" = "v12.03.23"
+}
+
+it_uses_generate_version_file_to_replace_any_existing_version_file() {
+  enter_sandbox
+
+  file_should_not_exist "VERSION"
+
+  output=$(generate_version_file 'v12.03.23')
+
+  file_should_exist "VERSION"
+
+  test "`cat VERSION`" = "v12.03.23"
+
+  output=$(generate_version_file 'v14.05.25')
+
+  test "`cat VERSION`" = "v14.05.25"
+}
+
 
