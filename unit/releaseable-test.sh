@@ -9,6 +9,7 @@ after() {
     remove_sandbox
   fi;
 }
+
 #validate_inputs()
 
 it_fails_on_validate_inputs_with_no_version_type() {
@@ -30,7 +31,6 @@ it_passes_on_validate_inputs_with_minor_version_type() {
 it_passes_on_validate_inputs_with_patch_version_type() {
   should_succeed $(validate_version_type "patch")
 }
-
 
 #ensure_git_directory()
 
@@ -443,70 +443,40 @@ Bugs:
   [QC Some Reference][More Custom References] Fixed the tagged bugs"
 }
 
-#generate_changelog
+#generate_changelog_content
 
-it_uses_generate_changelog_to_exit_with_errors_without_release_name_or_commit_filter() {
+it_uses_generate_changelog_content_to_exit_with_errors_without_release_name() {
   generate_git_repo
 
-  should_fail $(generate_changelog)
-  should_fail $(generate_changelog 'AnyOldReleaseName')
-  should_succeed $(generate_changelog 'AnyOldReleaseName' ':all')
+  should_fail $(generate_changelog_content)
+  should_fail $(generate_changelog_content '')
 }
 
-it_uses_generate_changelog_to_exit_with_errors_with_invalid_commit_filter() {
+it_uses_generate_changelog_content_to_exit_with_errors_with_invalid_commit_filter() {
   generate_git_repo
 
-  should_fail $(generate_changelog 'AnyOldReleaseName' '')
-  should_fail $(generate_changelog 'AnyOldReleaseName' ':unknown')
-  should_fail $(generate_changelog 'AnyOldReleaseName' ':anything')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' '')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':unknown')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':anything')
 
-  should_succeed $(generate_changelog 'AnyOldReleaseName' ':all')
-  should_succeed $(generate_changelog 'AnyOldReleaseName' ':pulls_only')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':pulls_only')
 }
 
-it_uses_generate_changelog_to_succeed_without_a_startpoint() {
+it_uses_generate_changelog_content_to_succeed_without_a_startpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog 'v0.0.5' ':all' '' 'releases/end/v02.34')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' '' 'releases/end/v02.34')
 }
 
-it_uses_generate_changelog_to_succeed_without_an_endpoint() {
+it_uses_generate_changelog_content_to_succeed_without_an_endpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog 'v0.0.5' ':all' 'releases/v1.0.45')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' 'releases/v1.0.45')
 }
 
-it_uses_generate_changelog_to_create_a_custom_changelog_file() {
-  generate_git_repo
-
-  file_should_not_exist "MYCHANGELOG"
-
-  output=$(generate_changelog 'v0.0.5' ':all' 'anythingstart' 'anythingend' 'MYCHANGELOG')
-
-  file_should_exist "MYCHANGELOG"
-}
-
-it_uses_generate_changelog_to_create_a_custom_changelog_file_with_no_endpoints() {
-  generate_git_repo
-
-  file_should_not_exist "MYCHANGELOG"
-
-  output=$(generate_changelog 'v0.0.5' ':all' '' '' 'MYCHANGELOG')
-
-  file_should_exist "MYCHANGELOG"
-}
-
-it_uses_generate_changelog_to_create_a_default_changelog_file() {
-  generate_git_repo
-
-  file_should_not_exist "CHANGELOG"
-
-  output=$(generate_changelog 'v0.0.5' ':all')
-
-  file_should_exist "CHANGELOG"
-}
-
-it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages(){
+it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
   local tags=(
     'random_tag_1'
     'release/v1.0.5'
@@ -522,14 +492,10 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_all_commit_messages()
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  file_should_not_exist "CHANGELOG"
-
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog "$custom_release_name" ':all')
-  local contents=`cat CHANGELOG`
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits')
 
-  file_should_exist "CHANGELOG"
-  test "$contents" = "$(changelog_header)
+  test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -537,10 +503,11 @@ ${commit_messages[3]}
 ${commit_messages[2]}
 ${commit_messages[1]}
 ${commit_messages[0]}
-$(get_commit_message_for_first_commit)"
+$(get_commit_message_for_first_commit)
+$(changelog_divider)"
 }
 
-it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages_for_a_range(){
+it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(){
   local tags=(
     'random_tag_1'
     'release/v1.0.5'
@@ -556,22 +523,19 @@ it_uses_generate_changelog_to_create_a_changelog_file_with_commit_messages_for_a
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  file_should_not_exist "CHANGELOG"
-
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog "$custom_release_name" ':all' 'release/v1.0.5' 'random_tag_2')
-  local contents=`cat CHANGELOG`
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' 'release/v1.0.5' 'random_tag_2')
 
-  file_should_exist "CHANGELOG"
-  test "$contents" = "$(changelog_header)
+  test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
 ${commit_messages[2]}
-${commit_messages[1]}"
+${commit_messages[1]}
+$(changelog_divider)"
 }
 
-it_uses_generate_changelog_to_create_a_changelog_file_scoped_to_only_pull_requests(){
+it_uses_generate_changelog_content_to_generate_scoped_to_only_pull_requests(){
   local tags=(
     'tag_with_pulls_1'
     'tag_witout_pull'
@@ -601,11 +565,9 @@ Fixing the customer login but no tag displayed."
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v2.0.5"
-  local output=$(generate_changelog "$custom_release_name" ':pulls_only')
-  local contents=`cat CHANGELOG`
+  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only')
 
-  file_should_exist "CHANGELOG"
-  test "$contents" = "$(changelog_header)
+  test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -619,7 +581,8 @@ Security:
 Bugs:
   Pay anyone from the accounts screen
 
-Fixing the customer login but no tag displayed."
+Fixing the customer login but no tag displayed.
+$(changelog_divider)"
 }
 
 #generate_version_file
@@ -668,5 +631,104 @@ it_uses_generate_version_file_to_replace_any_existing_version_file() {
 
   test "`cat VERSION`" = "v14.05.25"
 }
+
+#generate_changelog_file
+
+it_uses_generate_changelog_file_to_fail_with_content_passed_or_strategy() {
+  enter_sandbox
+
+  should_fail $(generate_changelog_file)
+  should_fail $(generate_changelog_file 'some content')
+  should_fail $(generate_changelog_file 'some content' '')
+
+  should_succeed $(generate_changelog_file 'some content' ':overwrite')
+}
+
+it_uses_generate_changelog_file_to_fail_with_invalid_strategy() {
+  enter_sandbox
+
+  should_fail $(generate_changelog_file 'some content' '')
+  should_fail $(generate_changelog_file 'some content' ':anything')
+  should_fail $(generate_changelog_file 'some content' ':unknown')
+
+
+  should_succeed $(generate_changelog_file 'some content' ':overwrite')
+  should_succeed $(generate_changelog_file 'some content' ':append')
+}
+
+it_uses_generate_changelog_file_file_to_create_a_changelog_file() {
+  enter_sandbox
+
+  file_should_not_exist "CHANGELOG"
+
+  local content="
+My Content
+Is Here Across Multiple Lines
+"
+  local output=$(generate_changelog_file "$content" ':overwrite')
+
+  file_should_exist "CHANGELOG"
+
+  local contents=`cat CHANGELOG`
+  test "$contents" = "$content
+$(changelog_footer)"
+}
+
+it_uses_generate_changelog_file_file_to_create_a_custom_version_file() {
+  enter_sandbox
+
+  file_should_not_exist "CHANGELOG"
+  file_should_not_exist "CUSTOM_CHANGELOG"
+
+  local content="
+My Content
+Is Here Across Multiple Lines
+"
+  output=$(generate_changelog_file "$content" ':overwrite' 'CUSTOM_CHANGELOG')
+
+  file_should_not_exist "CHANGELOG"
+  file_should_exist "CUSTOM_CHANGELOG"
+
+  test "`cat CUSTOM_CHANGELOG`" = "$content
+$(changelog_footer)"
+}
+
+it_uses_generate_changelog_file_to_replace_any_existing_file_with_overwrite_strategy() {
+  enter_sandbox
+
+  file_should_not_exist "CHANGELOG"
+
+  output=$(generate_changelog_file 'Original Content' ':overwrite')
+
+  file_should_exist "CHANGELOG"
+
+  test "`cat CHANGELOG`" = "Original Content
+$(changelog_footer)"
+
+  output=$(generate_changelog_file 'Updated Content' ':overwrite')
+
+  test "`cat CHANGELOG`" = "Updated Content
+$(changelog_footer)"
+}
+
+it_uses_generate_changelog_file_to_append_to_any_existing_file_with_append_strategy() {
+  enter_sandbox
+
+  file_should_not_exist "CHANGELOG"
+
+  output=$(generate_changelog_file 'Original Content' ':append')
+
+  file_should_exist "CHANGELOG"
+
+  test "`cat CHANGELOG`" = "Original Content
+$(changelog_footer)"
+
+  output=$(generate_changelog_file 'Updated Content' ':append')
+
+  test "`cat CHANGELOG`" = "Updated Content
+Original Content
+$(changelog_footer)"
+}
+
 
 

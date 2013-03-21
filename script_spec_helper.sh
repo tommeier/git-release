@@ -58,7 +58,10 @@ function generate_git_repo() {
 }
 
 function generate_sandbox_tags() {
-  generate_git_repo
+  if [[ ! -f '.git' ]]; then
+    #Generate git repo & enter sandbox
+    generate_git_repo
+  fi;
 
   #Optional arrays for sets of tags and commits
   if [[ "$1" != '' ]]; then
