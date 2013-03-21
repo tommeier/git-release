@@ -154,7 +154,7 @@ function changelog_divider() {
   echo "+=========================================================+"
 }
 
-function changelog_header() {
+function changelog_footer() {
 local output=""
 ! read -d '' output <<"EOF"
 ||    _____ _                            _               ||
@@ -264,19 +264,49 @@ function generate_version_file(){
   echo "${version_number}" > $version_file
 }
 
-#generate_changelog "$last_tag_name" "$next_tag_name"
-function generate_changelog() {
-  local release_name="$1"
-  local commit_filter="$2"
-  local starting_point="$3"        #optional
-  local end_point="$4"             #optional
-  local changelog_format="--format=%s" #default -> display title
+#generate_changelog_file "$changelog_content" ":overwrite/:append" "$optional_file_name"
+function generate_changelog_file(){
+  local changelog_content="$1"
+  local generate_strategy="$2"
 
-  if [[ "$5" != '' ]]; then
-    local changelog_file="$5"
+  if [[ "$changelog_content" = "" ]]; then
+    echo "Error : Changelog content required for version file generation."
+    exit 1;
+  fi;
+  if [[ "$3" != '' ]]; then
+    local changelog_file="$3"
   else
     local changelog_file="CHANGELOG" #optional
   fi;
+
+  case "$generate_strategy" in
+    ':overwrite' | 'overwrite' )
+      #Remove existing
+      #rm -rf $changelog_file;
+      echo "$changelog_content\n$(changelog_footer)" > $changelog_file;; #Overwrite;
+    ':append' | 'append' )
+      #Initialise new file
+      if [[ ! -f $changelog_file ]]; then
+        touch $changelog_file;
+        echo "$changelog_content
+$(changelog_footer)" > $changelog_file;
+      else
+        #Append to start of file
+        echo "$changelog_content\n$(cat $changelog_file)" > $changelog_file
+      fi;;
+    * )
+      echo "Error : Generate strategy required. Please specify :overwrite or :append."
+      exit 1;;
+  esac
+}
+
+#generate_changelog "$last_tag_name" "$next_tag_name" ":all/:pulls_only" ":overwrite/:append"
+function generate_changelog_content() {
+  local release_name="$1"
+  local commit_filter="$2"         #all_commits or pulls_only
+  local starting_point="$3"        #optional
+  local end_point="$4"             #optional
+  local changelog_format="--format=%s" #default -> display title
 
   if [[ "$release_name" = "" ]]; then
     echo "Error : Release name required for changelog generation."
@@ -284,7 +314,7 @@ function generate_changelog() {
   fi;
 
   case "$commit_filter" in
-    ':all' | 'all' )
+    ':all_commits' | 'all_commits' )
       #No filter
       commit_filter='';;
     ':pulls_only' | 'pulls_only' )
@@ -298,18 +328,14 @@ function generate_changelog() {
 
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
   local commit_output=$(get_changelog_text_for_commits "$changelog_format" $commits)
-
-  #TODO: Make optional/append after any existing header
-  #Replace file ->
-  rm -rf $changelog_file
-  touch $changelog_file
-
   local release_date=$(get_current_release_date)
 
-  echo "$(changelog_header)"            >> $changelog_file
-  echo "|| Release: ${release_name}"    >> $changelog_file
-  echo "|| Released on ${release_date}" >> $changelog_file
-  echo "$(changelog_divider)"           >> $changelog_file
-
-  echo "${commit_output}" >> $changelog_file
+  echo "$(changelog_divider)
+|| Release: ${release_name}
+|| Released on ${release_date}
+$(changelog_divider)
+${commit_output}
+$(changelog_divider)
+"
+  #echo "$output"
 }
