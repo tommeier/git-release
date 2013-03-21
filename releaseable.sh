@@ -14,7 +14,7 @@ set -e
 RELEASE_PREFIX='release'
 VERSION_PREFIX='v'
 
-USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'][-e 'opt'] --- create git release tags
+USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'] --- create git release tags
 
 options:
     -h  show this help text
@@ -22,11 +22,9 @@ options:
     -t  test only (will not execute script)
     -r  set the release prefix (default: release)
     -p  set the version prefix (default: v)
-    -e  set release environment (optional)
 
 default examples:
     git release tag         : release/v1.0.4
-    environment release tag : release/production/v1.0.4
 
 usage example:
     Given the last release was at 1.0.4 :
@@ -56,7 +54,6 @@ do
                 v) VERSION_TYPE="$OPTARG";;
                 r) RELEASE_PREFIX="$OPTARG";;
                 p) VERSION_PREFIX="$OPTARG";;
-                e) APP_ENV="$OPTARG";;
                 ?)
                   printf "illegal option: '%s'\n" "$OPTARG" >&2
                   echo "$USAGE_OUTPUT" >&2
@@ -86,12 +83,10 @@ if [ ! $SKIP_EXECUTE ]; then
   next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
 
   generate_version_file "$next_version_number"
-  generate_changelog "$next_tag_name" ":all" "$last_tag_name"
-  #TODO : Changelog generation (diff between last release)
-  #     : Get pull request bodies or optionally all commit messages
-  #     : TODO : Tagging for changelog generation
 
-  #TODO : Create VERSION file with latest version number
+  generate_changelog "$next_tag_name" ":all" "$last_tag_name"
+
+  #TODO : Optionally apply pull requests only
   #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
   #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
   # --> Create new tag with deploy prefix?
@@ -108,7 +103,3 @@ if [ ! $SKIP_EXECUTE ]; then
   git tag $next_tag_name
   #TODO : Test mode should display process
 fi;
-
-
-#TODO : Refactor specs to pass set of tags to create, with optional commit messages
-#       So it reduces the number of tags generated for each spec
