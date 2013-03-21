@@ -300,7 +300,7 @@ $(changelog_footer)" > $changelog_file;
   esac
 }
 
-#generate_changelog "$last_tag_name" "$next_tag_name" ":all/:pulls_only" ":overwrite/:append"
+#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
 function generate_changelog_content() {
   local release_name="$1"
   local commit_filter="$2"         #all_commits or pulls_only
@@ -323,7 +323,7 @@ function generate_changelog_content() {
       changelog_format="--format=%b";; #use body of pull requests
     * )
       echo "Error : Commit filter required. Please specify :all or :pulls_only."
-      exit 1;
+      exit 1;;
   esac
 
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
@@ -337,5 +337,4 @@ $(changelog_divider)
 ${commit_output}
 $(changelog_divider)
 "
-  #echo "$output"
 }
