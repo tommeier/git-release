@@ -44,11 +44,15 @@ usage examples:
   1) Basic usage with defaults
     Given the last release was at 1.0.4, with a tag of 'our-releases/REL1.0.4' :
 
-    $(basename "$0") -h -v minor -r 'our-releases' -p 'REL-'
+    $(basename "$0") -v minor -r 'our-releases' -p 'REL-'
 
     Tag generated           : our-releases/REL1.1.4
     Version file contains   : 1.1.4
     CHANGELOG file contains : commit information for all commits between last release and HEAD
+
+  2) Pull requests only (changelog generated only with body of pull request titles)
+
+    $(basename "$0") -v minor -r 'releases' -p 'v' -P
 
 "
 
@@ -113,9 +117,7 @@ if [ ! $SKIP_EXECUTE ]; then
 
   changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
 
-  echo "CHANGELOG CONTENT : ${changelog_content}"
   generate_changelog_file "$changelog_content" ":overwrite" "$CHANGELOG_FILE"
-
 
   #TODO : Verbose debug mode
 
