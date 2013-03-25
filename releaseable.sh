@@ -54,6 +54,10 @@ usage examples:
 
     $(basename "$0") -v minor -r 'releases' -p 'v' -P
 
+  3) Generate custom changelog and version file
+
+    $(basename "$0") -v minor -r 'releases' -p 'v' -C 'MYCHANGELOGFILE' -V 'MYVERSIONFILE'
+
 "
 
 #Supporting functions
