@@ -21,7 +21,7 @@ CHANGELOG_STRATEGY=':overwrite'
 START_POINT=''
 END_POINT=''
 
-USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'][-s 'opt'][-e 'opt'][-C -V -P] --- create git release tags
+USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-r 'opt'][-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog
 
 options:
   required:
@@ -127,10 +127,10 @@ if [ ! $SKIP_EXECUTE ]; then
 
   generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
+  #TODO : Test mode should display process
   #TODO : Verbose debug mode
 
   #TODO : Split up functions and specs into more logical divisions (changelog, git)
-  #TODO : Copy git history across to proper github repo
 
   #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
   #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
@@ -144,5 +144,4 @@ if [ ! $SKIP_EXECUTE ]; then
   set -e
 
   git tag $next_tag_name
-  #TODO : Test mode should display process
 fi;
