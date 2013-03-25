@@ -77,18 +77,8 @@ function generate_sandbox_tags() {
 
 
   if [[ $tag_names = '' ]]; then
-    #Use default set of tag names. TODO: remove over time, and let specs be explicit
-    tag_names=( 'random_tag_1'
-                      'release/v1.0.5'
-                      'random_tag_2'
-                      'release/v1.0.6'
-                      'release/production/v1.0.9'
-                      'release/staging/v2.0.3'
-                      'release/staging/v1.0.2'
-                      'release/production/v3.1.9'
-                      'release/production/v3.0.9'
-                      'random_tag_3'
-    )
+    echo "Error - Please be specific on the tag names you want to generate";
+    exit 1;
   fi;
   for i in "${!tag_names[@]}"; do
     touch "change${i}" &>/dev/null
