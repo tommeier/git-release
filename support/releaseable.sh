@@ -24,6 +24,17 @@ function ensure_git_directory() {
   fi;
 }
 
+function ensure_git_is_clean() {
+  local result=$(git status --porcelain)
+
+  if [[ "$result" != '' ]]; then
+    result=$(git status)
+    echo "Error - Current branch is in a dirty state, please commit your changes first."
+    echo "$result"
+    exit 1
+  fi;
+}
+
 function versioning_prefix() {
   if [[ $2 ]]; then
     echo "${1}/${2}"
@@ -279,9 +290,6 @@ function generate_changelog_file(){
     local changelog_file="CHANGELOG" #optional
   fi;
 
-  echo "changelog_file : ${changelog_file}"
-  echo "generate_strategy : ${generate_strategy}"
-
   case "$generate_strategy" in
     ':overwrite' | 'overwrite' )
       #Remove existing
@@ -344,6 +352,5 @@ function generate_changelog_content() {
 || Released on ${release_date}
 $(changelog_divider)
 ${commit_output}
-$(changelog_divider)
-"
+$(changelog_divider)"
 }

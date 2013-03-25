@@ -16,6 +16,7 @@ VERSION_PREFIX='v'
 CHANGELOG_FILE='CHANGELOG'
 VERSION_FILE='VERSION'
 CHANGELOG_SCOPE=':all_commits'
+CHANGELOG_STRATEGY=':overwrite'
 
 START_POINT=''
 END_POINT=''
@@ -31,6 +32,7 @@ options:
   changelog:
     -s  set the start point (default: the last tag name that matches the versioning prefix)
     -f  set the end/finish point (default: HEAD)
+    -A  append to changelog (default: overwrite)
     -P  set to only pull requests (default: all commits)
     -C  set the changelog filename (default: CHANGELOG)
     -V  set the version file name (default: VERSION)
@@ -68,7 +70,7 @@ source $script_source/support/releaseable.sh
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts htPv:r:s:f:p:C:V: option
+while getopts htAPv:r:s:f:p:C:V: option
 do
   case "${option}"
   in
@@ -78,6 +80,7 @@ do
       ;;
     t) SKIP_EXECUTE=true;;
     P) CHANGELOG_SCOPE=":pulls_only";;
+    A) CHANGELOG_STRATEGY=":append";;
     v) VERSION_TYPE="$OPTARG";;
     r) RELEASE_PREFIX="$OPTARG";;
     p) VERSION_PREFIX="$OPTARG";;
@@ -85,6 +88,7 @@ do
     f) END_POINT="$OPTARG";;
     C) CHANGELOG_FILE="$OPTARG";;
     V) VERSION_FILE="$OPTARG";;
+
     ?)
       printf "illegal option: '%s'\n" "$OPTARG" >&2
       echo "$USAGE_OUTPUT" >&2
@@ -101,8 +105,8 @@ if [ ! $SKIP_EXECUTE ]; then
   ############################################################
 
   validate_version_type $VERSION_TYPE $USAGE_OUTPUT
-  ensure_git_directory $VERSIONING_PREFIX
-  #TODO : Error if git in dirty state
+  ensure_git_directory
+  ensure_git_is_clean
 
   ############################################################
   #####                   RELEASE                        #####
@@ -121,7 +125,7 @@ if [ ! $SKIP_EXECUTE ]; then
 
   changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
 
-  generate_changelog_file "$changelog_content" ":overwrite" "$CHANGELOG_FILE"
+  generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
   #TODO : Verbose debug mode
 
