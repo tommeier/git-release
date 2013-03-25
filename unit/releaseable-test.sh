@@ -48,6 +48,29 @@ it_passes_on_ensure_git_directory_with_git_directory() {
   should_succeed $(ensure_git_directory)
 }
 
+#ensure_git_is_clean()
+
+it_fails_on_ensure_git_is_clean_when_dirty(){
+  generate_git_repo
+  should_succeed $(ensure_git_is_clean)
+  touch 'AnyOldFile'
+  should_fail $(ensure_git_is_clean)
+
+  test "$(ensure_git_is_clean)" = "Error - Current branch is in a dirty state, please commit your changes first.
+# On branch master
+# Untracked files:
+#   (use \"git add <file>...\" to include in what will be committed)
+#
+#"$'\t'"AnyOldFile
+nothing added to commit but untracked files present (use \"git add\" to track)"
+}
+
+it_passes_on_ensure_git_is_clean_when_clean(){
+  generate_git_repo
+
+  should_succeed $(ensure_git_is_clean)
+}
+
 #versioning_prefix()
 
 it_uses_versioning_prefix_to_generate_concatenated_prefix() {
