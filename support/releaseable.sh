@@ -279,6 +279,9 @@ function generate_changelog_file(){
     local changelog_file="CHANGELOG" #optional
   fi;
 
+  echo "changelog_file : ${changelog_file}"
+  echo "generate_strategy : ${generate_strategy}"
+
   case "$generate_strategy" in
     ':overwrite' | 'overwrite' )
       #Remove existing
@@ -312,6 +315,12 @@ function generate_changelog_content() {
     echo "Error : Release name required for changelog generation."
     exit 1;
   fi;
+
+  # echo "IN CHANGELOG CONTENT : "
+  # echo "release_name : ${release_name}"
+  # echo "commit_filter : ${commit_filter}"
+  # echo "starting_point : ${starting_point}"
+  # echo "end_point : ${end_point}"
 
   case "$commit_filter" in
     ':all_commits' | 'all_commits' )
