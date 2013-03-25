@@ -109,23 +109,14 @@ if [ ! $SKIP_EXECUTE ]; then
 
   next_version_number=$(get_next_version_number $VERSION_TYPE $last_tag_name)
   next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
-
-  echo "NEXT VERSION : ${next_version_number}"
-  echo "START_POINT : ${START_POINT}"
-  echo "END_POINT : ${END_POINT}"
-  echo "next_tag_name : ${next_tag_name}"
-  echo "Changelog File : ${CHANGELOG_FILE}"
   generate_version_file "$next_version_number" "$VERSION_FILE"
 
-  changelog_content=$(generate_changelog_content "$next_version_number" "${CHANGELOG_SCOPE}" "${START_POINT}" "${END_POINT}")
+  changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
 
   echo "CHANGELOG CONTENT : ${changelog_content}"
   generate_changelog_file "$changelog_content" ":overwrite" "$CHANGELOG_FILE"
 
-  #TODO : Set optional endpoint for content
-  #TODO : Set optional changelog file
-  #TODO : Set optional version file
-  #TODO : Optionally apply pull requests only
+
   #TODO : Verbose debug mode
 
   #TODO : Split up functions and specs into more logical divisions (changelog, git)
