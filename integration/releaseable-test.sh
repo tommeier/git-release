@@ -283,6 +283,42 @@ $(changelog_footer)"
   test "$version_content" = "0.1.0"
 }
 
+it_will_overwrite_a_changelog_file_by_default() {
+local tags=(
+    'release/v1.0.4'
+    'release/v1.0.5'
+    'release/v1.0.6'
+  )
+  local commit_messages=(
+    'Commit for last released start point 1.0.4'
+    '[Any Old] Message for 1.0.5'
+    'latest commit message to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  output=$(sandbox_rup -v minor -r "release" -p "v" -f "release/v1.0.5")
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 1.1.6
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+latest commit message to 1.0.6
+Lots of changes in this commit for random commit 2
+[Any Old] Message for 1.0.5
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "1.1.6"
+}
+
+# it_will_append_to_a_changelog_optionally(){
+
+# }
+
 # it_will_optionally_force_push_of_tag()
 
 
