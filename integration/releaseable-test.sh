@@ -38,8 +38,19 @@ it_will_display_error_when_no_git_directory_exists() {
   test $(search_substring "$output" "$missing_git") = 'found'
 }
 
-#TODO : Check for git state
-# it_will_error_if_git_is_in_a_dirty_state()
+it_will_error_if_git_is_in_a_dirty_state() {
+  generate_git_repo
+
+  should_succeed $(sandbox_rup -v minor)
+
+  touch 'FileToMakeGitDirty'
+
+  should_fail $(sandbox_rup -v minor)
+
+  rm 'FileToMakeGitDirty'
+
+  should_succeed $(sandbox_rup -v minor)
+}
 
 ### Success cases
 
@@ -284,7 +295,7 @@ $(changelog_footer)"
 }
 
 it_will_overwrite_a_changelog_file_by_default() {
-local tags=(
+  local tags=(
     'release/v1.0.4'
     'release/v1.0.5'
     'release/v1.0.6'
@@ -297,7 +308,7 @@ local tags=(
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v minor -r "release" -p "v" -f "release/v1.0.5")
+  output=$(sandbox_rup -v minor -r "release" -p "v" -s "release/v1.0.4" -f "release/v1.0.5")
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -306,18 +317,118 @@ local tags=(
 || Release: 1.1.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
-latest commit message to 1.0.6
-Lots of changes in this commit for random commit 2
 [Any Old] Message for 1.0.5
+Commit for last released start point 1.0.4
 $(changelog_divider)
 $(changelog_footer)"
 
   test "$version_content" = "1.1.6"
+
+  output=$(sandbox_rup -v major -r "release" -p "v" -s "release/v1.0.5" -f "release/v1.0.6")
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 2.1.6
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+latest commit message to 1.0.6
+[Any Old] Message for 1.0.5
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "2.1.6"
 }
 
-# it_will_append_to_a_changelog_optionally(){
+it_will_append_to_a_changelog_optionally(){
+  local tags=(
+    'release/v1.0.4'
+    'release/v1.0.5'
+  )
+  local commit_messages=(
+    'Commit for last released start point 1.0.4'
+    '[Any Old] Message for 1.0.5'
+  )
 
-# }
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  output=$(sandbox_rup -v minor -r "release" -p "v" -A)
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 1.1.5
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+[Any Old] Message for 1.0.5
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "1.1.5"
+
+  output=$(sandbox_rup -v major -r "release" -p "v" -A)
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 2.1.5
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+Release : release/v1.1.5
+$(changelog_divider)
+$(changelog_divider)
+|| Release: 1.1.5
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+[Any Old] Message for 1.0.5
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "2.1.5"
+}
+
+
+it_will_generate_in_an_opinionated_fashion(){
+  #using defaults other than append
+  generate_git_repo
+
+  output=$(sandbox_rup -v minor -A)
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 0.1.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+Initial Commit
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "0.1.0"
+
+  output=$(sandbox_rup -v major -A)
+
+  local changelog_content=`cat CHANGELOG`
+  local version_content=`cat VERSION`
+  test "$changelog_content" = "$(changelog_divider)
+|| Release: 1.1.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+Release : release/v0.1.0
+$(changelog_divider)
+$(changelog_divider)
+|| Release: 0.1.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+Initial Commit
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$version_content" = "1.1.0"
+}
+
 
 # it_will_optionally_force_push_of_tag()
 
