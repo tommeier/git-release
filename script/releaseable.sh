@@ -104,7 +104,7 @@ if [ ! $SKIP_EXECUTE ]; then
   #####                  VALIDATION                      #####
   ############################################################
 
-  validate_version_type $VERSION_TYPE $USAGE_OUTPUT
+  validate_version_type "$VERSION_TYPE" "$USAGE_OUTPUT"
   ensure_git_directory
   ensure_git_is_clean
 
