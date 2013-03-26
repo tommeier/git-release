@@ -23,7 +23,6 @@ function validate_deploy_tag() {
   local t="$1"
   local error_output="$2"
 
-  #Error if missing
   if [[ "$t" = '' ]]; then
     echo "Required parameter: Please enter the deploy tag released."
     echo "$error_output"
