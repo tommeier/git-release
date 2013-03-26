@@ -4,6 +4,7 @@
 #####               SUPPORT FUNCTIONS                  #####
 ############################################################
 
+#Releaseable only
 function validate_version_type() {
   #Confirm version type is in the accepted types
   local v="$1"
@@ -14,6 +15,31 @@ function validate_version_type() {
     echo "Please set to one of 'major', 'minor' or 'patch'" >&2
     echo "$error_output" >&2
     exit 1
+  fi;
+}
+
+#Releaseable-deployed only
+function validate_deploy_tag() {
+  local t="$1"
+  local error_output="$2"
+
+  #Error if missing
+  if [[ "$t" = '' ]]; then
+    echo "Required parameter: Please enter the deploy tag released."
+    echo "$error_output"
+    exit 1;
+  elif [[ "$(git tag -l $t )" = '' ]]; then
+    echo "Error: Unable to find tag '${t}'. Please check and try again."
+    exit 1;
+  fi;
+}
+
+function check_tag_exists() {
+  local tag_find=$(git tag -l "$1")
+  if [[ "$tag_find" = '' ]]; then
+    return 1;
+  else
+    return 0;
   fi;
 }
 

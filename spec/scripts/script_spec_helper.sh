@@ -92,13 +92,3 @@ function generate_sandbox_tags() {
     git tag "${tag_names[$i]}" &>/dev/null
   done;
 }
-
-function check_tag_exists() {
-  local filtered_tags=$(git tag -l $1)
-  local search_for_tag=$(search_substring "$filtered_tags" "$1")
-  if [[ "$search_for_tag" = "found" ]]; then
-    return 0;
-  else
-    return 1;
-  fi;
-}

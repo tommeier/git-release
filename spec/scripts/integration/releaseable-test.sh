@@ -23,6 +23,7 @@ it_will_fail_with_no_versioning_type() {
   ! rup
 }
 
+#TODO - Fix this to validate output like in releaseable-deployed
 it_will_display_help_text_on_fail() {
   output=$(rup 2>&1 | head -n 2 2>&1 )
 
