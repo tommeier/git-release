@@ -132,16 +132,13 @@ if [ ! $SKIP_EXECUTE ]; then
 
   #TODO : Split up functions and specs into more logical divisions (changelog, git)
 
-  #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
-  #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
-  # --> Create new tag with deploy prefix?
-  # --> Generate changelog in the same way
-
-  #TODO : Ask for confirmation unless -f (force) is passed
   set +e #Allow commit to fail if no files have changed
   git add -A
   git commit -m "Release : ${next_tag_name}"
   set -e
 
   git tag $next_tag_name
+  #TODO: Optional force push of tag
+  #TODO : Ask for confirmation unless -f (force) is passed
+  #git push --tags
 fi;
