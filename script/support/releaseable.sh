@@ -86,6 +86,23 @@ function get_release_tags() {
   echo "$tag_names"
 }
 
+#Get the version prefix from the tag name
+# (strip out version numbers from suffix)
+function get_versioning_prefix_from_tag() {
+  local existing_tag_name="$1"
+  regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+  if [[ $existing_tag_name =~ $regex ]]; then
+    local full_tag_name=$BASH_REMATCH
+    local version_prefix="${BASH_REMATCH[1]}"
+    local major_version="${BASH_REMATCH[2]}"
+    local minor_version="${BASH_REMATCH[3]}"
+    local patch_version="${BASH_REMATCH[4]}"
+  else
+    echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
+    exit 1;
+  fi;
+  echo "$version_prefix"
+}
 
 function get_last_tag_name() {
   local versioning_prefix=$1

@@ -119,13 +119,15 @@ if [ ! $SKIP_EXECUTE ]; then
   ensure_git_is_clean
   validate_deploy_tag "$DEPLOYED_TAG" "$USAGE_OUTPUT"
 
-  #exit 0
   ############################################################
-  #####                   RELEASE                        #####
+  #####                RELEASE-DEPLOYED                  #####
   ############################################################
-  # VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
 
-  # last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX);
+
+  git checkout -b "$DEPLOYED_TAG" "deployed-${DEPLOYED_TAG}"
+
+  VERSIONING_PREFIX=$(get_versioning_prefix_from_tag "$DEPLOYED_TAG")
+  last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX)
 
   # if [[ "$START_POINT" = '' ]]; then
   #   START_POINT=$last_tag_name

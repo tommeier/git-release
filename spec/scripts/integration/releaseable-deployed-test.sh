@@ -62,9 +62,7 @@ it_will_error_if_deploy_tag_cannot_be_found(){
   local tag_name='found/v1.0.3'
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
-  # output=$(git tag -l $tag_name)
-  # second=$(git tag -l 'Unknown')
-  # test "$second" = ''
+
   should_succeed $(sandbox_rup -d "$tag_name")
   should_fail $(sandbox_rup -d "cannotFindThisTag")
 }
