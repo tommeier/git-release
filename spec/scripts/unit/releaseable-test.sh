@@ -152,6 +152,40 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
   output=$(get_last_tag_name "no/matches/atall")
   test "$output" = ""
 }
+# function get_versioning_prefix_from_tag() {
+#   local existing_tag_name="$1"
+#   regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+#   if [[ $existing_tag_name =~ $regex ]]; then
+#     local full_tag_name=$BASH_REMATCH
+#     local version_prefix="${BASH_REMATCH[1]}"
+#     local major_version="${BASH_REMATCH[2]}"
+#     local minor_version="${BASH_REMATCH[3]}"
+#     local patch_version="${BASH_REMATCH[4]}"
+#   else
+#     echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
+#     exit 1;
+#   fi;
+# }
+#get_versioning_prefix_from_tag()
+
+it_uses_get_versioning_prefix_from_tag_to_error_on_missing_tag() {
+  should_fail $(get_versioning_prefix_from_tag)
+}
+
+it_uses_get_versioning_prefix_from_tag_with_an_invalid_tag_name() {
+  should_fail $(get_versioning_prefix_from_tag invalidx.x.x)
+  should_fail $(get_versioning_prefix_from_tag invalid0.0.x)
+  should_fail $(get_versioning_prefix_from_tag invalid1.0)
+  should_fail $(get_versioning_prefix_from_tag invalid0)
+  should_fail $(get_versioning_prefix_from_tag invalidNoVersionNumber)
+}
+
+it_uses_get_versioning_prefix_from_tag_to_succeed_capturing_version_prefix() {
+  test $(get_versioning_prefix_from_tag releases/2.1.3) = "releases/"
+  test $(get_versioning_prefix_from_tag r/v/2.1.3) = "r/v/"
+  test $(get_versioning_prefix_from_tag some/old/release/v1.0.40) = "some/old/release/v"
+}
+
 
 #get_next_version_number()
 
