@@ -22,7 +22,8 @@ set -e
     # Tag not found
 
 #Checkout existing tag
-#Generate new changelog
+#Generate new changelog with diff from last deployed tag to current one
+#   - Get version prefix -> find last tag -> generate changelog with that start point
 #Create tag with deploy prefix
 #Push tag (optional)
 
@@ -123,39 +124,37 @@ if [ ! $SKIP_EXECUTE ]; then
   #####                RELEASE-DEPLOYED                  #####
   ############################################################
 
+  #TODO: Make uniform either all caps variables or not.
 
+  #Checkout existing deployed tag
   git checkout -b "$DEPLOYED_TAG" "deployed-${DEPLOYED_TAG}"
 
-  VERSIONING_PREFIX=$(get_versioning_prefix_from_tag "$DEPLOYED_TAG")
-  last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX)
+  #TODO: Make single spec for capturing all elements from a tag name
 
-  # if [[ "$START_POINT" = '' ]]; then
-  #   START_POINT=$last_tag_name
-  # fi;
+  #Capture versioning prefix from deployed tag
+  versioning_prefix=$(get_versioning_prefix_from_tag "$DEPLOYED_TAG")
 
-  # next_version_number=$(get_next_version_number $VERSION_TYPE $last_tag_name)
-  # next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
-  # generate_version_file "$next_version_number" "$VERSION_FILE"
+  #Find last deployed tag for this versioning style
+  last_tag_name=$(get_last_tag_name $versioning_prefix)
 
-  # changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
+  #TODO:
+  deployed_version_number=$(get_version_number_from_tag "$DEPLOYED_TAG")
+  if [[ "$START_POINT" = '' ]]; then
+    START_POINT=$last_tag_name
+  fi;
 
-  # generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
+  changelog_content=$(generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
 
-  # #TODO : Test mode should display process
-  # #TODO : Verbose debug mode
+  generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
-  # #TODO : Split up functions and specs into more logical divisions (changelog, git)
+  #Create tag and optionally push
+  git add -A
+  git commit -m "Release deployed : ${DEPLOYED_TAG}"
 
-  # #TODO : Add option for applying deploy (no new tag -> add deploy prefix + tag, regen changelog)
-  # #Maybe a seperate bash script? deploy-releaseable, pass in the successful deploy tag.
-  # # --> Create new tag with deploy prefix?
-  # # --> Generate changelog in the same way
+  next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
 
-  # #TODO : Ask for confirmation unless -f (force) is passed
-  # set +e #Allow commit to fail if no files have changed
-  # git add -A
-  # git commit -m "Release : ${next_tag_name}"
-  # set -e
+  git tag $next_deploy_tag_name
 
-  # git tag $next_tag_name
+  #Optional force push of tag
+  #git push --tags
 fi;

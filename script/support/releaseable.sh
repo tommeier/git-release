@@ -86,6 +86,7 @@ function get_release_tags() {
   echo "$tag_names"
 }
 
+#TODO: Share method for splitting up values in regex, function should return array
 #Get the version prefix from the tag name
 # (strip out version numbers from suffix)
 function get_versioning_prefix_from_tag() {
