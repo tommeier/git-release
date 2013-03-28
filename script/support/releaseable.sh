@@ -1,6 +1,12 @@
 #!/bin/sh -e
 
 ############################################################
+#####                    GLOBALS                       #####
+############################################################
+
+TAG_VERSIONING_DELIMITER="?" #Used for IFS must be 1 character
+
+############################################################
 #####               SUPPORT FUNCTIONS                  #####
 ############################################################
 
@@ -86,23 +92,48 @@ function get_release_tags() {
   echo "$tag_names"
 }
 
+#Split tag name into relevent parts and return into delimited array
+function split_tag_name_into_parts() {
+  local tag_name="$1"
+  local regex="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+  if [[ $tag_name =~ $regex ]]; then
+    local version_number=$BASH_REMATCH
+    #Remove matching version number from tag to get prefix
+    local version_prefix="${tag_name%%$version_number}"
+    local major_version="${BASH_REMATCH[1]}"
+    local minor_version="${BASH_REMATCH[2]}"
+    local patch_version="${BASH_REMATCH[3]}"
+
+    local d="${TAG_VERSIONING_DELIMITER}"
+    echo "${version_prefix}${d}${major_version}${d}${minor_version}${d}${patch_version}"
+  else
+    echo "Error : Invalid tag name: '${existing_tag_name}'."
+    exit 1;
+  fi;
+}
+
 #TODO: Share method for splitting up values in regex, function should return array
 #Get the version prefix from the tag name
 # (strip out version numbers from suffix)
 function get_versioning_prefix_from_tag() {
   local existing_tag_name="$1"
-  regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-  if [[ $existing_tag_name =~ $regex ]]; then
-    local full_tag_name=$BASH_REMATCH
-    local version_prefix="${BASH_REMATCH[1]}"
-    local major_version="${BASH_REMATCH[2]}"
-    local minor_version="${BASH_REMATCH[3]}"
-    local patch_version="${BASH_REMATCH[4]}"
-  else
-    echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
-    exit 1;
-  fi;
-  echo "$version_prefix"
+
+  local tag_parts=$(split_tag_name_into_parts $1)
+  IFS="$TAG_VERSIONING_DELIMITER" read -a tag_parts <<< "$tag_parts"
+
+  echo "${tag_parts[0]}"
+  # regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+  # if [[ $existing_tag_name =~ $regex ]]; then
+  #   local full_tag_name=$BASH_REMATCH
+  #   local version_prefix="${BASH_REMATCH[1]}"
+  #   local major_version="${BASH_REMATCH[2]}"
+  #   local minor_version="${BASH_REMATCH[3]}"
+  #   local patch_version="${BASH_REMATCH[4]}"
+  # else
+  #   echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
+  #   exit 1;
+  # fi;
+  # echo "${version_prefix}"
 }
 
 function get_last_tag_name() {

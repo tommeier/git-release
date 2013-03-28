@@ -186,6 +186,35 @@ it_uses_get_versioning_prefix_from_tag_to_succeed_capturing_version_prefix() {
   test $(get_versioning_prefix_from_tag some/old/release/v1.0.40) = "some/old/release/v"
 }
 
+#split_tag_name_into_parts()
+
+it_uses_split_tag_name_into_parts_to_error_on_missing_tag_name() {
+  should_fail $(split_tag_name_into_parts)
+}
+
+it_uses_split_tag_name_into_parts_to_error_with_an_invalid_last_tag_name() {
+  should_fail $(split_tag_name_into_parts invalidx.x.x)
+  should_fail $(split_tag_name_into_parts invalid1.0)
+  should_fail $(split_tag_name_into_parts invalid0)
+}
+
+it_uses_split_tag_name_into_parts_to_return_delimited_string_of_parts(){
+  local d="$TAG_VERSIONING_DELIMITER"
+  local normal_release=$(split_tag_name_into_parts 'some/old/release/v1.0.40')
+  local release_with_spaces=$(split_tag_name_into_parts 'Release with spaces20.02.12')
+
+  test "$normal_release"      = "some/old/release/v${d}1${d}0${d}40"
+  test "$release_with_spaces" = "Release with spaces${d}20${d}02${d}12"
+
+
+  local tag_parts=$(split_tag_name_into_parts 'Release with spaces20.02.12')
+  IFS=$TAG_VERSIONING_DELIMITER read -a tag_parts <<< "$tag_parts"
+
+  test "${tag_parts[0]}" = "Release with spaces"
+  test "${tag_parts[1]}" = "20" #Major
+  test "${tag_parts[2]}" = "02" #Minor
+  test "${tag_parts[3]}" = "12" #Patch
+}
 
 #get_next_version_number()
 
