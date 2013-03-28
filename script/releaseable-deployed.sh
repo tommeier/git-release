@@ -137,6 +137,7 @@ if [ ! $SKIP_EXECUTE ]; then
   #Find last deployed tag for this versioning style
   last_tag_name=$(get_last_tag_name $versioning_prefix)
 
+  #IFS=', ' read -a array <<< "$string"
   #TODO:
   deployed_version_number=$(get_version_number_from_tag "$DEPLOYED_TAG")
   if [[ "$START_POINT" = '' ]]; then
