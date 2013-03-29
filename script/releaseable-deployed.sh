@@ -31,7 +31,7 @@ set -e
 #####                   DEFAULTS                       #####
 ############################################################
 
-DEPLOYED_PREFIX='deployed'
+DEPLOYED_PREFIX='deployed/'
 CHANGELOG_FILE='CHANGELOG'
 CHANGELOG_SCOPE=':all_commits'
 CHANGELOG_STRATEGY=':overwrite'
@@ -45,7 +45,7 @@ options:
   required:
     -d set the deployed tag name
   optional:
-    -p set the prefix for deployment tag (default: deployed)
+    -p set the prefix for deployment tag (default: 'deployed/')
   changelog:
     -s  set the start point (default: the last deployed tag)
     -f  set the end/finish point (default: HEAD)
@@ -85,7 +85,7 @@ source $script_source/support/releaseable.sh
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts htAPCd:s:f:p: option
+while getopts htAPd:s:C:f:p: option
 do
   case "${option}"
   in
@@ -127,7 +127,9 @@ if [ ! $SKIP_EXECUTE ]; then
   #TODO: Make uniform either all caps variables or not.
 
   #Checkout existing deployed tag
-  git checkout -b "$DEPLOYED_TAG" "deployed-${DEPLOYED_TAG}"
+  next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
+
+  git checkout -f --no-track -B "$next_deploy_tag_name" "$DEPLOYED_TAG"
 
   #TODO: Make single spec for capturing all elements from a tag name
 
@@ -137,14 +139,12 @@ if [ ! $SKIP_EXECUTE ]; then
   #Find last deployed tag for this versioning style
   last_tag_name=$(get_last_tag_name $versioning_prefix)
 
-  #IFS=', ' read -a array <<< "$string"
-  #TODO:
   deployed_version_number=$(get_version_number_from_tag "$DEPLOYED_TAG")
   if [[ "$START_POINT" = '' ]]; then
     START_POINT=$last_tag_name
   fi;
 
-  changelog_content=$(generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
+  changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT" )
 
   generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
@@ -152,9 +152,7 @@ if [ ! $SKIP_EXECUTE ]; then
   git add -A
   git commit -m "Release deployed : ${DEPLOYED_TAG}"
 
-  next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
-
-  git tag $next_deploy_tag_name
+  git tag -f $next_deploy_tag_name
 
   #Optional force push of tag
   #git push --tags

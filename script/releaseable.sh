@@ -119,7 +119,7 @@ if [ ! $SKIP_EXECUTE ]; then
     START_POINT=$last_tag_name
   fi;
 
-  next_version_number=$(get_next_version_number $VERSION_TYPE $last_tag_name)
+  next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_name)
   next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
   generate_version_file "$next_version_number" "$VERSION_FILE"
 

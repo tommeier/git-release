@@ -58,6 +58,26 @@ it_will_error_if_git_is_in_a_dirty_state() {
   should_succeed $(sandbox_rup -d "$tag_name")
 }
 
+it_will_forcibly_replace_existing_deploy_tags() {
+  local tag_name="MyReleases/v1.0.3"
+  local tags=("${tag_name}")
+  generate_sandbox_tags tags[@]
+
+  result=$(sandbox_rup -d "$tag_name")
+  file_should_exist "CHANGELOG"
+  file_should_not_exist "CHANGELOG2"
+
+  result=$(sandbox_rup -d "$tag_name" -C "CHANGELOG2")
+  file_should_not_exist "CHANGELOG"
+  file_should_exist "CHANGELOG2"
+
+  #Explicitly checkout the deploy tag in current state
+  git checkout -f -B "deployed/MyReleases/v1.0.3"
+
+  file_should_not_exist "CHANGELOG"
+  file_should_exist "CHANGELOG2"
+}
+
 it_will_error_if_deploy_tag_cannot_be_found(){
   local tag_name='found/v1.0.3'
   local tags=("${tag_name}")
@@ -67,7 +87,7 @@ it_will_error_if_deploy_tag_cannot_be_found(){
   should_fail $(sandbox_rup -d "cannotFindThisTag")
 }
 
-### Success cases
+# ### Success cases
 
 
 

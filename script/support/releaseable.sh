@@ -4,7 +4,7 @@
 #####                    GLOBALS                       #####
 ############################################################
 
-TAG_VERSIONING_DELIMITER="?" #Used for IFS must be 1 character
+TAG_VERSION_NUMBER_REGEX="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
 
 ############################################################
 #####               SUPPORT FUNCTIONS                  #####
@@ -92,50 +92,6 @@ function get_release_tags() {
   echo "$tag_names"
 }
 
-#Split tag name into relevent parts and return into delimited array
-function split_tag_name_into_parts() {
-  local tag_name="$1"
-  local regex="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-  if [[ $tag_name =~ $regex ]]; then
-    local version_number=$BASH_REMATCH
-    #Remove matching version number from tag to get prefix
-    local version_prefix="${tag_name%%$version_number}"
-    local major_version="${BASH_REMATCH[1]}"
-    local minor_version="${BASH_REMATCH[2]}"
-    local patch_version="${BASH_REMATCH[3]}"
-
-    local d="${TAG_VERSIONING_DELIMITER}"
-    echo "${version_prefix}${d}${major_version}${d}${minor_version}${d}${patch_version}"
-  else
-    echo "Error : Invalid tag name: '${existing_tag_name}'."
-    exit 1;
-  fi;
-}
-
-#TODO: Share method for splitting up values in regex, function should return array
-#Get the version prefix from the tag name
-# (strip out version numbers from suffix)
-function get_versioning_prefix_from_tag() {
-  local existing_tag_name="$1"
-
-  local tag_parts=$(split_tag_name_into_parts $1)
-  IFS="$TAG_VERSIONING_DELIMITER" read -a tag_parts <<< "$tag_parts"
-
-  echo "${tag_parts[0]}"
-  # regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-  # if [[ $existing_tag_name =~ $regex ]]; then
-  #   local full_tag_name=$BASH_REMATCH
-  #   local version_prefix="${BASH_REMATCH[1]}"
-  #   local major_version="${BASH_REMATCH[2]}"
-  #   local minor_version="${BASH_REMATCH[3]}"
-  #   local patch_version="${BASH_REMATCH[4]}"
-  # else
-  #   echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
-  #   exit 1;
-  # fi;
-  # echo "${version_prefix}"
-}
-
 function get_last_tag_name() {
   local versioning_prefix=$1
 
@@ -143,28 +99,51 @@ function get_last_tag_name() {
   echo "$tags" | tail -1
 }
 
-function get_next_version_number() {
+function get_versioning_prefix_from_tag() {
+  local tag_name="$1"
+  if [[ $tag_name =~ $TAG_VERSION_NUMBER_REGEX ]]; then
+    local version_number=$BASH_REMATCH
+    local version_prefix="${tag_name%%$version_number}"
+  else
+    echo "Error : Unable to determine version prefix from '${tag_name}'"
+    exit 1;
+  fi;
+  echo "${version_prefix}"
+}
+
+function get_version_number_from_tag() {
+  local tag_name="$1"
+  if [[ $tag_name =~ $TAG_VERSION_NUMBER_REGEX ]]; then
+    local full_version=$BASH_REMATCH
+  else
+    echo "Error : Unable to determine version number from '${tag_name}'"
+    exit 1;
+  fi;
+  #full stop delimited version number
+  echo "$full_version"
+}
+
+function get_next_version_number_from_tag() {
   local versioning_type=$1
-  local last_tag_name=$2
+  local tag_name=$2
 
   if [[ "$versioning_type" = "" ]]; then
     echo "Error : Versioning type required. eg. major"
     exit 1;
   fi;
 
-  if [[ $last_tag_name = '' ]]; then
+  if [[ $tag_name = '' ]]; then
     #No original tag name for version prefix - start increment
-    last_tag_name="0.0.0"
+    local tag_name="0.0.0"
   fi;
 
-  regex="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-  if [[ $last_tag_name =~ $regex ]]; then
+  if [[ $tag_name =~ $TAG_VERSION_NUMBER_REGEX ]]; then
     local full_version=$BASH_REMATCH
     local major_version="${BASH_REMATCH[1]}"
     local minor_version="${BASH_REMATCH[2]}"
     local patch_version="${BASH_REMATCH[3]}"
   else
-    echo "Error : Unable to determine version number from '${last_tag_name}'"
+    echo "Error : Unable to determine version number from '${tag_name}'"
     exit 1;
   fi;
 
@@ -397,12 +376,6 @@ function generate_changelog_content() {
     echo "Error : Release name required for changelog generation."
     exit 1;
   fi;
-
-  # echo "IN CHANGELOG CONTENT : "
-  # echo "release_name : ${release_name}"
-  # echo "commit_filter : ${commit_filter}"
-  # echo "starting_point : ${starting_point}"
-  # echo "end_point : ${end_point}"
 
   case "$commit_filter" in
     ':all_commits' | 'all_commits' )

@@ -152,20 +152,7 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
   output=$(get_last_tag_name "no/matches/atall")
   test "$output" = ""
 }
-# function get_versioning_prefix_from_tag() {
-#   local existing_tag_name="$1"
-#   regex="^(.*)([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-#   if [[ $existing_tag_name =~ $regex ]]; then
-#     local full_tag_name=$BASH_REMATCH
-#     local version_prefix="${BASH_REMATCH[1]}"
-#     local major_version="${BASH_REMATCH[2]}"
-#     local minor_version="${BASH_REMATCH[3]}"
-#     local patch_version="${BASH_REMATCH[4]}"
-#   else
-#     echo "Error : Unable to determine version prefix from '${existing_tag_name}'"
-#     exit 1;
-#   fi;
-# }
+
 #get_versioning_prefix_from_tag()
 
 it_uses_get_versioning_prefix_from_tag_to_error_on_missing_tag() {
@@ -181,84 +168,72 @@ it_uses_get_versioning_prefix_from_tag_with_an_invalid_tag_name() {
 }
 
 it_uses_get_versioning_prefix_from_tag_to_succeed_capturing_version_prefix() {
-  test $(get_versioning_prefix_from_tag releases/2.1.3) = "releases/"
-  test $(get_versioning_prefix_from_tag r/v/2.1.3) = "r/v/"
-  test $(get_versioning_prefix_from_tag some/old/release/v1.0.40) = "some/old/release/v"
+  test "$(get_versioning_prefix_from_tag 'releases/2.1.3')" = "releases/"
+  test "$(get_versioning_prefix_from_tag 'r/v/2.1.3')" = "r/v/"
+  test "$(get_versioning_prefix_from_tag 'some/old/release/v1.0.40')" = "some/old/release/v"
 }
 
-#split_tag_name_into_parts()
+#get_version_number_from_tag()
 
-it_uses_split_tag_name_into_parts_to_error_on_missing_tag_name() {
-  should_fail $(split_tag_name_into_parts)
+it_uses_get_version_number_from_tag_to_error_on_missing_tag() {
+  should_fail $(get_version_number_from_tag)
 }
 
-it_uses_split_tag_name_into_parts_to_error_with_an_invalid_last_tag_name() {
-  should_fail $(split_tag_name_into_parts invalidx.x.x)
-  should_fail $(split_tag_name_into_parts invalid1.0)
-  should_fail $(split_tag_name_into_parts invalid0)
+it_uses_get_version_number_from_tag_to_error_with_an_invalid_tag_name() {
+  should_fail $(get_version_number_from_tag invalidx.x.x)
+  should_fail $(get_version_number_from_tag invalid1.0)
+  should_fail $(get_version_number_from_tag invalid0)
 }
 
-it_uses_split_tag_name_into_parts_to_return_delimited_string_of_parts(){
-  local d="$TAG_VERSIONING_DELIMITER"
-  local normal_release=$(split_tag_name_into_parts 'some/old/release/v1.0.40')
-  local release_with_spaces=$(split_tag_name_into_parts 'Release with spaces20.02.12')
-
-  test "$normal_release"      = "some/old/release/v${d}1${d}0${d}40"
-  test "$release_with_spaces" = "Release with spaces${d}20${d}02${d}12"
-
-
-  local tag_parts=$(split_tag_name_into_parts 'Release with spaces20.02.12')
-  IFS=$TAG_VERSIONING_DELIMITER read -a tag_parts <<< "$tag_parts"
-
-  test "${tag_parts[0]}" = "Release with spaces"
-  test "${tag_parts[1]}" = "20" #Major
-  test "${tag_parts[2]}" = "02" #Minor
-  test "${tag_parts[3]}" = "12" #Patch
+it_uses_get_version_number_from_tag_to_succeed_capturing_version_numbers() {
+  test "$(get_version_number_from_tag 'releases/v102.29.20')" = "102.29.20"
+  test "$(get_version_number_from_tag '1.22.33')" = "1.22.33"
+  test "$(get_version_number_from_tag 'Release with Spaces40.50.60')" = "40.50.60"
 }
 
-#get_next_version_number()
+#get_next_version_number_from_tag()
 
-it_uses_get_next_version_number_to_error_on_missing_version_type() {
-  should_fail $(get_next_version_number)
+it_uses_get_next_version_number_from_tag_to_error_on_missing_version_type() {
+  should_fail $(get_next_version_number_from_tag)
 }
 
-it_uses_get_next_version_number_to_error_with_an_invalid_last_tag_name() {
-  should_fail $(get_next_version_number major invalidx.x.x)
-  should_fail $(get_next_version_number major invalid1.0)
-  should_fail $(get_next_version_number major invalid0)
+it_uses_get_next_version_number_from_tag_to_error_with_an_invalid_last_tag_name() {
+  should_fail $(get_next_version_number_from_tag major invalidx.x.x)
+  should_fail $(get_next_version_number_from_tag major invalid1.0)
+  should_fail $(get_next_version_number_from_tag major invalid0)
 }
 
-it_uses_get_next_version_number_to_succeed_with_an_empty_version_prefix() {
-  should_succeed $(get_next_version_number major)
+it_uses_get_next_version_number_from_tag_to_succeed_with_an_empty_version_prefix() {
+  should_succeed $(get_next_version_number_from_tag major)
 }
 
-it_uses_get_next_version_number_to_succeed_with_no_existing_tags() {
-  should_succeed $(get_next_version_number major v1.0.40)
+it_uses_get_next_version_number_from_tag_to_succeed_with_no_existing_tags() {
+  should_succeed $(get_next_version_number_from_tag major v1.0.40)
 }
 
-it_uses_get_next_version_number_to_succeed_with_no_matching_tags() {
-  output=$(get_next_version_number major some/old/release/v1.0.40)
+it_uses_get_next_version_number_from_tag_to_succeed_with_no_matching_tags() {
+  output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
   test $output = "2.0.40"
 }
 
-it_uses_get_next_version_number_to_succeed_incrementing_with_no_last_version() {
-  output=$(get_next_version_number major)
+it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_no_last_version() {
+  output=$(get_next_version_number_from_tag major)
   test $output = "1.0.0"
 }
 
-it_uses_get_next_version_number_to_succeed_incrementing_with_found_last_version() {
-  output=$(get_next_version_number minor release/production/v3.1.9)
+it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_found_last_version() {
+  output=$(get_next_version_number_from_tag minor release/production/v3.1.9)
   test $output = "3.2.9"
 }
 
-it_uses_get_next_version_number_to_succeed_incrementing_each_type() {
-  output=$(get_next_version_number major release/production/v3.1.9)
+it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
+  output=$(get_next_version_number_from_tag major release/production/v3.1.9)
   test $output = "4.1.9"
 
-  output=$(get_next_version_number minor release/staging/v2.0.3)
+  output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
   test $output = "2.1.3"
 
-  output=$(get_next_version_number patch release/v1.0.6)
+  output=$(get_next_version_number_from_tag patch release/v1.0.6)
   test $output = "1.0.7"
 }
 
