@@ -4,6 +4,6 @@ DIR=$(dirname $0)
 
 ls -al
 
-$DIR/roundup $DIR/../test/**/*
+$DIR/roundup $DIR/../test/**/*.sh
 
 
