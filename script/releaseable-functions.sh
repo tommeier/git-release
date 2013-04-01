@@ -240,6 +240,7 @@ get_changelog_text_for_commits() {
   #Pass in commits array of SHA's
   #Return formatted changelog text, with tags handled
   #Optional first argument for the format "--format=%H"
+
   local previous_shopt_extglob=$(shopt -p extglob)
   local existing_shopt_nocasematch=$(shopt -p nocasematch)
   shopt -s nocasematch

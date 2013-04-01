@@ -123,14 +123,10 @@ if [ ! $SKIP_EXECUTE ]; then
   #####                RELEASE-DEPLOYED                  #####
   ############################################################
 
-  #TODO: Make uniform either all caps variables or not.
-
   #Checkout existing deployed tag
   next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
 
   git checkout -f --no-track -B "$next_deploy_tag_name" "$DEPLOYED_TAG"
-
-  #TODO: Make single spec for capturing all elements from a tag name
 
   #Capture versioning prefix from deployed tag
   versioning_prefix=$(get_versioning_prefix_from_tag "$DEPLOYED_TAG")

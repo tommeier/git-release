@@ -126,18 +126,12 @@ if [ ! $SKIP_EXECUTE ]; then
 
   generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
-  #TODO : Test mode should display process
-  #TODO : Verbose debug mode
-
-  #TODO : Split up functions and specs into more logical divisions (changelog, git)
-
   set +e #Allow commit to fail if no files have changed
   git add -A
   git commit -m "Release : ${next_tag_name}"
   set -e
 
   git tag $next_tag_name
-  #TODO: Optional force push of tag
-  #TODO : Ask for confirmation unless -f (force) is passed
+
   #git push --tags
 fi;
