@@ -3,11 +3,10 @@
 . ./test/test_helper.sh
 . ./script/support/releaseable.sh
 
-script_source='./script/releaseable-deployed.sh'
-rup() { /bin/bash $script_source $@; }
-sandbox_rup() { /bin/bash ../$script_source $@; }
+rup() { ./script/releaseable-deployed.sh $@; }
+sandbox_rup() { /bin/bash ../script/releaseable-deployed.sh $@; }
 
-usage_head="++ /bin/bash .././script/releaseable-deployed.sh
+usage_head="++ /bin/bash ../script/releaseable-deployed.sh
 Required parameter: Please enter the deploy tag released.
 Usage : releaseable-deployed.sh -d 'opt' [-p 'opt'] [-h] [-t] [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C] --- create git release tag for a deployed releaseable with generated changelog."
 
