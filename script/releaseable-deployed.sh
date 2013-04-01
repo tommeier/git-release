@@ -78,7 +78,7 @@ usage examples:
 "
 
 #Supporting functions
-script_source=$( dirname $BASH_SOURCE[0] )
+script_source=$( dirname "${BASH_SOURCE[0]}" )
 . $script_source/support/releaseable.sh
 
 ############################################################

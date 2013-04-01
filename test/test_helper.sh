@@ -3,7 +3,7 @@
 #Script spec helpers
 
 script_directory() {
-  "$( cd "$( dirname $BASH_SOURCE[0] )" && pwd )"
+  "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 }
 
 #Search argument 1 for substring in argument 2
