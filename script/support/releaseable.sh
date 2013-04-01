@@ -268,7 +268,7 @@ get_changelog_text_for_commits() {
     fi;
 
     local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
-
+    local newline=$'\n'
     regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
     if [[ $body_result =~ $regex ]]; then
       #Tagged entry
@@ -277,7 +277,7 @@ get_changelog_text_for_commits() {
       #Remove leading spaces (regex in bash capturing always)
       local tag_content="${BASH_REMATCH[2]##*( )}"
       #Add leading 2 spaces with bullet point for tagged line prefix & remove trailing spaces
-      tag_content="  ${tag_content%%*( )}\n"
+      tag_content="  ${tag_content%%*( )}${newline}"
       #Sort matching tags
       case "$tag_type" in
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
@@ -291,7 +291,7 @@ get_changelog_text_for_commits() {
       esac;
     else
       #Normal entry
-      general_release_lines+="$body_result\n"
+      general_release_lines+="$body_result${newline}"
     fi;
   done;
 
@@ -300,13 +300,16 @@ get_changelog_text_for_commits() {
   eval $existing_shopt_nocasematch
 
   if [[ $feature_tag_lines != '' ]]; then
-    echo "Features:\n${feature_tag_lines}"
+    echo "Features:
+${feature_tag_lines}"
   fi;
   if [[ $security_tag_lines != '' ]]; then
-    echo "Security:\n${security_tag_lines}"
+    echo "Security:
+${security_tag_lines}"
   fi;
   if [[ $bug_tag_lines != '' ]]; then
-    echo "Bugs:\n${bug_tag_lines}"
+    echo "Bugs:
+${bug_tag_lines}"
   fi;
   echo "$general_release_lines"
 }
@@ -345,18 +348,21 @@ generate_changelog_file(){
 
   case "$generate_strategy" in
     ':overwrite' | 'overwrite' )
-      #Remove existing
-      #rm -rf $changelog_file;
-      echo "$changelog_content\n$(changelog_footer)" > $changelog_file;; #Overwrite;
+      #Overwrite;
+      echo "$changelog_content
+$(changelog_footer)" > $changelog_file;;
     ':append' | 'append' )
-      #Initialise new file
       if [[ ! -f $changelog_file ]]; then
+        #Initialise new file
         touch $changelog_file;
         echo "$changelog_content
-$(changelog_footer)" > $changelog_file;
+$(changelog_footer)" > $changelog_file
       else
         #Append to start of file
-        echo "$changelog_content\n$(cat $changelog_file)" > $changelog_file
+        local existing_content=$(cat $changelog_file);
+
+        echo "$changelog_content
+$existing_content" > $changelog_file;
       fi;;
     * )
       echo "Error : Generate strategy required. Please specify :overwrite or :append."
