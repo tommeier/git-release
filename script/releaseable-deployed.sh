@@ -78,7 +78,8 @@ usage examples:
 "
 
 #Supporting functions
-. $( dirname "${BASH_SOURCE[0]}/support/releaseable.sh" )
+script_source=$(dirname "${BASH_SOURCE[0]}")
+source "${script_source}/support/releaseable.sh"
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
