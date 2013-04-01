@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 . ./test/test_helper.sh
 . ./script/support/releaseable.sh
