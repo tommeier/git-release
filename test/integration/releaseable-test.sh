@@ -1,6 +1,6 @@
 #!/usr/bin/env roundup
-source ./test/test_helper.sh
-source ./script/support/releaseable.sh
+. ./test/test_helper.sh
+. ./script/support/releaseable.sh
 
 script_source='./script/releaseable.sh'
 rup() { /bin/sh $script_source $@; }
