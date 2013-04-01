@@ -1,4 +1,5 @@
-#!/usr/bin/env roundup
+#!/bin/sh -e
+
 . ./test/test_helper.sh
 . ./script/support/releaseable.sh
 

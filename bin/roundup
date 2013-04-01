@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 #Direct copy of roundup so we can use it on Travis CI
 #https://github.com/bmizerany/roundup
