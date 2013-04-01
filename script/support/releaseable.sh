@@ -11,7 +11,7 @@ TAG_VERSION_NUMBER_REGEX="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
 ############################################################
 
 #Releaseable only
-function validate_version_type {
+function validate_version_type() {
   #Confirm version type is in the accepted types
   local v="$1"
   local error_output="$2"
@@ -25,7 +25,7 @@ function validate_version_type {
 }
 
 #Releaseable-deployed only
-function validate_deploy_tag {
+function validate_deploy_tag() {
   local t="$1"
   local error_output="$2"
 
@@ -39,7 +39,7 @@ function validate_deploy_tag {
   fi;
 }
 
-function check_tag_exists {
+function check_tag_exists() {
   local tag_find=$(git tag -l "$1")
   if [[ "$tag_find" = '' ]]; then
     return 1;
@@ -48,14 +48,14 @@ function check_tag_exists {
   fi;
 }
 
-function ensure_git_directory {
+function ensure_git_directory() {
   if [[ ! -d  '.git' ]]; then
     echo "Error - Not a git repository please run from the base of your git repo." >&2
     exit 1
   fi;
 }
 
-function ensure_git_is_clean {
+function ensure_git_is_clean() {
   local result=$(git status --porcelain)
 
   if [[ "$result" != '' ]]; then
@@ -66,7 +66,7 @@ function ensure_git_is_clean {
   fi;
 }
 
-function versioning_prefix {
+function versioning_prefix() {
   if [[ $2 ]]; then
     echo "${1}/${2}"
   else
@@ -78,7 +78,7 @@ function versioning_prefix {
 #####                TAG FUNCTIONS                     #####
 ############################################################
 
-function get_release_tags {
+function get_release_tags() {
   local filter=""
   local tag_names=""
 
@@ -92,14 +92,14 @@ function get_release_tags {
   echo "$tag_names"
 }
 
-function get_last_tag_name {
+function get_last_tag_name() {
   local versioning_prefix=$1
 
   tags=$(get_release_tags $versioning_prefix)
   echo "$tags" | tail -1
 }
 
-function get_versioning_prefix_from_tag {
+function get_versioning_prefix_from_tag() {
   local tag_name="$1"
   if [[ $tag_name =~ $TAG_VERSION_NUMBER_REGEX ]]; then
     local version_number=$BASH_REMATCH
@@ -111,7 +111,7 @@ function get_versioning_prefix_from_tag {
   echo "${version_prefix}"
 }
 
-function get_version_number_from_tag {
+function get_version_number_from_tag() {
   local tag_name="$1"
   if [[ $tag_name =~ $TAG_VERSION_NUMBER_REGEX ]]; then
     local full_version=$BASH_REMATCH
@@ -123,7 +123,7 @@ function get_version_number_from_tag {
   echo "$full_version"
 }
 
-function get_next_version_number_from_tag {
+function get_next_version_number_from_tag() {
   local versioning_type=$1
   local tag_name=$2
 
@@ -160,30 +160,30 @@ function get_next_version_number_from_tag {
   echo "${major_version}.${minor_version}.${patch_version}"
 }
 
-function get_sha_for_tag_name {
+function get_sha_for_tag_name() {
   local result=$(git show-ref --tags --hash $1)
   echo "$result"
 }
 
-function get_sha_for_first_commit {
+function get_sha_for_first_commit() {
   local filter=$1
   local result=$(git log --reverse --format="%H" $filter | head -1)
   echo "$result"
 }
 
-function get_commit_message_for_first_commit {
+function get_commit_message_for_first_commit() {
   local filter=$1
   local result=$(git log --reverse --format="%s" $filter | head -1)
   echo "$result"
 }
 
-function get_commit_message_for_latest_commit {
+function get_commit_message_for_latest_commit() {
   local filter=$1
   local result=$(git log -n1 --format="%s" $filter)
   echo "$result"
 }
 
-function get_commits_between_points {
+function get_commits_between_points() {
   local starting_point="$1" #optional
   local end_point="$2"      #optional
   local log_filter="$3"     #optional
@@ -210,15 +210,15 @@ function get_commits_between_points {
 #####            CHANGELOG FUNCTIONS                   #####
 ############################################################
 
-function get_current_release_date {
+function get_current_release_date() {
   echo $( date "+%A %d %B, %Y %l:%M%p" )
 }
 
-function changelog_divider {
+function changelog_divider() {
   echo "+=========================================================+"
 }
 
-function changelog_footer {
+function changelog_footer() {
 local output=""
 ! read -d '' output <<"EOF"
 ||    _____ _                            _               ||
@@ -236,7 +236,7 @@ $output
 $(changelog_divider)"
 }
 
-function get_changelog_text_for_commits {
+function get_changelog_text_for_commits() {
   #Pass in commits array of SHA's
   #Return formatted changelog text, with tags handled
   #Optional first argument for the format "--format=%H"
@@ -312,7 +312,7 @@ function get_changelog_text_for_commits {
 }
 
 #generate_version_file "$version_number" "$optional_file_name"
-function generate_version_file {
+function generate_version_file(){
   local version_number="$1"
   if [[ "$version_number" = "" ]]; then
     echo "Error : Version number required for version file generation."
@@ -329,7 +329,7 @@ function generate_version_file {
 }
 
 #generate_changelog_file "$changelog_content" ":overwrite/:append" "$optional_file_name"
-function generate_changelog_file {
+function generate_changelog_file(){
   local changelog_content="$1"
   local generate_strategy="$2"
 
@@ -365,7 +365,7 @@ $(changelog_footer)" > $changelog_file;
 }
 
 #generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
-function generate_changelog_content {
+function generate_changelog_content() {
   local release_name="$1"
   local commit_filter="$2"         #all_commits or pulls_only
   local starting_point="$3"        #optional
