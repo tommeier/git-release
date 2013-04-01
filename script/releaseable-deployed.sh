@@ -78,16 +78,7 @@ usage examples:
 "
 
 #Supporting functions
-#script_source=$(dirname $BASH_SOURCE[0])
-#echo "Current script : ${script_source}"
-# Absolute path to this script. /home/user/bin/foo.sh
-# pushd `dirname $0` > /dev/null
-# SCRIPTPATH=`pwd -P`
-# popd > /dev/null
-DIR="$( cd "$( dirname $BASH_SOURCE[0] )" && pwd -P)"
-
-#ABSOLUTE_PATH=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd -P)../`basename "${BASH_SOURCE[0]}"`
-. "${DIR}/support/releaseable.sh"
+. "${BASH_SOURCE[0]%/*}/releaseable-functions.sh"
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
