@@ -80,6 +80,7 @@ usage examples:
 #Supporting functions
 script_source=$(dirname $BASH_SOURCE[0])
 echo "Current script : ${script_source}"
+echo "Current DIR : ${PWD}"
 . "${script_source}/support/releaseable.sh"
 
 ############################################################
