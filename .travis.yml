@@ -1,2 +1,7 @@
+
+before_script:
+    - git config --global user.email "testing_git@example.com"
+    - git config --global user.name "Testing Releaseable Git"
+
 script:
     - bin/tests
