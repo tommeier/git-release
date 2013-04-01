@@ -1,3 +1,4 @@
+#!/bin/sh -e
 #Script spec helpers
 
 function script_directory() {
