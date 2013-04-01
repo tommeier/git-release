@@ -3,7 +3,7 @@
 #Script spec helpers
 
 script_directory() {
-  "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  "$( cd "$( dirname $BASH_SOURCE[0] )" && pwd )"
 }
 
 #Search argument 1 for substring in argument 2
@@ -72,7 +72,7 @@ generate_sandbox_tags() {
     local tag_names="$1"
   fi;
   if [[ "$2" != '' ]]; then
-    local tag_commit_messages=("${!2}")
+    declare -a tag_commit_messages=("${!2}")
   else
     local tag_commit_messages="$2"
   fi;
