@@ -10,7 +10,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 
 *add full examples*
 
-*add contribution section*
+*add contribution section (how to test)*
 
 ## Dependencies
 
@@ -24,6 +24,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 * [ ] Optionally force push of tags, otherwise ask for confirmation to send
 * [ ] Make uniform variable style, either all capped variables or not
 * [ ] Test mode should display processes it would run (--dry-run option)
+* [ ] Remove *.sh filenames and rely on shebangs on each file
 * [ ] Verbose debug mode (display a lot more info)
 * [ ] Split up functions and specs into more logical divisions (changelog, git) rather than one large support file
 * [*] Split into seperate github repo with migrated history
