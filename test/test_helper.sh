@@ -2,12 +2,12 @@
 
 #Script spec helpers
 
-function script_directory() {
+script_directory() {
   "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 }
 
 #Search argument 1 for substring in argument 2
-function search_substring() {
+search_substring() {
   if echo "$1" | grep -q "$2"; then
     echo 'found'
   else
@@ -15,7 +15,7 @@ function search_substring() {
   fi;
 }
 
-function should_succeed() {
+should_succeed() {
   if [[ $? = 0 ]]; then
     return 0
   else
@@ -23,11 +23,11 @@ function should_succeed() {
   fi;
 }
 
-function should_fail() {
+should_fail() {
   ! should_succeed
 }
 
-function file_should_exist() {
+file_should_exist() {
   if [[ -f $1 ]];
   then
     return 0;
@@ -36,22 +36,22 @@ function file_should_exist() {
   fi;
 }
 
-function file_should_not_exist() {
+file_should_not_exist() {
   ! file_should_exist $1
 }
 
-function enter_sandbox() {
+enter_sandbox() {
   __DIR__="$PWD"
   rm -rf .sandbox
   mkdir -p .sandbox
   cd .sandbox
 }
 
-function remove_sandbox() {
+remove_sandbox() {
   rm -rf .sandbox
 }
 
-function generate_git_repo() {
+generate_git_repo() {
   enter_sandbox
   git init
   touch 'commit_1'
@@ -59,7 +59,7 @@ function generate_git_repo() {
   git commit -am "Initial Commit"
 }
 
-function generate_sandbox_tags() {
+generate_sandbox_tags() {
   if [[ ! -f '.git' ]]; then
     #Generate git repo & enter sandbox
     generate_git_repo
