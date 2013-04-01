@@ -4,10 +4,10 @@
 . ./script/support/releaseable.sh
 
 script_source='./script/releaseable.sh'
-rup() { /bin/sh $script_source $@; }
-sandbox_rup() { /bin/sh ../$script_source $@; }
+rup() { /bin/bash $script_source $@; }
+sandbox_rup() { /bin/bash ../$script_source $@; }
 
-usage_head="++ /bin/sh ./script/releaseable.sh -h
+usage_head="++ /bin/bash ./script/releaseable.sh -h
 Usage : releaseable.sh -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'][-e 'opt'] --- create git release tags"
 
 describe "releaseable - integration"
