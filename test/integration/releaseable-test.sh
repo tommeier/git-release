@@ -1,5 +1,5 @@
 #!/usr/bin/env roundup
-source ./spec/scripts/script_spec_helper.sh
+source ./test/test_helper.sh
 source ./script/support/releaseable.sh
 
 script_source='./script/releaseable.sh'
