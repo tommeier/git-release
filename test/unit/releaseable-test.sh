@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./test/test_helper.sh
-. ./script/support/releaseable.sh
+. ./support/releaseable.sh
 
 describe "releaseable - unit"
 

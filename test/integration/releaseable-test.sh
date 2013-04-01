@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
 . ./test/test_helper.sh
-. ./script/support/releaseable.sh
+. ./support/releaseable.sh
 
-rup() { ./script/releaseable.sh $@; }
-sandbox_rup() { /bin/bash ../script/releaseable.sh $@; }
+rup() { ./bin/releaseable $@; }
+sandbox_rup() { /bin/bash ../bin/releaseable $@; }
 
 usage_head="++ /bin/bash ./script/releaseable.sh -h
 Usage : releaseable.sh -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'][-e 'opt'] --- create git release tags"
