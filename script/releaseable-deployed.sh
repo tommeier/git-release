@@ -84,7 +84,7 @@ usage examples:
 # pushd `dirname $0` > /dev/null
 # SCRIPTPATH=`pwd -P`
 # popd > /dev/null
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)"
+DIR="$( cd "$( dirname $BASH_SOURCE[0] )" && pwd -P)"
 
 #ABSOLUTE_PATH=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd -P)../`basename "${BASH_SOURCE[0]}"`
 . "${DIR}/support/releaseable.sh"
