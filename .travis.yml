@@ -1,2 +1,2 @@
 script:
-    - bin/tests
+    - ./bin/tests
