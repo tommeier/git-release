@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+DIR=$(dirname $0)
+
+
+
+echo "Running Integration tests:"
+time $DIR/../support/roundup $DIR/../integration/*
+
+echo "Running Unit tests:"
+time $DIR/../support/roundup $DIR/../unit/*
+
+

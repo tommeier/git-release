@@ -29,6 +29,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
  - [ ] Create Node NPM branch and release as an NPM.
  - [ ] Create Python PIP branch and release as a PIP.
  - [ ] Test on variety of systems and servers
+ - [ ] Fix issue in tests where the time can very rarely cross over a second boundary (make specs ignore seconds difference)
  - [ ] [potentially] Make CHANGELOG tagging dynamic (search for initial square brackets), with features + bugs on top of listing
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
  - [*] Split into seperate github repo with migrated history
