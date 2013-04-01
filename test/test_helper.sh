@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 #Script spec helpers
 
