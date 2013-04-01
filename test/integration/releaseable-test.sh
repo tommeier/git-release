@@ -6,8 +6,10 @@
 rup() { ./bin/releaseable $@; }
 sandbox_rup() { /bin/bash ../bin/releaseable $@; }
 
-usage_head="++ /bin/bash ./script/releaseable.sh -h
-Usage : releaseable.sh -v 'opt' [-h] [-t] [-r 'opt'][-p 'opt'][-e 'opt'] --- create git release tags"
+usage_head="++ /bin/bash ../bin/releaseable
+incorrect versioning type: ''
+Please set to one of 'major', 'minor' or 'patch'
+Usage : releaseable -v 'opt' [-r 'opt'][-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog"
 
 describe "releaseable - integration"
 
@@ -23,11 +25,11 @@ it_will_fail_with_no_versioning_type() {
   ! rup
 }
 
-#TODO - Fix this to validate output like in releaseable-deployed
 it_will_display_help_text_on_fail() {
-  output=$(rup 2>&1 | head -n 2 2>&1 )
+  generate_git_repo
 
-  test $(search_substring "$output" "$usage_output") = 'found'
+  output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
+  test "$output" = "$usage_head"
 }
 
 it_will_display_error_when_no_git_directory_exists() {
