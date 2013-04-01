@@ -4,5 +4,5 @@ before_script:
     - git config --global user.name "Testing Releaseable Git"
 
 script:
-    - bash --version
+    - echo $(bash --version)
     - bin/tests
