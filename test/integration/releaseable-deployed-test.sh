@@ -4,8 +4,8 @@
 . ./script/support/releaseable.sh
 
 script_source='./script/releaseable-deployed.sh'
-rup() { /bin/sh $script_source $@; }
-sandbox_rup() { /bin/sh ../$script_source $@; }
+rup() { /bin/bash $script_source $@; }
+sandbox_rup() { /bin/bash ../$script_source $@; }
 
 usage_head="++ /bin/sh .././script/releaseable-deployed.sh
 Required parameter: Please enter the deploy tag released.
