@@ -1,4 +1,7 @@
-#!/bin/sh -e
+#!/bin/sh
+# [r5]: roundup.5.html
+# [r1t]: roundup-1-test.sh.html
+# [r5t]: roundup-5-test.sh.html
 
 #Direct copy of roundup so we can use it on Travis CI
 #https://github.com/bmizerany/roundup
