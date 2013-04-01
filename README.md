@@ -3,4 +3,4 @@ releaseable
 
 Bash only (language agnostic) git release script for tagging and bagging a release candidate with changelog
 
-https://travis-ci.org/tommeier/releaseable.png
+[![Build Status](https://travis-ci.org/tommeier/releaseable.png)](https://travis-ci.org/tommeier/releaseable)
