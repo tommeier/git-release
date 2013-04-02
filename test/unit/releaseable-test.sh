@@ -33,7 +33,6 @@ it_passes_on_validate_inputs_with_patch_version_type() {
   should_succeed $(validate_version_type "patch")
 }
 
-
 #versioning_prefix()
 
 it_uses_versioning_prefix_to_generate_concatenated_prefix() {
