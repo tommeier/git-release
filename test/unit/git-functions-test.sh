@@ -11,6 +11,45 @@ after() {
   fi;
 }
 
+it_uses_check_tag_exists_to_return_false_if_no_tags_exist() {
+  generate_git_repo
+
+  result=$(set +e ; check_tag_exists "not/found/anything" ; echo $?)
+  test 1 -eq $result
+
+  result=$(set +e ; check_tag_exists "" ; echo $?)
+  test 1 -eq $result
+}
+
+it_uses_check_tag_exists_to_return_false_if_it_doesnt_exist() {
+  local tags=(
+    "release/v1.0.5"
+    "release/v1.0.6"
+  )
+  generate_sandbox_tags tags[@]
+
+  result=$(set +e ; check_tag_exists "not/found/anything" ; echo $?)
+  test 1 -eq $result
+
+  result=$(set +e ; check_tag_exists ""; echo $?)
+  test 1 -eq $result
+}
+
+it_uses_check_tag_exists_to_return_true_if_tag_exists() {
+
+  local tags=(
+    "release/v1.0.5"
+    "release/v1.0.6"
+  )
+  generate_sandbox_tags tags[@]
+
+  result=$(set +e ; check_tag_exists "release/v1.0.5" ; echo $?)
+  test 0 -eq $result
+
+  result=$(set +e ; check_tag_exists "release/v1.0.6" ; echo $?)
+  test 0 -eq $result
+}
+
 #ensure_git_directory()
 
 it_fails_on_ensure_git_directory_with_no_git() {
