@@ -1,9 +1,5 @@
 #!/bin/bash -e
 
-#Dependencies
-. "${BASH_SOURCE[0]%/*}/git-functions.sh"
-. "${BASH_SOURCE[0]%/*}/changelog-functions.sh"
-
 ############################################################
 #####                    GLOBALS                       #####
 ############################################################
@@ -14,7 +10,6 @@ TAG_VERSION_NUMBER_REGEX="([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
 #####               SUPPORT FUNCTIONS                  #####
 ############################################################
 
-#Releaseable only
 validate_version_type() {
   #Confirm version type is in the accepted types
   local v="$1"

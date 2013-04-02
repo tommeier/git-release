@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
 . ./test/test_helper.sh
-. ./support/releaseable-functions.sh
+. ./support/support-functions.sh
+
 
 rup() { ./bin/releaseable $@; }
 sandbox_rup() { /bin/bash ../bin/releaseable $@; }
