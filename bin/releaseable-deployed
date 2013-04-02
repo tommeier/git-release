@@ -78,7 +78,7 @@ usage examples:
 "
 
 #Supporting functions
-. "${BASH_SOURCE[0]%/*}/../support/releaseable-functions.sh"
+. "${BASH_SOURCE[0]%/*}/../support/support-functions.sh"
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
