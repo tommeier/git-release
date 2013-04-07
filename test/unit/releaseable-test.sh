@@ -45,8 +45,7 @@ it_uses_get_release_tags_to_return_all_tags_with_no_pattern_ordered_by_alpha() {
   )
   generate_sandbox_tags tags[@]
 
-  output=$(get_release_tags)
-  test "$output" = "random_tag_1
+  test "$(get_release_tags)" = "random_tag_1
 random_tag_2
 random_tag_3
 release/production/v1.0.9
@@ -63,12 +62,12 @@ it_uses_get_release_tags_to_return_tags_matching_a_given_pattern() {
   )
   generate_sandbox_tags tags[@]
 
-  output=$(get_release_tags random)
+  local output=$(get_release_tags random)
   test "$output" = "random_tag_1
 random_tag_2
 random_tag_3"
 
-  output=$(get_release_tags release/production)
+  local output=$(get_release_tags release/production)
   test "$output" = "release/production/v1.0.9
 release/production/v3.0.9"
 }
@@ -83,13 +82,12 @@ it_uses_get_last_tag_name_to_find_the_last_tag_scoped_by_pattern() {
   )
   generate_sandbox_tags tags[@]
 
-  output=$(get_last_tag_name "release/production/v")
+  local output=$(get_last_tag_name "release/production/v")
   test "$output" = "release/production/v3.0.9"
 }
 
 it_uses_get_last_tag_name_to_return_nothing_with_no_tags() {
-  output=$(get_last_tag_name "no/existing/tags")
-  test "$output" = ""
+  test "$(get_last_tag_name 'no/existing/tags')" = ""
 }
 
 it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
@@ -99,8 +97,7 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
   )
   generate_sandbox_tags tags[@]
 
-  output=$(get_last_tag_name "no/matches/atall")
-  test "$output" = ""
+  test "$(get_last_tag_name 'no/matches/atall')" = ""
 }
 
 #get_versioning_prefix_from_tag()
@@ -162,27 +159,27 @@ it_uses_get_next_version_number_from_tag_to_succeed_with_no_existing_tags() {
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_with_no_matching_tags() {
-  output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
+  local output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
   test $output = "2.0.40"
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_no_last_version() {
-  output=$(get_next_version_number_from_tag major)
+  local output=$(get_next_version_number_from_tag major)
   test $output = "1.0.0"
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_found_last_version() {
-  output=$(get_next_version_number_from_tag minor release/production/v3.1.9)
+  local output=$(get_next_version_number_from_tag minor release/production/v3.1.9)
   test $output = "3.2.9"
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
-  output=$(get_next_version_number_from_tag major release/production/v3.1.9)
+  local output=$(get_next_version_number_from_tag major release/production/v3.1.9)
   test $output = "4.1.9"
 
-  output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
+  local output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
   test $output = "2.1.3"
 
-  output=$(get_next_version_number_from_tag patch release/v1.0.6)
+  local output=$(get_next_version_number_from_tag patch release/v1.0.6)
   test $output = "1.0.7"
 }

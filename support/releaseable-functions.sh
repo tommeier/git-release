@@ -59,7 +59,7 @@ get_release_tags() {
 get_last_tag_name() {
   local versioning_prefix=$1
 
-  tags=$(get_release_tags $versioning_prefix)
+  local tags=$(get_release_tags $versioning_prefix)
   echo "$tags" | tail -1
 }
 
