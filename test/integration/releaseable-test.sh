@@ -9,7 +9,7 @@ sandbox_rup() { /bin/bash ../bin/releaseable $@; }
 usage_head="++ /bin/bash ../bin/releaseable
 incorrect versioning type: ''
 Please set to one of 'major', 'minor' or 'patch'
-Usage : releaseable -v 'opt' [-r 'opt'][-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog"
+Usage : releaseable -v 'opt' [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog"
 
 describe "releaseable - integration"
 
@@ -67,7 +67,7 @@ it_will_genereate_a_new_tag_for_next_release() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "release/production/v3.1.10")
 
-  output=$(sandbox_rup -v patch -r "release/production" -p "v")
+  sandbox_rup -v patch -p "release/production/v"
 
   should_succeed $(check_tag_exists "release/production/v3.1.10")
 }
@@ -83,7 +83,7 @@ it_will_genereate_a_new_tag_for_next_release_with_defaults() {
   should_succeed $(check_tag_exists "release/v1.0.6")
   should_fail $(check_tag_exists "release/v1.1.6")
 
-  output=$(sandbox_rup -v minor 2>&1)
+  sandbox_rup -v minor
 
   should_succeed $(check_tag_exists "release/v1.1.6")
 }
@@ -94,12 +94,12 @@ it_will_genereate_a_new_tag_for_next_release_when_none_exist() {
   should_fail $(check_tag_exists "my-release/yay-1.0.0")
   should_fail $(check_tag_exists "my-release/yay-1.1.0")
 
-  output=$(sandbox_rup -v major -r "my-release" -p "yay-" 2>&1)
+  sandbox_rup -v major -p "my-release/yay-"
 
   should_succeed $(check_tag_exists "my-release/yay-1.0.0")
   should_fail $(check_tag_exists "my-release/yay-1.1.0")
 
-  output=$(sandbox_rup -v minor -r "my-release" -p "yay-" 2>&1)
+  sandbox_rup -v minor -p "my-release/yay-"
 
   should_succeed $(check_tag_exists "my-release/yay-1.0.0")
   should_succeed $(check_tag_exists "my-release/yay-1.1.0")
@@ -121,7 +121,7 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v major -r "release" -p "v" 2>&1)
+  sandbox_rup -v major -p "release/v"
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -153,7 +153,7 @@ it_will_generate_a_changelog_for_a_set_starting_point() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v patch -r "release" -p "v" -s "release/v1.0.5")
+  sandbox_rup -v patch -p "release/v" -s "release/v1.0.5"
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -189,7 +189,7 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v minor -r "release" -p "v" -s "release/v1.0.5" -f "release/v1.0.6")
+  sandbox_rup -v minor -p "release/v" -s "release/v1.0.5" -f "release/v1.0.6"
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -220,7 +220,7 @@ it_will_generate_files_with_optional_names() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v major -r "release" -p "v" -C "MYCHANGELOG" -V "VERSION_NUMBER")
+  sandbox_rup -v major -C "MYCHANGELOG" -V "VERSION_NUMBER"
 
   file_should_not_exist "CHANGELOG"
   file_should_not_exist "VERSION"
@@ -244,12 +244,12 @@ $(changelog_footer)"
 
 it_will_generate_a_changelog_file_scoped_to_pull_requests() {
   local tags=(
-    'tag_with_pulls/1'
+    'tag_with_pulls/1.0.0'
     'tag_witout_pull'
-    'tag_with_pulls/2'
+    'tag_with_pulls/2.0.0'
     'another_tag_without'
-    'tag_with_pulls/3'
-    'tag_with_pulls/4'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
   )
   local commit_messages=(
     "Merge pull request #705 from Ferocia/bug/limit-payment-description-length
@@ -271,7 +271,7 @@ Fixing the customer login but no tag displayed."
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v minor -r "tag_with_pulls" -P)
+  sandbox_rup -v "minor" -P
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -311,7 +311,7 @@ it_will_overwrite_a_changelog_file_by_default() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v minor -r "release" -p "v" -s "release/v1.0.4" -f "release/v1.0.5")
+  sandbox_rup -v minor -s "release/v1.0.4" -f "release/v1.0.5"
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -327,7 +327,7 @@ $(changelog_footer)"
 
   test "$version_content" = "1.1.6"
 
-  output=$(sandbox_rup -v major -r "release" -p "v" -s "release/v1.0.5" -f "release/v1.0.6")
+  sandbox_rup -v major -s "release/v1.0.5" -f "release/v1.0.6"
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -355,7 +355,7 @@ it_will_append_to_a_changelog_optionally(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -v minor -r "release" -p "v" -A)
+  sandbox_rup -v minor -A
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -370,7 +370,7 @@ $(changelog_footer)"
 
   test "$version_content" = "1.1.5"
 
-  output=$(sandbox_rup -v major -r "release" -p "v" -A)
+  sandbox_rup -v major -A
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -396,7 +396,7 @@ it_will_generate_in_an_opinionated_fashion(){
   #using defaults other than append
   generate_git_repo
 
-  output=$(sandbox_rup -v minor -A)
+  sandbox_rup -v minor -A
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`
@@ -411,7 +411,7 @@ $(changelog_footer)"
 
   test "$version_content" = "0.1.0"
 
-  output=$(sandbox_rup -v major -A)
+  sandbox_rup -v major -A
 
   local changelog_content=`cat CHANGELOG`
   local version_content=`cat VERSION`

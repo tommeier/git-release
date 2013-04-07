@@ -11,8 +11,7 @@ set -e
 #####                   DEFAULTS                       #####
 ############################################################
 
-RELEASE_PREFIX='release'
-VERSION_PREFIX='v'
+RELEASE_PREFIX='release/v'
 CHANGELOG_FILE='CHANGELOG'
 VERSION_FILE='VERSION'
 CHANGELOG_SCOPE=':all_commits'
@@ -21,14 +20,13 @@ CHANGELOG_STRATEGY=':overwrite'
 START_POINT=''
 END_POINT=''
 
-USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-r 'opt'][-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog
+USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog
 
 options:
   required:
     -v set the software versioning type (major or minor or patch)
   versioning:
-    -r  set the release prefix (default: release)
-    -p  set the version prefix (default: v)
+    -p  set the release prefix (default: 'release/v')
   changelog:
     -s  set the start point (default: the last tag name that matches the versioning prefix)
     -f  set the end/finish point (default: HEAD)
@@ -46,7 +44,7 @@ usage examples:
   1) Basic usage with defaults
     Given the last release was at 1.0.4, with a tag of 'our-releases/REL1.0.4' :
 
-    $(basename "$0") -v minor -r 'our-releases' -p 'REL-'
+    $(basename "$0") -v minor -p 'our-releases/REL-'
 
     Tag generated           : our-releases/REL1.1.4
     Version file contains   : 1.1.4
@@ -54,11 +52,11 @@ usage examples:
 
   2) Pull requests only (changelog generated only with body of pull request titles)
 
-    $(basename "$0") -v minor -r 'releases' -p 'v' -P
+    $(basename "$0") -v minor -P
 
   3) Generate custom changelog and version file
 
-    $(basename "$0") -v minor -r 'releases' -p 'v' -C 'MYCHANGELOGFILE' -V 'MYVERSIONFILE'
+    $(basename "$0") -v minor -C 'MYCHANGELOGFILE' -V 'MYVERSIONFILE'
 
 "
 
@@ -69,7 +67,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts htAPv:r:s:f:p:C:V: option
+while getopts htAPv:s:f:p:C:V: option
 do
   case "${option}"
   in
@@ -81,8 +79,7 @@ do
     P) CHANGELOG_SCOPE=":pulls_only";;
     A) CHANGELOG_STRATEGY=":append";;
     v) VERSION_TYPE="$OPTARG";;
-    r) RELEASE_PREFIX="$OPTARG";;
-    p) VERSION_PREFIX="$OPTARG";;
+    p) RELEASE_PREFIX="$OPTARG";;
     s) START_POINT="$OPTARG";;
     f) END_POINT="$OPTARG";;
     C) CHANGELOG_FILE="$OPTARG";;
@@ -110,16 +107,14 @@ if [ ! $SKIP_EXECUTE ]; then
   ############################################################
   #####                   RELEASE                        #####
   ############################################################
-  VERSIONING_PREFIX=$(versioning_prefix $RELEASE_PREFIX $VERSION_PREFIX)
-
-  last_tag_name=$(get_last_tag_name $VERSIONING_PREFIX);
+  last_tag_name=$(get_last_tag_name $RELEASE_PREFIX);
 
   if [[ "$START_POINT" = '' ]]; then
     START_POINT=$last_tag_name
   fi;
 
   next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_name)
-  next_tag_name="${VERSIONING_PREFIX}${next_version_number}"
+  next_tag_name="${RELEASE_PREFIX}${next_version_number}"
   generate_version_file "$next_version_number" "$VERSION_FILE"
 
   changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
@@ -130,7 +125,8 @@ if [ ! $SKIP_EXECUTE ]; then
   git add -A
   git commit -m "Release : ${next_tag_name}"
   set -e
-
+  echo "UP TO HERE"
+  echo "NEXT TAG NAME: ${next_tag_name}"
   git tag $next_tag_name
 
   #git push --tags

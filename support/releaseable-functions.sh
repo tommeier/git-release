@@ -38,14 +38,6 @@ validate_deploy_tag() {
   fi;
 }
 
-versioning_prefix() {
-  if [[ $2 ]]; then
-    echo "${1}/${2}"
-  else
-    echo "${1}"
-  fi;
-}
-
 ############################################################
 #####                TAG FUNCTIONS                     #####
 ############################################################
@@ -60,7 +52,7 @@ get_release_tags() {
   fi;
   tag_names=$(git tag -l $filter)
 
-  #<ref> tags/<release_prefix>/<version_prefix><version_number>
+  #<ref> tags/<release_prefix><version_number>
   echo "$tag_names"
 }
 
