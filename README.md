@@ -19,6 +19,9 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 ## TODO
 
  - [ ] Write a proper README
+ - [ ] Change releaseable to work out prefix if given a start or an end point
+ - [ ] Remove unnessary $(output)= statements in tests
+ - [ ] Remove the 'skip execute' code
  - [ ] Optionally force push of tags, otherwise ask for confirmation to send
  - [ ] Make uniform variable style, either all capped variables or not
  - [ ] Test mode should display processes it would run (--dry-run option)
@@ -33,6 +36,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
  - [ ] Make test helpers for generating the content (changing the style now will break a lot of tests)
  - [ ] [potentially] Make CHANGELOG tagging dynamic (search for initial square brackets), with features + bugs on top of listing
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
+ - [*] Update releaseable to remove the division of release and version prefix, make just one prefix (simpler)
  - [x] Write success cases for releaseable-deployed script
  - [*] Split up functions and specs into more logical divisions (changelog, git) rather than one large support file
  - [*] Remove *.sh filenames and rely on shebangs on each executable file. Support files keep for editors to use.
