@@ -78,7 +78,7 @@ usage examples:
 "
 
 #Supporting functions
-. "${BASH_SOURCE[0]%/*}/../support/releaseable.sh"
+. "${BASH_SOURCE[0]%/*}/../support/support-functions.sh"
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
@@ -126,15 +126,19 @@ if [ ! $SKIP_EXECUTE ]; then
   #Checkout existing deployed tag
   next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
 
+  if [[ $(check_tag_exists "$next_deploy_tag_name" && echo $?) = "0" ]]; then
+    #Delete existing
+    git tag -d $next_deploy_tag_name
+  fi;
   git checkout -f --no-track -B "$next_deploy_tag_name" "$DEPLOYED_TAG"
 
-  #Capture versioning prefix from deployed tag
-  versioning_prefix=$(get_versioning_prefix_from_tag "$DEPLOYED_TAG")
+  #Capture versioning prefix from new deploy tag
+  versioning_prefix=$(get_versioning_prefix_from_tag "$next_deploy_tag_name")
 
   #Find last deployed tag for this versioning style
   last_tag_name=$(get_last_tag_name $versioning_prefix)
 
-  deployed_version_number=$(get_version_number_from_tag "$DEPLOYED_TAG")
+  deployed_version_number=$(get_version_number_from_tag "$next_deploy_tag_name")
   if [[ "$START_POINT" = '' ]]; then
     START_POINT=$last_tag_name
   fi;
