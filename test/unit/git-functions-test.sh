@@ -107,7 +107,7 @@ it_uses_get_commits_between_points_to_list_all_commits_from_a_start_point() {
   )
   generate_sandbox_tags tags[@]
 
-  output=$(get_commits_between_points 'random_tag_2')
+  local output=$(get_commits_between_points 'random_tag_2')
   test "$output" = "$(get_sha_for_tag_name 'random_tag_3')
 $(get_sha_for_tag_name 'release/v1.0.6')
 $(get_sha_for_tag_name 'random_tag_2')"
@@ -131,7 +131,7 @@ it_uses_get_commits_between_points_to_return_commits_with_no_start_point() {
 
   local start_point=""
   local end_point="release/v1.0.6"
-  output=$(get_commits_between_points "$start_point" "$end_point")
+  local output=$(get_commits_between_points "$start_point" "$end_point")
 
   #Ordered by creation date
   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
@@ -164,7 +164,7 @@ it_uses_get_commits_between_points_to_return_all_commits_between_points_with_fil
   local commit_message=$(get_commit_message_for_latest_commit 'release/production/v3.0.9')
   local target_tag_sha=$(get_sha_for_tag_name 'release/production/v3.0.9')
 
-  output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
+  local output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
 
   test "$output" = "$target_tag_sha"
 }
@@ -186,7 +186,7 @@ it_uses_get_commits_between_points_to_return_all_commits_with_no_start_point_wit
   local commit_message=$(get_commit_message_for_latest_commit 'release/production/v3.1.9')
   local target_tag_sha=$(get_sha_for_tag_name 'release/production/v3.1.9')
 
-  output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
+  local output=$(get_commits_between_points "$start_point" "$end_point" "$commit_message")
 
   test "$output" = "$target_tag_sha"
 }
@@ -202,7 +202,7 @@ it_uses_get_commits_between_points_to_return_all_commits_between_points() {
 
   local start_point="release/v1.0.5"
   local end_point="release/v1.0.6"
-  output=$(get_commits_between_points "$start_point" "$end_point")
+  local output=$(get_commits_between_points "$start_point" "$end_point")
 
   #Ordered by creation date
   local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')

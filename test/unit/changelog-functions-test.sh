@@ -125,7 +125,6 @@ it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_ins
 
   output=$(get_changelog_text_for_commits "$commit_shas")
 
-  local sha_array=($commit_shas)
   test "$output" = "Features:
   OMG. I had time to write something of use
 
@@ -308,12 +307,11 @@ it_uses_generate_version_file_to_create_a_version_file() {
 
   file_should_not_exist "VERSION"
 
-  output=$(generate_version_file 'v12.03.23')
+  generate_version_file 'v12.03.23'
 
   file_should_exist "VERSION"
 
-  local contents=`cat VERSION`
-  test "$contents" = "v12.03.23"
+  test "$(cat VERSION)" = "v12.03.23"
 }
 
 it_uses_generate_version_file_to_create_a_custom_version_file() {
@@ -321,7 +319,7 @@ it_uses_generate_version_file_to_create_a_custom_version_file() {
 
   file_should_not_exist "CUSTOM_VERSION"
 
-  output=$(generate_version_file 'v12.03.23' 'CUSTOM_VERSION')
+  generate_version_file 'v12.03.23' 'CUSTOM_VERSION'
 
   file_should_exist "CUSTOM_VERSION"
 
@@ -333,13 +331,13 @@ it_uses_generate_version_file_to_replace_any_existing_version_file() {
 
   file_should_not_exist "VERSION"
 
-  output=$(generate_version_file 'v12.03.23')
+  generate_version_file 'v12.03.23'
 
   file_should_exist "VERSION"
 
   test "`cat VERSION`" = "v12.03.23"
 
-  output=$(generate_version_file 'v14.05.25')
+  generate_version_file 'v14.05.25'
 
   test "`cat VERSION`" = "v14.05.25"
 }
@@ -381,8 +379,7 @@ Is Here Across Multiple Lines
 
   file_should_exist "CHANGELOG"
 
-  local contents=`cat CHANGELOG`
-  test "$contents" = "$content
+  test "$(cat CHANGELOG)" = "$content
 $(changelog_footer)"
 }
 
@@ -417,7 +414,7 @@ it_uses_generate_changelog_file_to_replace_any_existing_file_with_overwrite_stra
   test "`cat CHANGELOG`" = "Original Content
 $(changelog_footer)"
 
-  output=$(generate_changelog_file 'Updated Content' ':overwrite')
+  generate_changelog_file 'Updated Content' ':overwrite'
 
   test "`cat CHANGELOG`" = "Updated Content
 $(changelog_footer)"
@@ -428,14 +425,14 @@ it_uses_generate_changelog_file_to_append_to_any_existing_file_with_append_strat
 
   file_should_not_exist "CHANGELOG"
 
-  output=$(generate_changelog_file 'Original Content' ':append')
+  generate_changelog_file 'Original Content' ':append'
 
   file_should_exist "CHANGELOG"
 
   test "`cat CHANGELOG`" = "Original Content
 $(changelog_footer)"
 
-  output=$(generate_changelog_file 'Updated Content' ':append')
+  generate_changelog_file 'Updated Content' ':append'
 
   test "`cat CHANGELOG`" = "Updated Content
 Original Content

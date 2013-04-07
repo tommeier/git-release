@@ -29,15 +29,15 @@ it_will_fail_with_no_deployed_tag() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  output=$(sandbox_rup 2>&1 | head -n 3 2>&1)
+  local output=$(sandbox_rup 2>&1 | head -n 3 2>&1)
   test "$output" = "$usage_head"
 }
 
 it_will_display_error_when_no_git_directory_exists() {
   enter_sandbox
 
-  output=$(sandbox_rup -d 'AnyDeployTag' 2>&1 | head -n 2 2>&1)
-  missing_git="Error - Not a git repository please run from the base of your git repo."
+  local output=$(sandbox_rup -d 'AnyDeployTag' 2>&1 | head -n 2 2>&1)
+  local missing_git="Error - Not a git repository please run from the base of your git repo."
 
   test $(search_substring "$output" "$missing_git") = 'found'
 }
@@ -63,11 +63,13 @@ it_will_forcibly_replace_existing_deploy_tags() {
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
-  result=$(sandbox_rup -d "$tag_name")
+  sandbox_rup -d "$tag_name"
+
   file_should_exist "CHANGELOG"
   file_should_not_exist "CHANGELOG2"
 
-  result=$(sandbox_rup -d "$tag_name" -C "CHANGELOG2")
+  sandbox_rup -d "$tag_name" -C "CHANGELOG2"
+
   file_should_not_exist "CHANGELOG"
   file_should_exist "CHANGELOG2"
 
@@ -96,7 +98,7 @@ it_will_genereate_a_new_deploy_tag_for_each_release() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "deployed/release/production/v3.1.9")
 
-  output=$(sandbox_rup -d "release/production/v3.1.9")
+  sandbox_rup -d "release/production/v3.1.9"
 
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
 }
@@ -108,12 +110,14 @@ it_will_genereate_a_new_deploy_tag_for_each_release_overwriting_any_existing() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "deployed/release/production/v3.1.9")
 
-  output=$(sandbox_rup -d "release/production/v3.1.9")
+  sandbox_rup -d "release/production/v3.1.9"
+
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
   file_should_exist 'CHANGELOG'
   file_should_not_exist 'DifferentFile'
 
-  output=$(sandbox_rup -d "release/production/v3.1.9" -C 'DifferentFile')
+  sandbox_rup -d "release/production/v3.1.9" -C 'DifferentFile'
+
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
   file_should_not_exist 'CHANGELOG'
   file_should_exist 'DifferentFile'
@@ -137,7 +141,7 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -d "release/v1.0.6")
+  sandbox_rup -d "release/v1.0.6"
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -148,7 +152,7 @@ The last deployed release
 $(changelog_divider)
 $(changelog_footer)"
 
-  output=$(sandbox_rup -d "release/v1.0.6" -C 'DiffChangeLog')
+  sandbox_rup -d "release/v1.0.6" -C 'DiffChangeLog'
   file_should_not_exist 'CHANGELOG'
 
   test "$(cat DiffChangeLog)" = "$(changelog_divider)
@@ -175,7 +179,7 @@ it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -d "release/v1.0.6")
+  sandbox_rup -d "release/v1.0.6"
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -188,7 +192,7 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  output=$(sandbox_rup -d "release/v1.0.6" -s "release/v1.0.5")
+  sandbox_rup -d "release/v1.0.6" -s "release/v1.0.5"
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -214,7 +218,7 @@ it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -d "release/v1.0.6" -s "release/v1.0.4" -f "release/v1.0.5")
+  sandbox_rup -d "release/v1.0.6" -s "release/v1.0.4" -f "release/v1.0.5"
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -240,11 +244,12 @@ it_will_generate_a_deploy_changelog_with_optional_names() {
 
   file_should_not_exist "CHANGELOG"
 
-  output=$(sandbox_rup -d "release/v1.0.6")
+  sandbox_rup -d "release/v1.0.6"
 
   file_should_exist "CHANGELOG"
 
-  output=$(sandbox_rup -d "release/v1.0.6" -C 'NewChangelog')
+  sandbox_rup -d "release/v1.0.6" -C 'NewChangelog'
+
   file_should_not_exist 'CHANGELOG'
   file_should_exist "NewChangelog"
 }
@@ -277,7 +282,7 @@ Fixing the customer login but no tag displayed."
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -d "releases/v0.0.1" -P)
+  sandbox_rup -d "releases/v0.0.1" -P
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.0.1
@@ -312,7 +317,7 @@ it_will_append_to_a_deploy_changelog_optionally(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  output=$(sandbox_rup -d "release/v1.0.4")
+  sandbox_rup -d "release/v1.0.4"
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.4
@@ -329,7 +334,7 @@ $(changelog_footer)"
   git tag -f release/v1.0.5
   git checkout master
 
-  output=$(sandbox_rup -d "release/v1.0.5" -A)
+  sandbox_rup -d "release/v1.0.5" -A
 
 test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.5

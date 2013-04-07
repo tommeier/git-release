@@ -77,7 +77,6 @@ generate_sandbox_tags() {
     local tag_commit_messages="$2"
   fi;
 
-
   if [[ $tag_names = '' ]]; then
     echo "Error - Please be specific on the tag names you want to generate";
     exit 1;

@@ -28,15 +28,15 @@ it_will_fail_with_no_versioning_type() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
+  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
   test "$output" = "$usage_head"
 }
 
 it_will_display_error_when_no_git_directory_exists() {
   enter_sandbox
 
-  output=$(sandbox_rup -v patch 2>&1 | head -n 2 2>&1)
-  missing_git="Error - Not a git repository please run from the base of your git repo."
+  local output=$(sandbox_rup -v patch 2>&1 | head -n 2 2>&1)
+  local missing_git="Error - Not a git repository please run from the base of your git repo."
 
   test $(search_substring "$output" "$missing_git") = 'found'
 }
@@ -123,10 +123,7 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
 
   sandbox_rup -v major -p "release/v"
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -134,7 +131,7 @@ latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "2.0.6"
+  test "$(cat VERSION)" = "2.0.6"
 }
 
 it_will_generate_a_changelog_for_a_set_starting_point() {
@@ -155,10 +152,7 @@ it_will_generate_a_changelog_for_a_set_starting_point() {
 
   sandbox_rup -v patch -p "release/v" -s "release/v1.0.5"
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -168,7 +162,7 @@ Lots of changes in this commit for random commit 2
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "1.0.7"
+  test "$(cat VERSION)" = "1.0.7"
 }
 
 it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
@@ -191,10 +185,7 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
 
   sandbox_rup -v minor -p "release/v" -s "release/v1.0.5" -f "release/v1.0.6"
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -204,7 +195,7 @@ Lots of changes in this commit for random commit 2
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "1.1.6"
+  test "$(cat VERSION)" = "1.1.6"
 }
 
 
@@ -227,10 +218,7 @@ it_will_generate_files_with_optional_names() {
   file_should_exist "MYCHANGELOG"
   file_should_exist "VERSION_NUMBER"
 
-  local changelog_content=`cat MYCHANGELOG`
-  local version_content=`cat VERSION_NUMBER`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat MYCHANGELOG)" = "$(changelog_divider)
 || Release: 2.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -238,7 +226,7 @@ latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "2.0.6"
+  test "$(cat VERSION_NUMBER)" = "2.0.6"
 }
 
 
@@ -273,10 +261,7 @@ Fixing the customer login but no tag displayed."
 
   sandbox_rup -v "minor" -P
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -294,7 +279,7 @@ Fixing the customer login but no tag displayed.
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "0.1.0"
+  test "$(cat VERSION)" = "0.1.0"
 }
 
 it_will_overwrite_a_changelog_file_by_default() {
@@ -313,10 +298,7 @@ it_will_overwrite_a_changelog_file_by_default() {
 
   sandbox_rup -v minor -s "release/v1.0.4" -f "release/v1.0.5"
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -325,13 +307,11 @@ Commit for last released start point 1.0.4
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "1.1.6"
+  test "$(cat VERSION)" = "1.1.6"
 
   sandbox_rup -v major -s "release/v1.0.5" -f "release/v1.0.6"
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.1.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -340,7 +320,7 @@ latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "2.1.6"
+  test "$(cat VERSION)" = "2.1.6"
 }
 
 it_will_append_to_a_changelog_optionally(){
@@ -357,10 +337,7 @@ it_will_append_to_a_changelog_optionally(){
 
   sandbox_rup -v minor -A
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.5
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -368,13 +345,11 @@ $(changelog_divider)
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "1.1.5"
+  test "$(cat VERSION)" = "1.1.5"
 
   sandbox_rup -v major -A
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.1.5
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -388,7 +363,7 @@ $(changelog_divider)
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "2.1.5"
+  test "$(cat VERSION)" = "2.1.5"
 }
 
 
@@ -398,10 +373,7 @@ it_will_generate_in_an_opinionated_fashion(){
 
   sandbox_rup -v minor -A
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -409,13 +381,11 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "0.1.0"
+  test "$(cat VERSION)" = "0.1.0"
 
   sandbox_rup -v major -A
 
-  local changelog_content=`cat CHANGELOG`
-  local version_content=`cat VERSION`
-  test "$changelog_content" = "$(changelog_divider)
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
@@ -429,7 +399,7 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$version_content" = "1.1.0"
+  test "$(cat VERSION)" = "1.1.0"
 }
 
 #TODO
