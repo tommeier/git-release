@@ -8,7 +8,8 @@ sandbox_rup() { /bin/bash ../bin/releaseable-deployed $@; }
 
 usage_head="++ /bin/bash ../bin/releaseable-deployed
 Required parameter: Please enter the deploy tag released.
-Usage : releaseable-deployed -d 'opt' [-p 'opt'] [-h] [-t] [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C] --- create git release tag for a deployed releaseable with generated changelog."
+
+usage : releaseable-deployed -d '<deployed_tag>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']"
 
 describe "releaseable-deployed - integration"
 
@@ -29,7 +30,7 @@ it_will_fail_with_no_deployed_tag() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 3 2>&1)
+  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
   test "$output" = "$usage_head"
 }
 

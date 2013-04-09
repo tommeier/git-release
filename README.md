@@ -19,7 +19,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 ## TODO
 
  - [ ] Write a proper README
- - [ ] Review argument naming and choose better letters
+ - [ ] Create language maps (bash first, to make ruby only etc) for argument naming. Use everywhere in specs
  - [ ] Make test helpers for setting argument mapping (for easily changing in other wrappers)
  - [ ] Make test helpers for generating the content (changing the style now will break a lot of tests)
  - [ ] Change releaseable to work out prefix if given a start or an end point and no prefix
@@ -35,6 +35,7 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
  - [ ] Make uniform variable style, either all capped variables or not
  - [ ] [potentially] Make CHANGELOG tagging dynamic (search for initial square brackets), with features + bugs on top of listing
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
+ - [*] Review argument naming and choose better letters
  - [*] Remove unnessary $(output)= statements in tests
  - [*] Update releaseable to remove the division of release and version prefix, make just one prefix (simpler)
  - [*] Write success cases for releaseable-deployed script

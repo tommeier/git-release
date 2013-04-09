@@ -29,16 +29,16 @@ usage : $(basename "$0") -v '<version>' [-p '<prefix>'] [-s '<start>'] [-f '<fin
 
 options:
   required:
-    [-v '<version>'] set the software versioning type (major or minor or patch)
+    -v '<version>'  set the software versioning type (major or minor or patch)
   optional:
     [-p '<prefix>'] set the release prefix (default: 'release/v')
   changelog:
-    [-s '<start>'] set the start point (default: the last tag name that matches the versioning prefix)
+    [-s '<start>']  set the start point (default: the last tag name that matches the prefix)
     [-f '<finish>'] set the end/finish point (default: HEAD)
-    [-A] append to changelog (default: overwrite)
-    [-P] set to only pull requests (default: all commits)
-    [-C 'val'] set the changelog filename (default: CHANGELOG)
-    [-V 'val'] set the version file name (default: VERSION)
+    [-A]            append to changelog (default: overwrite)
+    [-P]            set to only pull requests (default: all commits)
+    [-C 'filename'] set the changelog filename (default: CHANGELOG)
+    [-V 'filename'] set the version file name (default: VERSION)
   general:
     -h  show this help text
     -t  test only (will not execute script)
