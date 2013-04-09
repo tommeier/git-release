@@ -39,19 +39,23 @@ CHANGELOG_STRATEGY=':overwrite'
 START_POINT=''
 END_POINT=''
 
-USAGE_OUTPUT="Usage : $(basename "$0") -d 'opt' [-p 'opt'] [-h] [-t] [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C] --- create git release tag for a deployed releaseable with generated changelog.
+USAGE_OUTPUT="
+usage : $(basename "$0") -d '<deployed_tag>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']
+                         [-A] [-P] [-C '<changelog_file']
+                         [-h] [-t]
+                         --- create git release tag for a deployed releaseable with a generated changelog.
 
 options:
   required:
-    -d set the deployed tag name
+    -d '<deployed_tag>' set the deployed tag name
   optional:
-    -p set the prefix for deployment tag (default: 'deployed/')
+    [-p '<prefix>']     set the prefix for the new deployment tag (default: 'deployed/')
   changelog:
-    -s  set the start point (default: the last deployed tag)
-    -f  set the end/finish point (default: HEAD)
-    -A  append to changelog (default: overwrite)
-    -P  set to only pull requests (default: all commits)
-    -C  set the changelog filename (default: CHANGELOG)
+    [-s '<start>']      set the start point (default: the last deployed tag)
+    [-f '<finish>']     set the end/finish point (default: HEAD)
+    [-A]                append to changelog (default: overwrite)
+    [-P]                set to only pull requests (default: all commits)
+    [-C '<filename>']   set the changelog filename (default: CHANGELOG)
   general:
   -h  show this help text
   -t  test only (will not execute script)
