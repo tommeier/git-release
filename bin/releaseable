@@ -20,20 +20,25 @@ CHANGELOG_STRATEGY=':overwrite'
 START_POINT=''
 END_POINT=''
 
-USAGE_OUTPUT="Usage : $(basename "$0") -v 'opt' [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog
+
+USAGE_OUTPUT="
+usage : $(basename "$0") -v '<version>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']
+                         [-A] [-P] [-C '<changelog_file>'] [-V '<version_file>']
+                         [-h] [-t]
+                         --- create git release tag with changelog
 
 options:
   required:
-    -v set the software versioning type (major or minor or patch)
-  versioning:
-    -p  set the release prefix (default: 'release/v')
+    [-v '<version>'] set the software versioning type (major or minor or patch)
+  optional:
+    [-p '<prefix>'] set the release prefix (default: 'release/v')
   changelog:
-    -s  set the start point (default: the last tag name that matches the versioning prefix)
-    -f  set the end/finish point (default: HEAD)
-    -A  append to changelog (default: overwrite)
-    -P  set to only pull requests (default: all commits)
-    -C  set the changelog filename (default: CHANGELOG)
-    -V  set the version file name (default: VERSION)
+    [-s '<start>'] set the start point (default: the last tag name that matches the versioning prefix)
+    [-f '<finish>'] set the end/finish point (default: HEAD)
+    [-A] append to changelog (default: overwrite)
+    [-P] set to only pull requests (default: all commits)
+    [-C 'val'] set the changelog filename (default: CHANGELOG)
+    [-V 'val'] set the version file name (default: VERSION)
   general:
     -h  show this help text
     -t  test only (will not execute script)

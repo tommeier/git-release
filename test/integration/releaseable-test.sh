@@ -9,7 +9,8 @@ sandbox_rup() { /bin/bash ../bin/releaseable $@; }
 usage_head="++ /bin/bash ../bin/releaseable
 incorrect versioning type: ''
 Please set to one of 'major', 'minor' or 'patch'
-Usage : releaseable -v 'opt' [-p 'opt'] [-s 'opt'][-f 'opt'][-A][-P][-C][-V] --- create git release tag with changelog"
+
+usage : releaseable -v '<version>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']"
 
 describe "releaseable - integration"
 
@@ -28,7 +29,7 @@ it_will_fail_with_no_versioning_type() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
+  local output=$(sandbox_rup 2>&1 | head -n 5 2>&1)
   test "$output" = "$usage_head"
 }
 
