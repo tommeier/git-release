@@ -4,6 +4,7 @@
 # Use to handle sourcing all required files.
 # Loading example: . "${BASH_SOURCE[0]%/*}/../support/support-functions.sh"
 
+. "${BASH_SOURCE[0]%/*}/language-bash.sh"
 . "${BASH_SOURCE[0]%/*}/git-functions.sh"
 . "${BASH_SOURCE[0]%/*}/releaseable-functions.sh"
 . "${BASH_SOURCE[0]%/*}/changelog-functions.sh"
