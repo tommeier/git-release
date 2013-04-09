@@ -20,27 +20,29 @@ CHANGELOG_STRATEGY=':overwrite'
 START_POINT=''
 END_POINT=''
 
+#Supporting functions
+. "${BASH_SOURCE[0]%/*}/../support/support-functions.sh"
 
 USAGE_OUTPUT="
-usage : $(basename "$0") -v '<version>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']
-                         [-A] [-P] [-C '<changelog_file>'] [-V '<version_file>']
-                         [-h] [-t]
+usage : $(basename "$0") ${ARG_VERSION}${ARGA}'<version>' [${ARG_PREFIX}${ARGA}'<prefix>'] [${ARG_START}${ARGA}'<start>'] [${ARG_FINISH}${ARGA}'<finish>']
+                         [${ARG_APPEND}] [${ARG_PULL_REQUESTS}] [${ARG_CHANGELOG}${ARGA}'<changelog_file>'] [${ARG_VERSION_FILE}${ARGA}'<version_file>']
+                         [${ARG_HELP_TEXT}] [-t]
                          --- create git release tag with changelog
 
 options:
   required:
-    -v '<version>'  set the software versioning type (major or minor or patch)
+    ${ARG_VERSION}${ARGA}'<version>'  set the software versioning type (major or minor or patch)
   optional:
-    [-p '<prefix>'] set the release prefix (default: 'release/v')
+    [${ARG_PREFIX}${ARGA}'<prefix>'] set the release prefix (default: 'release/v')
   changelog:
-    [-s '<start>']  set the start point (default: the last tag name that matches the prefix)
-    [-f '<finish>'] set the end/finish point (default: HEAD)
-    [-A]            append to changelog (default: overwrite)
-    [-P]            set to only pull requests (default: all commits)
-    [-C 'filename'] set the changelog filename (default: CHANGELOG)
-    [-V 'filename'] set the version file name (default: VERSION)
+    [${ARG_START}${ARGA}'<start>']  set the start point (default: the last tag name that matches the prefix)
+    [${ARG_FINISH}${ARGA}'<finish>'] set the end/finish point (default: HEAD)
+    [${ARG_APPEND}]            append to changelog (default: overwrite)
+    [${ARG_PULL_REQUESTS}]            set to only pull requests (default: all commits)
+    [${ARG_CHANGELOG}${ARGA}'filename'] set the changelog filename (default: CHANGELOG)
+    [${ARG_VERSION_FILE}${ARGA}'filename'] set the version file name (default: VERSION)
   general:
-    -h  show this help text
+    -${ARG_HELP_TEXT}  show this help text
     -t  test only (will not execute script)
 
 
@@ -49,7 +51,7 @@ usage examples:
   1) Basic usage with defaults
     Given the last release was at 1.0.4, with a tag of 'our-releases/REL1.0.4' :
 
-    $(basename "$0") -v minor -p 'our-releases/REL-'
+    $(basename "$0") ${ARG_VERSION}${ARGA}minor ${ARG_PREFIX}${ARGA}'our-releases/REL-'
 
     Tag generated           : our-releases/REL1.1.4
     Version file contains   : 1.1.4
@@ -57,16 +59,13 @@ usage examples:
 
   2) Pull requests only (changelog generated only with body of pull request titles)
 
-    $(basename "$0") -v minor -P
+    $(basename "$0") -${ARG_VERSION}${ARGA}minor -P
 
   3) Generate custom changelog and version file
 
-    $(basename "$0") -v minor -C 'MYCHANGELOGFILE' -V 'MYVERSIONFILE'
+    $(basename "$0") ${ARG_VERSION}${ARGA}minor ${ARG_CHANGELOG}${ARGA}'MYCHANGELOGFILE' ${ARG_VERSION_FILE}${ARGA}'MYVERSIONFILE'
 
 "
-
-#Supporting functions
-. "${BASH_SOURCE[0]%/*}/../support/support-functions.sh"
 
 ############################################################
 #####                  INPUT CAPTURE                   #####
