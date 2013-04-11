@@ -10,7 +10,7 @@ usage_head="++ /bin/bash ../bin/releaseable
 incorrect versioning type: ''
 Please set to one of 'major', 'minor' or 'patch'
 
-usage : releaseable -v '<version>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']"
+usage : releaseable -v <version> [-p <prefix>] [-s <start>] [-f <finish>]"
 
 describe "releaseable - integration"
 
