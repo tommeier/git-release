@@ -20,7 +20,6 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 
  - [ ] Write a proper README
  - [ ] Test mode should display processes it would run (--dry-run option)
- - [ ] Optionally force push of tags, otherwise ask for confirmation to send
  - [ ] Change output of script to hide most output (unless dry run activated)
  - [ ] Create Ruby gem branch and release as a gem. Use better OPTPARSER to use more human readable variables to pass to - der lying  script
  - [ ] Create Node NPM branch and release as an NPM.
@@ -31,6 +30,9 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
  - [ ] [potentially] Make test helpers for generating the content (changing the style now will break a lot of tests)
  - [ ] [potentially] Make CHANGELOG tagging dynamic (search for initial square brackets), with features + bugs on top of listing
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
+ - [ ] [potentially] Work out how to test git push being fired, mocking a git command
+ - [ ] [potentially] Use an left pad command to align help text correctly
+ - [*] Optionally force push of tags, otherwise ask for confirmation to send
  - [*] Remove the 'skip execute' code
  - [*] Create language maps (bash first, to make ruby only etc) for argument naming. Use everywhere in specs
  - [*] Make test helpers for setting argument mapping (for easily changing in other wrappers)

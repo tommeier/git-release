@@ -44,8 +44,8 @@ END_POINT=''
 
 USAGE_OUTPUT="
 usage : $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]
-                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
-                         [$(arg_for $ARG_HELP_TEXT)] [-t]
+                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
+                         [$(arg_for $ARG_HELP_TEXT)]
                          --- create git release tag for a deployed releaseable with a generated changelog.
 
 options:
@@ -53,6 +53,7 @@ options:
     $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') set the deployed tag name
   optional:
     [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')]     set the prefix for the new deployment tag (default: 'deployed/')
+    [$(arg_for $ARG_FORCE)]            force push of new deploy tag (default: commit changes but do not push)
   changelog:
     [$(arg_for $ARG_START '<start>')]      set the start point (default: the last deployed tag)
     [$(arg_for $ARG_FINISH '<finish>')]     set the end/finish point (default: HEAD)
@@ -87,7 +88,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts "$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
+while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
 do
   case "${option}"
   in
@@ -96,6 +97,7 @@ do
     $ARG_START) START_POINT="$OPTARG";;
     $ARG_FINISH) END_POINT="$OPTARG";;
     $ARG_APPEND) CHANGELOG_STRATEGY=":append";;
+    $ARG_FORCE) FORCE_PUSH='true';;
     $ARG_PULL_REQUESTS) CHANGELOG_SCOPE=":pulls_only";;
     $ARG_CHANGELOG) CHANGELOG_FILE="$OPTARG";;
     $ARG_HELP_TEXT)
@@ -153,5 +155,6 @@ git commit -m "Release deployed : ${DEPLOYED_TAG}"
 
 git tag -f $next_deploy_tag_name
 
-#Optional force push of tag
-#git push --tags
+if [[ "$FORCE_PUSH" = 'true' ]]; then
+  git push $next_deploy_tag_name
+fi;
