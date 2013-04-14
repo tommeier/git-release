@@ -10,7 +10,7 @@ usage_head="++ /bin/bash ../bin/releaseable
 incorrect versioning type: ''
 Please set to one of 'major', 'minor' or 'patch'
 
-usage : releaseable -v <version> [-p <prefix>] [-s <start>] [-f <finish>]"
+usage : releaseable $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 
 describe "releaseable - integration"
 
@@ -36,7 +36,7 @@ it_will_display_help_text_on_fail() {
 it_will_display_error_when_no_git_directory_exists() {
   enter_sandbox
 
-  local output=$(sandbox_rup -v patch 2>&1 | head -n 2 2>&1)
+  local output=$(sandbox_rup $(arg_for $ARG_VERSION 'patch') 2>&1 | head -n 2 2>&1)
   local missing_git="Error - Not a git repository please run from the base of your git repo."
 
   test $(search_substring "$output" "$missing_git") = 'found'
@@ -45,15 +45,15 @@ it_will_display_error_when_no_git_directory_exists() {
 it_will_error_if_git_is_in_a_dirty_state() {
   generate_git_repo
 
-  should_succeed $(sandbox_rup -v minor)
+  should_succeed $(sandbox_rup $(arg_for $ARG_VERSION 'minor'))
 
   touch 'FileToMakeGitDirty'
 
-  should_fail $(sandbox_rup -v minor)
+  should_fail $(sandbox_rup $(arg_for $ARG_VERSION 'minor'))
 
   rm 'FileToMakeGitDirty'
 
-  should_succeed $(sandbox_rup -v minor)
+  should_succeed $(sandbox_rup $(arg_for $ARG_VERSION 'minor'))
 }
 
 ### Success cases
@@ -68,7 +68,7 @@ it_will_genereate_a_new_tag_for_next_release() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "release/production/v3.1.10")
 
-  sandbox_rup -v patch -p "release/production/v"
+  sandbox_rup $(arg_for $ARG_VERSION 'patch') $(arg_for $ARG_RELEASE_PREFIX 'release/production/v')
 
   should_succeed $(check_tag_exists "release/production/v3.1.10")
 }
@@ -84,7 +84,7 @@ it_will_genereate_a_new_tag_for_next_release_with_defaults() {
   should_succeed $(check_tag_exists "release/v1.0.6")
   should_fail $(check_tag_exists "release/v1.1.6")
 
-  sandbox_rup -v minor
+  sandbox_rup $(arg_for $ARG_VERSION 'minor')
 
   should_succeed $(check_tag_exists "release/v1.1.6")
 }
@@ -95,12 +95,12 @@ it_will_genereate_a_new_tag_for_next_release_when_none_exist() {
   should_fail $(check_tag_exists "my-release/yay-1.0.0")
   should_fail $(check_tag_exists "my-release/yay-1.1.0")
 
-  sandbox_rup -v major -p "my-release/yay-"
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_RELEASE_PREFIX 'my-release/yay-')
 
   should_succeed $(check_tag_exists "my-release/yay-1.0.0")
   should_fail $(check_tag_exists "my-release/yay-1.1.0")
 
-  sandbox_rup -v minor -p "my-release/yay-"
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_RELEASE_PREFIX 'my-release/yay-')
 
   should_succeed $(check_tag_exists "my-release/yay-1.0.0")
   should_succeed $(check_tag_exists "my-release/yay-1.1.0")
@@ -122,7 +122,7 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v major -p "release/v"
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_RELEASE_PREFIX 'release/v')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.0.6
@@ -151,7 +151,7 @@ it_will_generate_a_changelog_for_a_set_starting_point() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v patch -p "release/v" -s "release/v1.0.5"
+  sandbox_rup $(arg_for $ARG_VERSION 'patch') $(arg_for $ARG_RELEASE_PREFIX 'release/v') $(arg_for $ARG_START 'release/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.7
@@ -184,7 +184,7 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v minor -p "release/v" -s "release/v1.0.5" -f "release/v1.0.6"
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_RELEASE_PREFIX 'release/v') $(arg_for $ARG_START 'release/v1.0.5') $(arg_for $ARG_FINISH 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.6
@@ -212,7 +212,7 @@ it_will_generate_files_with_optional_names() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v major -C "MYCHANGELOG" -V "VERSION_NUMBER"
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_CHANGELOG 'MYCHANGELOG') $(arg_for $ARG_VERSION_FILE 'VERSION_NUMBER')
 
   file_should_not_exist "CHANGELOG"
   file_should_not_exist "VERSION"
@@ -260,7 +260,7 @@ Fixing the customer login but no tag displayed."
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v "minor" -P
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_PULL_REQUESTS)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.1.0
@@ -297,7 +297,7 @@ it_will_overwrite_a_changelog_file_by_default() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v minor -s "release/v1.0.4" -f "release/v1.0.5"
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_START 'release/v1.0.4') $(arg_for $ARG_FINISH 'release/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.6
@@ -310,7 +310,7 @@ $(changelog_footer)"
 
   test "$(cat VERSION)" = "1.1.6"
 
-  sandbox_rup -v major -s "release/v1.0.5" -f "release/v1.0.6"
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_START 'release/v1.0.5') $(arg_for $ARG_FINISH 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.1.6
@@ -336,7 +336,7 @@ it_will_append_to_a_changelog_optionally(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -v minor -A
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.5
@@ -348,7 +348,7 @@ $(changelog_footer)"
 
   test "$(cat VERSION)" = "1.1.5"
 
-  sandbox_rup -v major -A
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 2.1.5
@@ -372,7 +372,7 @@ it_will_generate_in_an_opinionated_fashion(){
   #using defaults other than append
   generate_git_repo
 
-  sandbox_rup -v minor -A
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.1.0
@@ -384,7 +384,7 @@ $(changelog_footer)"
 
   test "$(cat VERSION)" = "0.1.0"
 
-  sandbox_rup -v major -A
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.1.0

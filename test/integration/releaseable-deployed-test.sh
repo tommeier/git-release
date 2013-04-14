@@ -9,7 +9,7 @@ sandbox_rup() { /bin/bash ../bin/releaseable-deployed $@; }
 usage_head="++ /bin/bash ../bin/releaseable-deployed
 Required parameter: Please enter the deploy tag released.
 
-usage : releaseable-deployed -d '<deployed_tag>' [-p '<prefix>'] [-s '<start>'] [-f '<finish>']"
+usage : releaseable-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 
 describe "releaseable-deployed - integration"
 
@@ -37,7 +37,7 @@ it_will_display_help_text_on_fail() {
 it_will_display_error_when_no_git_directory_exists() {
   enter_sandbox
 
-  local output=$(sandbox_rup -d 'AnyDeployTag' 2>&1 | head -n 2 2>&1)
+  local output=$(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'AnyDeployTag') 2>&1 | head -n 2 2>&1)
   local missing_git="Error - Not a git repository please run from the base of your git repo."
 
   test $(search_substring "$output" "$missing_git") = 'found'
@@ -48,15 +48,15 @@ it_will_error_if_git_is_in_a_dirty_state() {
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
-  should_succeed $(sandbox_rup -d "$tag_name")
+  should_succeed $(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name"))
 
   touch 'FileToMakeGitDirty'
 
-  should_fail $(sandbox_rup -d "$tag_name")
+  should_fail $(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name"))
 
   rm 'FileToMakeGitDirty'
 
-  should_succeed $(sandbox_rup -d "$tag_name")
+  should_succeed $(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name"))
 }
 
 it_will_forcibly_replace_existing_deploy_tags() {
@@ -64,12 +64,12 @@ it_will_forcibly_replace_existing_deploy_tags() {
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
-  sandbox_rup -d "$tag_name"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name")
 
   file_should_exist "CHANGELOG"
   file_should_not_exist "CHANGELOG2"
 
-  sandbox_rup -d "$tag_name" -C "CHANGELOG2"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name") $(arg_for $ARG_CHANGELOG 'CHANGELOG2')
 
   file_should_not_exist "CHANGELOG"
   file_should_exist "CHANGELOG2"
@@ -86,8 +86,8 @@ it_will_error_if_deploy_tag_cannot_be_found(){
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
-  should_succeed $(sandbox_rup -d "$tag_name")
-  should_fail $(sandbox_rup -d "cannotFindThisTag")
+  should_succeed $(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "$tag_name"))
+  should_fail $(sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'cannotFindThisTag'))
 }
 
 # ### Success cases
@@ -99,7 +99,7 @@ it_will_genereate_a_new_deploy_tag_for_each_release() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "deployed/release/production/v3.1.9")
 
-  sandbox_rup -d "release/production/v3.1.9"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "release/production/v3.1.9")
 
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
 }
@@ -111,13 +111,13 @@ it_will_genereate_a_new_deploy_tag_for_each_release_overwriting_any_existing() {
   should_succeed $(check_tag_exists "release/production/v3.1.9")
   should_fail $(check_tag_exists "deployed/release/production/v3.1.9")
 
-  sandbox_rup -d "release/production/v3.1.9"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/production/v3.1.9')
 
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
   file_should_exist 'CHANGELOG'
   file_should_not_exist 'DifferentFile'
 
-  sandbox_rup -d "release/production/v3.1.9" -C 'DifferentFile'
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/production/v3.1.9') $(arg_for $ARG_CHANGELOG 'DifferentFile')
 
   should_succeed $(check_tag_exists "deployed/release/production/v3.1.9")
   file_should_not_exist 'CHANGELOG'
@@ -142,7 +142,7 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -d "release/v1.0.6"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -153,7 +153,7 @@ The last deployed release
 $(changelog_divider)
 $(changelog_footer)"
 
-  sandbox_rup -d "release/v1.0.6" -C 'DiffChangeLog'
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_CHANGELOG 'DiffChangeLog')
   file_should_not_exist 'CHANGELOG'
 
   test "$(cat DiffChangeLog)" = "$(changelog_divider)
@@ -180,7 +180,7 @@ it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -d "release/v1.0.6"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -193,7 +193,7 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  sandbox_rup -d "release/v1.0.6" -s "release/v1.0.5"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_START 'release/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -219,7 +219,7 @@ it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -d "release/v1.0.6" -s "release/v1.0.4" -f "release/v1.0.5"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_START 'release/v1.0.4') $(arg_for $ARG_FINISH 'release/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -245,11 +245,11 @@ it_will_generate_a_deploy_changelog_with_optional_names() {
 
   file_should_not_exist "CHANGELOG"
 
-  sandbox_rup -d "release/v1.0.6"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
 
   file_should_exist "CHANGELOG"
 
-  sandbox_rup -d "release/v1.0.6" -C 'NewChangelog'
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_CHANGELOG 'NewChangeLog')
 
   file_should_not_exist 'CHANGELOG'
   file_should_exist "NewChangelog"
@@ -283,7 +283,7 @@ Fixing the customer login but no tag displayed."
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -d "releases/v0.0.1" -P
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v0.0.1') $(arg_for $ARG_PULL_REQUESTS)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 0.0.1
@@ -318,7 +318,7 @@ it_will_append_to_a_deploy_changelog_optionally(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup -d "release/v1.0.4"
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.4')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.4
@@ -335,7 +335,7 @@ $(changelog_footer)"
   git tag -f release/v1.0.5
   git checkout master
 
-  sandbox_rup -d "release/v1.0.5" -A
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.5') $(arg_for $ARG_APPEND)
 
 test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.5
