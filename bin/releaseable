@@ -25,8 +25,8 @@ END_POINT=''
 
 USAGE_OUTPUT="
 usage : $(basename "$0") $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]
-                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')] [$(arg_for $ARG_VERSION_FILE '<version_file>')]
-                         [$(arg_for $ARG_HELP_TEXT)] [-t]
+                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')] [$(arg_for $ARG_VERSION_FILE '<version_file>')]
+                         [$(arg_for $ARG_HELP_TEXT)]
                          --- create git release tag with changelog
 
 options:
@@ -34,6 +34,7 @@ options:
     $(arg_for $ARG_VERSION '<version>')  set the software versioning type (major or minor or patch)
   optional:
     [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] set the release prefix (default: 'release/v')
+    [$(arg_for $ARG_FORCE)]            force push of new tags (default: commit changes but do not push)
   changelog:
     [$(arg_for $ARG_START '<start>')]  set the start point (default: the last tag name that matches the prefix)
     [$(arg_for $ARG_FINISH '<finish>')] set the end/finish point (default: HEAD)
@@ -70,7 +71,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts "$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
+while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
 do
   case "${option}"
   in
@@ -80,6 +81,7 @@ do
       ;;
     $ARG_PULL_REQUESTS) CHANGELOG_SCOPE=":pulls_only";;
     $ARG_APPEND) CHANGELOG_STRATEGY=":append";;
+    $ARG_FORCE) FORCE_PUSH='true';;
     $ARG_VERSION) VERSION_TYPE="$OPTARG";;
     $ARG_RELEASE_PREFIX) RELEASE_PREFIX="$OPTARG";;
     $ARG_START) START_POINT="$OPTARG";;
@@ -128,4 +130,6 @@ set -e
 
 git tag $next_tag_name
 
-#git push --tags
+if [[ "$FORCE_PUSH" = 'true' ]]; then
+  git push $next_tag_name
+fi;

@@ -14,6 +14,7 @@ ARG_APPEND="A"
 ARG_PULL_REQUESTS="P"
 ARG_CHANGELOG="C"
 ARG_VERSION_FILE="V"
+ARG_FORCE="F"
 ARG_HELP_TEXT="h"
 
 #Display arg with language specific assigner and prefix
