@@ -19,17 +19,16 @@ Bash only (language agnostic) git release script for tagging and bagging a relea
 ## TODO
 
  - [ ] Write a proper README
- - [ ] Make test helpers for generating the content (changing the style now will break a lot of tests)
- - [ ] Change releaseable to work out prefix if given a start or an end point and no prefix
- - [ ] Optionally force push of tags, otherwise ask for confirmation to send
  - [ ] Test mode should display processes it would run (--dry-run option)
- - [ ] Verbose debug mode (display a lot more info)
+ - [ ] Optionally force push of tags, otherwise ask for confirmation to send
+ - [ ] Change output of script to hide most output (unless dry run activated)
  - [ ] Create Ruby gem branch and release as a gem. Use better OPTPARSER to use more human readable variables to pass to - der lying  script
  - [ ] Create Node NPM branch and release as an NPM.
  - [ ] Create Python PIP branch and release as a PIP.
  - [ ] Test on variety of systems and servers
- - [ ] Fix issue in tests where the time can very rarely cross over a second boundary (make specs ignore seconds difference)
- - [ ] Make uniform variable style, either all capped variables or not
+ - [ ] [potentially] Fix issue in tests where the time can very rarely cross over a second boundary (make specs ignore seconds difference)
+ - [ ] [potentially] Change releaseable to work out prefix if given a start or an end point and no prefix
+ - [ ] [potentially] Make test helpers for generating the content (changing the style now will break a lot of tests)
  - [ ] [potentially] Make CHANGELOG tagging dynamic (search for initial square brackets), with features + bugs on top of listing
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
  - [*] Remove the 'skip execute' code
