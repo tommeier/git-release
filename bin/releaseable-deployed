@@ -61,7 +61,6 @@ options:
     [$(arg_for $ARG_CHANGELOG '<changelog_file>')]   set the changelog filename (default: CHANGELOG)
   general:
     [$(arg_for $ARG_HELP_TEXT)]  show this help text
-    -t  test only (will not execute script)
 
 
 usage examples:
@@ -88,7 +87,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts "$ARG_HELP_TEXT"t"$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
+while getopts "$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
 do
   case "${option}"
   in
@@ -103,7 +102,6 @@ do
       echo "$USAGE_OUTPUT" >&2
       exit 0
       ;;
-    t) SKIP_EXECUTE=true;;
     ?)
       printf "illegal option: '%s'\n" "$OPTARG" >&2
       echo "$USAGE_OUTPUT" >&2
@@ -113,50 +111,47 @@ do
 done
 shift $((OPTIND - 1))
 
+############################################################
+#####                  VALIDATION                      #####
+############################################################
 
-if [ ! $SKIP_EXECUTE ]; then
-  ############################################################
-  #####                  VALIDATION                      #####
-  ############################################################
+ensure_git_directory
+ensure_git_is_clean
+validate_deploy_tag "$DEPLOYED_TAG" "$USAGE_OUTPUT"
 
-  ensure_git_directory
-  ensure_git_is_clean
-  validate_deploy_tag "$DEPLOYED_TAG" "$USAGE_OUTPUT"
+############################################################
+#####                RELEASE-DEPLOYED                  #####
+############################################################
 
-  ############################################################
-  #####                RELEASE-DEPLOYED                  #####
-  ############################################################
+#Checkout existing deployed tag
+next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
 
-  #Checkout existing deployed tag
-  next_deploy_tag_name="${DEPLOYED_PREFIX}${DEPLOYED_TAG}"
-
-  if [[ $(check_tag_exists "$next_deploy_tag_name" && echo $?) = "0" ]]; then
-    #Delete existing
-    git tag -d $next_deploy_tag_name
-  fi;
-  git checkout -f --no-track -B "$next_deploy_tag_name" "$DEPLOYED_TAG"
-
-  #Capture versioning prefix from new deploy tag
-  versioning_prefix=$(get_versioning_prefix_from_tag "$next_deploy_tag_name")
-
-  #Find last deployed tag for this versioning style
-  last_tag_name=$(get_last_tag_name $versioning_prefix)
-
-  deployed_version_number=$(get_version_number_from_tag "$next_deploy_tag_name")
-  if [[ "$START_POINT" = '' ]]; then
-    START_POINT=$last_tag_name
-  fi;
-
-  changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT" )
-
-  generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
-
-  #Create tag and optionally push
-  git add -A
-  git commit -m "Release deployed : ${DEPLOYED_TAG}"
-
-  git tag -f $next_deploy_tag_name
-
-  #Optional force push of tag
-  #git push --tags
+if [[ $(check_tag_exists "$next_deploy_tag_name" && echo $?) = "0" ]]; then
+  #Delete existing
+  git tag -d $next_deploy_tag_name
 fi;
+git checkout -f --no-track -B "$next_deploy_tag_name" "$DEPLOYED_TAG"
+
+#Capture versioning prefix from new deploy tag
+versioning_prefix=$(get_versioning_prefix_from_tag "$next_deploy_tag_name")
+
+#Find last deployed tag for this versioning style
+last_tag_name=$(get_last_tag_name $versioning_prefix)
+
+deployed_version_number=$(get_version_number_from_tag "$next_deploy_tag_name")
+if [[ "$START_POINT" = '' ]]; then
+  START_POINT=$last_tag_name
+fi;
+
+changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT" )
+
+generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
+
+#Create tag and optionally push
+git add -A
+git commit -m "Release deployed : ${DEPLOYED_TAG}"
+
+git tag -f $next_deploy_tag_name
+
+#Optional force push of tag
+#git push --tags

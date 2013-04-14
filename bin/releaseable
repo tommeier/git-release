@@ -43,7 +43,6 @@ options:
     [$(arg_for $ARG_VERSION_FILE '<version_file>')] set the version file name (default: VERSION)
   general:
     $(arg_for $ARG_HELP_TEXT)  show this help text
-    -t  test only (will not execute script)
 
 
 usage examples:
@@ -71,7 +70,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts t"$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
+while getopts "$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
 do
   case "${option}"
   in
@@ -79,7 +78,6 @@ do
       echo "$USAGE_OUTPUT" >&2
       exit 0
       ;;
-    t) SKIP_EXECUTE=true;;
     $ARG_PULL_REQUESTS) CHANGELOG_SCOPE=":pulls_only";;
     $ARG_APPEND) CHANGELOG_STRATEGY=":append";;
     $ARG_VERSION) VERSION_TYPE="$OPTARG";;
@@ -98,39 +96,36 @@ do
 done
 shift $((OPTIND - 1))
 
+############################################################
+#####                  VALIDATION                      #####
+############################################################
 
-if [ ! $SKIP_EXECUTE ]; then
-  ############################################################
-  #####                  VALIDATION                      #####
-  ############################################################
+validate_version_type "$VERSION_TYPE" "$USAGE_OUTPUT"
+ensure_git_directory
+ensure_git_is_clean
 
-  validate_version_type "$VERSION_TYPE" "$USAGE_OUTPUT"
-  ensure_git_directory
-  ensure_git_is_clean
+############################################################
+#####                   RELEASE                        #####
+############################################################
+last_tag_name=$(get_last_tag_name $RELEASE_PREFIX);
 
-  ############################################################
-  #####                   RELEASE                        #####
-  ############################################################
-  last_tag_name=$(get_last_tag_name $RELEASE_PREFIX);
-
-  if [[ "$START_POINT" = '' ]]; then
-    START_POINT=$last_tag_name
-  fi;
-
-  next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_name)
-  next_tag_name="${RELEASE_PREFIX}${next_version_number}"
-  generate_version_file "$next_version_number" "$VERSION_FILE"
-
-  changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
-
-  generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
-
-  set +e #Allow commit to fail if no files have changed
-  git add -A
-  git commit -m "Release : ${next_tag_name}"
-  set -e
-
-  git tag $next_tag_name
-
-  #git push --tags
+if [[ "$START_POINT" = '' ]]; then
+  START_POINT=$last_tag_name
 fi;
+
+next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_name)
+next_tag_name="${RELEASE_PREFIX}${next_version_number}"
+generate_version_file "$next_version_number" "$VERSION_FILE"
+
+changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
+
+generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
+
+set +e #Allow commit to fail if no files have changed
+git add -A
+git commit -m "Release : ${next_tag_name}"
+set -e
+
+git tag $next_tag_name
+
+#git push --tags
