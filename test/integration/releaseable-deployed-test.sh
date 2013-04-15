@@ -249,7 +249,7 @@ it_will_generate_a_deploy_changelog_with_optional_names() {
 
   file_should_exist "CHANGELOG"
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_CHANGELOG 'NewChangeLog')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "release/v1.0.6") $(arg_for $ARG_CHANGELOG "NewChangeLog")
 
   file_should_not_exist 'CHANGELOG'
   file_should_exist "NewChangelog"
