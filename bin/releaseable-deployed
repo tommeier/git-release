@@ -147,7 +147,6 @@ fi;
 
 changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT" )
 
-echo "SHOULD GENERATE ${CHANGELOG_FILE}"
 generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
 #Create tag and optionally push
