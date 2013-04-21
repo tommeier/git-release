@@ -50,30 +50,14 @@ Developers that follow feature branches can pass an optional parameter to genera
 Tagged content of the changelog is limited at the moment, I'm looking at ways to make this dynamic. But right now, any commit with the following prefixes (ignoring spaces and case) will group the commits in the `CHANGELOG` and present under ordered headings:
 
    * `[feature]`
-   * `[bug]`
    * `[security]`
+   * `[bug]`
 
 ## Deploy
 
 After a deploy running `releaseable-deployed` with the release tag passed in provides the ability to generate the changelog based only on the last deploy. With a custom deploy prefix, for example `deployed/staging` you can scope the changelog to a given environment.
 
 ## Full examples
-<!-- options:
-  required:
-    $(arg_for $ARG_VERSION '<version>')  set the software versioning type (major or minor or patch)
-  optional:
-    [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] set the release prefix (default: 'release/v')
-    [$(arg_for $ARG_FORCE)]            force push of new tags (default: commit changes but do not push)
-  changelog:
-    [$(arg_for $ARG_START '<start>')]  set the start point (default: the last tag name that matches the prefix)
-    [$(arg_for $ARG_FINISH '<finish>')] set the end/finish point (default: HEAD)
-    [$(arg_for $ARG_APPEND)]            append to changelog (default: overwrite)
-    [$(arg_for $ARG_PULL_REQUESTS)]            set to only pull requests (default: all commits)
-    [$(arg_for $ARG_CHANGELOG '<changelog_file>')] set the changelog filename (default: CHANGELOG)
-    [$(arg_for $ARG_VERSION_FILE '<version_file>')] set the version file name (default: VERSION)
-  general:
-    $(arg_for $ARG_HELP_TEXT)  show this help text
- -->
 
 ### Releaseable
 (TODO)
@@ -110,11 +94,6 @@ Generates:
   * Changelog   : all merged pull requests and the body text of the merge commit
 
 
-
-
-## Example CHANGELOG output
-
-
 ## Contributing
 
 All fork + pull requests welcome!
@@ -129,7 +108,6 @@ $> test/bin/run_all
 
 ## TODO
 
- - [ ] Add full examples to Readme
  - [ ] Create remaining TODO items as issues in Github
  - [ ] Test mode should display processes it would run (--dry-run option)
  - [ ] Change output of script to hide most output (unless dry run activated)
@@ -144,6 +122,7 @@ $> test/bin/run_all
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
  - [ ] [potentially] Work out how to test git push being fired, mocking a git command
  - [ ] [potentially] Use an left pad command to align help text correctly
+ - [*] Add full examples to Readme
  - [*] Optionally force push of tags, otherwise ask for confirmation to send
  - [*] Remove the 'skip execute' code
  - [*] Create language maps (bash first, to make ruby only etc) for argument naming. Use everywhere in specs
