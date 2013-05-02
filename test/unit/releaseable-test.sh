@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
 . ./test/test_helper.sh
-. ./support/releaseable-functions.sh
+. ./support/git-release-functions.sh
 
-describe "releaseable - unit"
+describe "git-release - unit"
 
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then

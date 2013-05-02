@@ -4,7 +4,7 @@
 . ./support/git-functions.sh
 . ./support/changelog-functions.sh
 
-describe "releaseable - unit - changelog"
+describe "git-release - unit - changelog"
 
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then
