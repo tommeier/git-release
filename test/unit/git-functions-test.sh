@@ -3,7 +3,7 @@
 . ./test/test_helper.sh
 . ./support/git-functions.sh
 
-describe "releaseable - unit - git functions"
+describe "git-release - unit - git functions"
 
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then

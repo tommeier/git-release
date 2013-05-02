@@ -3,16 +3,16 @@
 . ./test/test_helper.sh
 . ./support/support-functions.sh
 
-rup() { ./bin/releaseable $@; }
-sandbox_rup() { /bin/bash ../bin/releaseable $@; }
+rup() { ./bin/git-release $@; }
+sandbox_rup() { /bin/bash ../bin/git-release $@; }
 
-usage_head="++ /bin/bash ../bin/releaseable
+usage_head="++ /bin/bash ../bin/git-release
 incorrect versioning type: ''
 Please set to one of 'major', 'minor' or 'patch'
 
-usage : releaseable $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
+usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 
-describe "releaseable - integration"
+describe "git-release - integration"
 
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then

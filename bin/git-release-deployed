@@ -2,30 +2,10 @@
 set -e
 
 ############################################################
-#####              Releasable-Deployed                 #####
+#####               Git-Release-Deployed               #####
 ###   Pure bash script for handling deployed releases    ###
 ###       Providing a tag with generated changelog       ###
 ############################################################
-
-
-#Psuedo =>
-#Pass in tag released
-#Pass in prefix for deployment tag
-#Optional : append/overwrite CHANGELOG
-#Optional : changelog scope
-#Optional : Force push
-#Optional : Start + End point
-
-#Error ->
-    #Not a GIT repo
-    # Dirty git repo
-    # Tag not found
-
-#Checkout existing tag
-#Generate new changelog with diff from last deployed tag to current one
-#   - Get version prefix -> find last tag -> generate changelog with that start point
-#Create tag with deploy prefix
-#Push tag (optional)
 
 ############################################################
 #####                   DEFAULTS                       #####
@@ -46,20 +26,20 @@ USAGE_OUTPUT="
 usage : $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]
                          [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
                          [$(arg_for $ARG_HELP_TEXT)]
-                         --- create git release tag for a deployed releaseable with a generated changelog.
+                         --- create git release tag for a deployed release with a generated changelog.
 
 options:
   required:
     $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') set the deployed tag name
   optional:
-    [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')]     set the prefix for the new deployment tag (default: 'deployed/')
+    [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')]     set the prefix for the new deployment tag (default: '${DEPLOYED_PREFIX}')
     [$(arg_for $ARG_FORCE)]            force push of new deploy tag (default: commit changes but do not push)
   changelog:
     [$(arg_for $ARG_START '<start>')]      set the start point (default: the last deployed tag)
     [$(arg_for $ARG_FINISH '<finish>')]     set the end/finish point (default: HEAD)
-    [$(arg_for $ARG_APPEND)]                append to changelog (default: overwrite)
-    [$(arg_for $ARG_PULL_REQUESTS)]                set to only pull requests (default: all commits)
-    [$(arg_for $ARG_CHANGELOG '<changelog_file>')]   set the changelog filename (default: CHANGELOG)
+    [$(arg_for $ARG_APPEND)]                append to changelog (default: ${CHANGELOG_STRATEGY})
+    [$(arg_for $ARG_PULL_REQUESTS)]                set to only pull requests (default: ${CHANGELOG_SCOPE})
+    [$(arg_for $ARG_CHANGELOG '<changelog_file>')]   set the changelog filename (default: ${CHANGELOG_FILE})
   general:
     [$(arg_for $ARG_HELP_TEXT)]  show this help text
 

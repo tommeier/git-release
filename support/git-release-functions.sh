@@ -23,7 +23,7 @@ validate_version_type() {
   fi;
 }
 
-#Releaseable-deployed only
+#git-release-deployed only
 validate_deploy_tag() {
   local t="$1"
   local error_output="$2"

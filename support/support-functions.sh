@@ -6,5 +6,5 @@
 
 . "${BASH_SOURCE[0]%/*}/language-bash.sh"
 . "${BASH_SOURCE[0]%/*}/git-functions.sh"
-. "${BASH_SOURCE[0]%/*}/releaseable-functions.sh"
+. "${BASH_SOURCE[0]%/*}/git-release-functions.sh"
 . "${BASH_SOURCE[0]%/*}/changelog-functions.sh"

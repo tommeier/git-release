@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in releaseable.gemspec
+# Specify your gem's dependencies in git-release.gemspec
 gemspec

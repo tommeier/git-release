@@ -3,15 +3,15 @@
 . ./test/test_helper.sh
 . ./support/support-functions.sh
 
-rup() { ./bin/releaseable-deployed $@; }
-sandbox_rup() { /bin/bash ../bin/releaseable-deployed $@; }
+rup() { ./bin/git-release-deployed $@; }
+sandbox_rup() { /bin/bash ../bin/git-release-deployed $@; }
 
-usage_head="++ /bin/bash ../bin/releaseable-deployed
+usage_head="++ /bin/bash ../bin/git-release-deployed
 Required parameter: Please enter the deploy tag released.
 
-usage : releaseable-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
+usage : git-release-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 
-describe "releaseable-deployed - integration"
+describe "git-release-deployed - integration"
 
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then

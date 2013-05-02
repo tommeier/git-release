@@ -2,8 +2,8 @@
 set -e
 
 ############################################################
-#####                  Releasable                      #####
-### Pure BASH script for handling git release versioning ###
+#####                  Git-Release                     #####
+### Pure bash script for handling git release versioning ###
 ############################################################
 
 
@@ -33,15 +33,15 @@ options:
   required:
     $(arg_for $ARG_VERSION '<version>')  set the software versioning type (major or minor or patch)
   optional:
-    [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] set the release prefix (default: 'release/v')
+    [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] set the release prefix (default: '${RELEASE_PREFIX}')
     [$(arg_for $ARG_FORCE)]            force push of new tags (default: commit changes but do not push)
   changelog:
     [$(arg_for $ARG_START '<start>')]  set the start point (default: the last tag name that matches the prefix)
     [$(arg_for $ARG_FINISH '<finish>')] set the end/finish point (default: HEAD)
-    [$(arg_for $ARG_APPEND)]            append to changelog (default: overwrite)
-    [$(arg_for $ARG_PULL_REQUESTS)]            set to only pull requests (default: all commits)
-    [$(arg_for $ARG_CHANGELOG '<changelog_file>')] set the changelog filename (default: CHANGELOG)
-    [$(arg_for $ARG_VERSION_FILE '<version_file>')] set the version file name (default: VERSION)
+    [$(arg_for $ARG_APPEND)]            append to changelog (default: ${CHANGELOG_STRATEGY})
+    [$(arg_for $ARG_PULL_REQUESTS)]            set to only pull requests (default: ${CHANGELOG_SCOPE})
+    [$(arg_for $ARG_CHANGELOG '<changelog_file>')] set the changelog filename (default: ${CHANGELOG_FILE})
+    [$(arg_for $ARG_VERSION_FILE '<version_file>')] set the version file name (default: ${VERSION_FILE})
   general:
     $(arg_for $ARG_HELP_TEXT)  show this help text
 
