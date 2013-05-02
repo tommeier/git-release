@@ -1,0 +1,3 @@
+module Releaseable
+  VERSION = '0.0.1'
+end
