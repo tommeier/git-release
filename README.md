@@ -2,7 +2,7 @@
 
 Bash only (language agnostic) git release script for tagging and bagging a release candidate with changelog text generation
 
-[![Build Status](https://travis-ci.org/tommeier/releaseable.png)](https://travis-ci.org/tommeier/releaseable)
+[![Build Status](https://travis-ci.org/tommeier/git-release.png)](https://travis-ci.org/tommeier/git-release)
 
 This project performs two simple tasks:
 
@@ -55,7 +55,7 @@ Tagged content of the changelog is limited at the moment, I'm looking at ways to
 
 ## Deploy
 
-After a deploy running `releaseable-deployed` with the release tag passed in provides the ability to generate the changelog based only on the last deploy. With a custom deploy prefix, for example `deployed/staging` you can scope the changelog to a given environment.
+After a deploy running `git-release-deployed` with the release tag passed in provides the ability to generate the changelog based only on the last deploy. With a custom deploy prefix, for example `deployed/staging` you can scope the changelog to a given environment.
 
 ## Full examples
 
@@ -137,8 +137,8 @@ $> test/bin/run_all
  - [*] Make test helpers for setting argument mapping (for easily changing in other wrappers)
  - [*] Review argument naming and choose better letters
  - [*] Remove unnessary $(output)= statements in tests
- - [*] Update releaseable to remove the division of release and version prefix, make just one prefix (simpler)
- - [*] Write success cases for releaseable-deployed script
+ - [*] Update git-release to remove the division of release and version prefix, make just one prefix (simpler)
+ - [*] Write success cases for git-release-deployed script
  - [*] Split up functions and specs into more logical divisions (changelog, git) rather than one large support file
  - [*] Remove *.sh filenames and rely on shebangs on each executable file. Support files keep for editors to use.
  - [*] Split into seperate github repo with migrated history
