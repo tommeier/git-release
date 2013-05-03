@@ -2,7 +2,7 @@
 
 Bash only (language agnostic) git release script for tagging and bagging a release candidate with changelog text generation
 
-[![Build Status](https://travis-ci.org/tommeier/releaseable.png)](https://travis-ci.org/tommeier/releaseable)
+[![Build Status](https://travis-ci.org/tommeier/git-release.png)](https://travis-ci.org/tommeier/git-release)
 
 This project performs two simple tasks:
 
