@@ -2,7 +2,6 @@ PREFIX ?= /usr/local
 BINS = $(wildcard bin/git-*)
 
 install:
-	@mkdir -p $(DESTDIR)$(MANPREFIX)
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	@echo "... installing bins to $(DESTDIR)$(PREFIX)/bin"
 	@$(foreach BIN, $(BINS), \
