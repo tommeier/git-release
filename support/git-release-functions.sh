@@ -114,9 +114,12 @@ get_next_version_number_from_tag() {
   #Increment version
   case "$versioning_type" in
     'major' )
-        major_version=$(( $major_version + 1 ));;
+        major_version=$(( $major_version + 1 ));
+        minor_version="0";
+        patch_version="0";;
     'minor' )
-        minor_version=$(( $minor_version + 1 ));;
+        minor_version=$(( $minor_version + 1 ));
+        patch_version="0";;
     'patch' )
         patch_version=$(( $patch_version + 1 ));;
   esac

@@ -82,11 +82,11 @@ it_will_genereate_a_new_tag_for_next_release_with_defaults() {
   generate_sandbox_tags tags[@]
 
   should_succeed $(check_tag_exists "release/v1.0.6")
-  should_fail $(check_tag_exists "release/v1.1.6")
+  should_fail $(check_tag_exists "release/v1.1.0")
 
   sandbox_rup $(arg_for $ARG_VERSION 'minor')
 
-  should_succeed $(check_tag_exists "release/v1.1.6")
+  should_succeed $(check_tag_exists "release/v1.1.0")
 }
 
 it_will_genereate_a_new_tag_for_next_release_when_none_exist() {
@@ -125,14 +125,14 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
   sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_RELEASE_PREFIX 'release/v')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 2.0.6
+|| Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "2.0.6"
+  test "$(cat VERSION)" = "2.0.0"
 }
 
 it_will_generate_a_changelog_for_a_set_starting_point() {
@@ -187,7 +187,7 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
   sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_RELEASE_PREFIX 'release/v') $(arg_for $ARG_START 'release/v1.0.5') $(arg_for $ARG_FINISH 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.1.6
+|| Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 latest commit message to 1.0.6
@@ -196,7 +196,7 @@ Lots of changes in this commit for random commit 2
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "1.1.6"
+  test "$(cat VERSION)" = "1.1.0"
 }
 
 
@@ -220,14 +220,14 @@ it_will_generate_files_with_optional_names() {
   file_should_exist "VERSION_NUMBER"
 
   test "$(cat MYCHANGELOG)" = "$(changelog_divider)
-|| Release: 2.0.6
+|| Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION_NUMBER)" = "2.0.6"
+  test "$(cat VERSION_NUMBER)" = "2.0.0"
 }
 
 
@@ -300,7 +300,7 @@ it_will_overwrite_a_changelog_file_by_default() {
   sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_START 'release/v1.0.4') $(arg_for $ARG_FINISH 'release/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.1.6
+|| Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 [Any Old] Message for 1.0.5
@@ -308,12 +308,12 @@ Commit for last released start point 1.0.4
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "1.1.6"
+  test "$(cat VERSION)" = "1.1.0"
 
   sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_START 'release/v1.0.5') $(arg_for $ARG_FINISH 'release/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 2.1.6
+|| Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 latest commit message to 1.0.6
@@ -321,7 +321,7 @@ latest commit message to 1.0.6
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "2.1.6"
+  test "$(cat VERSION)" = "2.0.0"
 }
 
 it_will_append_to_a_changelog_optionally(){
@@ -339,32 +339,32 @@ it_will_append_to_a_changelog_optionally(){
   sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.1.5
+|| Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 [Any Old] Message for 1.0.5
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "1.1.5"
+  test "$(cat VERSION)" = "1.1.0"
 
   sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 2.1.5
+|| Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
-Release : release/v1.1.5
+Release : release/v1.1.0
 $(changelog_divider)
 $(changelog_divider)
-|| Release: 1.1.5
+|| Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 [Any Old] Message for 1.0.5
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "2.1.5"
+  test "$(cat VERSION)" = "2.0.0"
 }
 
 
@@ -387,7 +387,7 @@ $(changelog_footer)"
   sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_APPEND)
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.1.0
+|| Release: 1.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
 Release : release/v0.1.0
@@ -400,7 +400,7 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  test "$(cat VERSION)" = "1.1.0"
+  test "$(cat VERSION)" = "1.0.0"
 }
 
 #TODO

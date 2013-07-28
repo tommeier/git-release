@@ -77,8 +77,8 @@ Release with defaults (second time):
 $> git-release -v 'major'
 ```
 Generates:
-  * version file: `1.1.0`
-  * tag         : `release/v1.1.0`
+  * version file: `1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all commits between last release and this one
 
 ---
@@ -88,8 +88,8 @@ Release with only pull requests for changelog generation:
 $> git-release -v 'major' -P
 ```
 Generates:
-  * version file: `1.1.0`
-  * tag         : `release/v1.1.0`
+  * version file: `1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all merged pull requests and the body text of the merge commit
 
 (TODO: git-release-deployed info)

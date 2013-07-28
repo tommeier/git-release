@@ -160,7 +160,7 @@ it_uses_get_next_version_number_from_tag_to_succeed_with_no_existing_tags() {
 
 it_uses_get_next_version_number_from_tag_to_succeed_with_no_matching_tags() {
   local output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
-  test $output = "2.0.40"
+  test $output = "2.0.0"
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_no_last_version() {
@@ -170,15 +170,15 @@ it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_no_last_ve
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_with_found_last_version() {
   local output=$(get_next_version_number_from_tag minor release/production/v3.1.9)
-  test $output = "3.2.9"
+  test $output = "3.2.0"
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
   local output=$(get_next_version_number_from_tag major release/production/v3.1.9)
-  test $output = "4.1.9"
+  test $output = "4.0.0"
 
   local output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
-  test $output = "2.1.3"
+  test $output = "2.1.0"
 
   local output=$(get_next_version_number_from_tag patch release/v1.0.6)
   test $output = "1.0.7"
