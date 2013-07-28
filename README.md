@@ -115,6 +115,8 @@ $> test/bin/run_all
 
 ## TODO
 
+ - [ ] Fix the version numbering, when updating to 'minor' or 'major' zero out the bits to the right
+
  - [ ] Merge capture and help text into language agnostic file, so ruby can load in ruby and return loaded ENV variables
  - [ ] Create remaining TODO items as issues in Github
  - [ ] Test mode should display processes it would run (--dry-run option)
