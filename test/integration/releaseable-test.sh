@@ -250,9 +250,9 @@ it_will_generate_a_changelog_file_scoped_to_pull_requests() {
 [Features] This is a pull request merging a feature across multiple
 lines and continuing"
     " Yet another commit,that isn't a pull request"
-    "Merge pull request #714 from SomeOrg/fix-customer-login
+    "Merge pull request #714 from SomeOrg/fix-login
 
-Fixing the customer login but no tag displayed."
+Fixing the login but no tag displayed."
     "Merge pull request #685 from SomeOrg/bug/modal-new-login
 
 [Security] Commit fixing the modal with security flaw"
@@ -276,7 +276,7 @@ Security:
 Bugs:
   logout screen
 
-Fixing the customer login but no tag displayed.
+Fixing the login but no tag displayed.
 $(changelog_divider)
 $(changelog_footer)"
 
