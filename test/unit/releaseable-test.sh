@@ -117,7 +117,7 @@ it_uses_get_versioning_prefix_from_tag_with_an_invalid_tag_name() {
 it_uses_get_versioning_prefix_from_tag_to_succeed_capturing_version_prefix() {
   test "$(get_versioning_prefix_from_tag 'releases/2.1.3')" = "releases/"
   test "$(get_versioning_prefix_from_tag 'r/v/2.1.3')" = "r/v/"
-  test "$(get_versioning_prefix_from_tag 'some/old/release/v1.0.40')" = "some/old/release/v"
+  test "$(get_versioning_prefix_from_tag 'some/old/releases/v1.0.40')" = "some/old/releases/v"
 }
 
 #get_version_number_from_tag()
@@ -159,7 +159,7 @@ it_uses_get_next_version_number_from_tag_to_succeed_with_no_existing_tags() {
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_with_no_matching_tags() {
-  local output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
+  local output=$(get_next_version_number_from_tag major some/old/releases/v1.0.40)
   test $output = "2.0.0"
 }
 
@@ -180,6 +180,6 @@ it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
   local output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
   test $output = "2.1.0"
 
-  local output=$(get_next_version_number_from_tag patch release/v1.0.6)
+  local output=$(get_next_version_number_from_tag patch releases/v1.0.6)
   test $output = "1.0.7"
 }

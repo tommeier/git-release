@@ -130,9 +130,9 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
   #Overwrite any existing tag
 
   local tags=(
-    'release/v1.0.5'
-    'deployed/release/v1.0.5'
-    'release/v1.0.6'
+    'releases/v1.0.5'
+    'deployed/releases/v1.0.5'
+    'releases/v1.0.6'
   )
   local commit_messages=(
     '[Any Old] Message for 1.0.5'
@@ -142,7 +142,7 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -153,7 +153,7 @@ The last deployed release
 $(changelog_divider)
 $(changelog_footer)"
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_CHANGELOG 'DiffChangeLog')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6') $(arg_for $ARG_CHANGELOG 'DiffChangeLog')
   file_should_not_exist 'CHANGELOG'
 
   test "$(cat DiffChangeLog)" = "$(changelog_divider)
@@ -168,9 +168,9 @@ $(changelog_footer)"
 
 it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
   local tags=(
-    'release/v1.0.4'
-    'release/v1.0.5'
-    'release/v1.0.6'
+    'releases/v1.0.4'
+    'releases/v1.0.5'
+    'releases/v1.0.6'
   )
   local commit_messages=(
     'commit message for 1.0.4'
@@ -180,7 +180,7 @@ it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -193,7 +193,7 @@ Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_START 'release/v1.0.5')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6') $(arg_for $ARG_START 'releases/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -207,9 +207,9 @@ $(changelog_footer)"
 
 it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
   local tags=(
-    'release/v1.0.4'
-    'release/v1.0.5'
-    'release/v1.0.6'
+    'releases/v1.0.4'
+    'releases/v1.0.5'
+    'releases/v1.0.6'
   )
   local commit_messages=(
     'commit message for 1.0.4'
@@ -219,7 +219,7 @@ it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6') $(arg_for $ARG_START 'release/v1.0.4') $(arg_for $ARG_FINISH 'release/v1.0.5')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6') $(arg_for $ARG_START 'releases/v1.0.4') $(arg_for $ARG_FINISH 'releases/v1.0.5')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.6
@@ -233,8 +233,8 @@ $(changelog_footer)"
 
 it_will_generate_a_deploy_changelog_with_optional_names() {
   local tags=(
-    'release/v1.0.5'
-    'release/v1.0.6'
+    'releases/v1.0.5'
+    'releases/v1.0.6'
   )
   local commit_messages=(
     '[Any Old] Message for 1.0.5'
@@ -245,11 +245,11 @@ it_will_generate_a_deploy_changelog_with_optional_names() {
 
   file_should_not_exist "CHANGELOG"
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.6')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6')
 
   file_should_exist "CHANGELOG"
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "release/v1.0.6") $(arg_for $ARG_CHANGELOG "NewChangeLog")
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG "releases/v1.0.6") $(arg_for $ARG_CHANGELOG "NewChangeLog")
 
   file_should_not_exist 'CHANGELOG'
   file_should_exist "NewChangeLog"
@@ -306,50 +306,50 @@ $(changelog_footer)"
 
 it_will_append_to_a_deploy_changelog_optionally(){
   local tags=(
-    'release/v1.0.4'
-    'release/v1.0.5'
-    'release/v1.0.6'
+    'releases/v1.0.7'
+    'releases/v1.0.8'
+    'releases/v1.0.9'
   )
   local commit_messages=(
-    'commit message for 1.0.4'
-    '[Any Old] Message for 1.0.5'
-    'latest commit message to 1.0.6'
+    'commit message for 1.0.7'
+    '[Any Old] Message for 1.0.8'
+    'latest commit message to 1.0.9'
   )
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.4')
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.7')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.0.4
+|| Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
-commit message for 1.0.4
+commit message for 1.0.7
 Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
 
   #Add current changelog to tag
-  git checkout release/v1.0.5
-  git merge deployed/release/v1.0.4
-  git tag -f release/v1.0.5
+  git checkout releases/v1.0.8
+  git merge deployed/releases/v1.0.7
+  git tag -f releases/v1.0.8
   git checkout master
 
-  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.5') $(arg_for $ARG_APPEND)
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.8') $(arg_for $ARG_APPEND)
 
 test "$(cat CHANGELOG)" = "$(changelog_divider)
-|| Release: 1.0.5
+|| Release: 1.0.8
 || Released on $(get_current_release_date)
 $(changelog_divider)
-Merge tag 'deployed/release/v1.0.4' into HEAD
-[Any Old] Message for 1.0.5
-Release deployed : release/v1.0.4
+Merge tag 'deployed/releases/v1.0.7' into HEAD
+[Any Old] Message for 1.0.8
+Release deployed : releases/v1.0.7
 $(changelog_divider)
 $(changelog_divider)
-|| Release: 1.0.4
+|| Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
-commit message for 1.0.4
+commit message for 1.0.7
 Initial Commit
 $(changelog_divider)
 $(changelog_footer)"
