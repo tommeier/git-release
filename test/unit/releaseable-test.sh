@@ -72,6 +72,42 @@ random_tag_3"
 release/production/v3.0.9"
 }
 
+it_uses_get_release_tags_to_return_tags_matching_a_given_pattern_with_10_boundaries() {
+  local tags=(
+    "releases/v0.2.9"
+    "releases/v0.2.10"
+    "releases/v0.2.11"
+    "releases/v0.2.12"
+  )
+  generate_sandbox_tags tags[@]
+
+  local output=$(get_release_tags releases/v)
+  test "$output" = "releases/v0.2.9
+releases/v0.2.10
+releases/v0.2.11
+releases/v0.2.12"
+}
+
+#TODO: KNOWN ISSUE: Fix this to handle multi-digit major versions
+it_uses_get_release_tags_to_return_tags_matching_a_given_pattern_with_10_boundaries_on_majors() {
+  local tags=(
+    "releases/v11.0.0"
+    "releases/v9.0.0"
+    "releases/v10.0.0"
+    "releases/v12.0.0"
+  )
+  generate_sandbox_tags tags[@]
+
+  local output=$(get_release_tags 'releases/v')
+  test "$output" = "releases/v10.0.0
+releases/v11.0.0
+releases/v12.0.0
+releases/v9.0.0"
+#TODO: 9 should be returned first.
+# We need to strip the prefix before sorting, or add zero padding to the numbers
+# for accurate numerical sort
+}
+
 #get_last_tag_name()
 
 it_uses_get_last_tag_name_to_find_the_last_tag_scoped_by_pattern() {
@@ -98,6 +134,18 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
   generate_sandbox_tags tags[@]
 
   test "$(get_last_tag_name 'no/matches/atall')" = ""
+}
+
+it_uses_get_last_tag_name_to_return_over_a_10_boundry() {
+  local tags=(
+    "releases/v0.2.9",
+    "releases/v0.2.10",
+    "releases/v0.2.11"
+  )
+  generate_sandbox_tags tags[@]
+
+  local output=$(get_last_tag_name "releases/v")
+  test "$output" = "releases/v0.2.11"
 }
 
 #get_versioning_prefix_from_tag()
@@ -180,6 +228,6 @@ it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
   local output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
   test $output = "2.1.0"
 
-  local output=$(get_next_version_number_from_tag patch releases/v1.0.6)
-  test $output = "1.0.7"
+  local output=$(get_next_version_number_from_tag patch releases/v0.2.11)
+  test $output = "0.2.12"
 }

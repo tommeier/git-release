@@ -53,7 +53,9 @@ get_release_tags() {
   tag_names=$(git tag -l $filter)
 
   #<ref> tags/<release_prefix><version_number>
-  echo "$tag_names"
+  # Sort by base version numbers (known issue with non-zero padded majors)
+  # TODO: Remove 'filter' text before sorting, then reappend for accurate sort
+  echo -e "$tag_names" | sort -n -t. -k1,1 -k2,2 -k3,3
 }
 
 get_last_tag_name() {
