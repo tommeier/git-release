@@ -290,16 +290,16 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 Features:
-  This is a pull request merging a feature across multiple
+  #722 - This is a pull request merging a feature across multiple
 lines and continuing
 
 Security:
-  Commit fixing the modal with security flaw
+  #685 - Commit fixing the modal with security flaw
 
 Bugs:
-  Login screen broken in firefox
+  #705 - Login screen broken in firefox
 
-Fixing the login but no tag displayed.
+#714 - Fixing the login but no tag displayed.
 $(changelog_divider)
 $(changelog_footer)"
 }
