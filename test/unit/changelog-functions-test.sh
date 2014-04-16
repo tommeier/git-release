@@ -283,16 +283,16 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 Features:
-  #722 - This is a pull request merging a feature across multiple
+  https://github.com/user/repo/pull/722 - This is a pull request merging a feature across multiple
 lines and continuing
 
 Security:
-  #685 - Commit fixing the modal with security flaw
+  https://github.com/user/repo/pull/685 - Commit fixing the modal with security flaw
 
 Bugs:
-  #705 - Login field length
+  https://github.com/user/repo/pull/705 - Login field length
 
-#714 - Fixing the login but no tag displayed.
+https://github.com/user/repo/pull/714 - Fixing the login but no tag displayed.
 $(changelog_divider)"
 }
 
