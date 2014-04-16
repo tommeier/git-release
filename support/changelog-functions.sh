@@ -67,9 +67,9 @@ get_changelog_text_for_commits() {
 
     local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
 
-    #TODO: This matches any instances of #<numbers>. Which does not guarentee a PR commit message
+    #Check to see if the commit message has a matching pull request
     local unformatted_commit="`git show -s ${commit_shas[$i]}`"
-    pr_regex="#([0-9]+)"
+    pr_regex="Merge pull request #([0-9]+)"
     if [[ $unformatted_commit =~ $pr_regex ]]; then
       local pr_url="${repo}/pull/${BASH_REMATCH[1]} - "
     fi
