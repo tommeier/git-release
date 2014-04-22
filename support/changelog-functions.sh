@@ -49,6 +49,13 @@ get_changelog_text_for_commits() {
   local log_format="--format=%s"
   local log_format_matcher="\-\-format\="
 
+  #repo url is used to link commit messages to PRs
+  remote_origin_url="`git config --get remote.origin.url`"
+  repo_regex="git@github\.com:(.*).git"
+  if [[ $remote_origin_url =~ $repo_regex ]]; then
+    local repo="https://github.com/${BASH_REMATCH[1]}"
+  fi
+
   #Capture line by line unless first argument provides a custom format
   for i in "${!commit_shas[@]}"; do
     if [[ "${i}" = '0' ]]; then
@@ -59,6 +66,14 @@ get_changelog_text_for_commits() {
     fi;
 
     local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
+
+    #Check to see if the commit message has a matching pull request
+    local unformatted_commit="`git show -s ${commit_shas[$i]}`"
+    pr_regex="Merge pull request #([0-9]+)"
+    if [[ $unformatted_commit =~ $pr_regex ]]; then
+      local pr_url="${repo}/pull/${BASH_REMATCH[1]} - "
+    fi
+
     local newline=$'\n'
     regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
     if [[ $body_result =~ $regex ]]; then
@@ -68,7 +83,7 @@ get_changelog_text_for_commits() {
       #Remove leading spaces (regex in bash capturing always)
       local tag_content="${BASH_REMATCH[2]##*( )}"
       #Add leading 2 spaces with bullet point for tagged line prefix & remove trailing spaces
-      tag_content="  ${tag_content%%*( )}${newline}"
+      tag_content="  ${pr_url}${tag_content%%*( )}${newline}"
       #Sort matching tags
       case "$tag_type" in
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
@@ -82,7 +97,7 @@ get_changelog_text_for_commits() {
       esac;
     else
       #Normal entry
-      general_release_lines+="$body_result${newline}"
+      general_release_lines+="${pr_url}$body_result${newline}"
     fi;
   done;
 

@@ -198,7 +198,6 @@ $(changelog_footer)"
   test "$(cat VERSION)" = "1.1.0"
 }
 
-
 it_will_generate_files_with_optional_names() {
   local tags=(
     'releases/v1.0.5'
@@ -228,7 +227,6 @@ $(changelog_footer)"
 
   test "$(cat VERSION_NUMBER)" = "2.0.0"
 }
-
 
 it_will_generate_a_changelog_file_scoped_to_pull_requests() {
   local tags=(
@@ -266,16 +264,16 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 Features:
-  This is a pull request merging a feature across multiple
+  https://github.com/user/repo/pull/722 - This is a pull request merging a feature across multiple
 lines and continuing
 
 Security:
-  Commit fixing the modal with security flaw
+  https://github.com/user/repo/pull/685 - Commit fixing the modal with security flaw
 
 Bugs:
-  logout screen
+  https://github.com/user/repo/pull/705 - logout screen
 
-Fixing the login but no tag displayed.
+https://github.com/user/repo/pull/714 - Fixing the login but no tag displayed.
 $(changelog_divider)
 $(changelog_footer)"
 
