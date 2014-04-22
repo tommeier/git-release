@@ -6,11 +6,6 @@
 rup() { ./bin/git-release-deployed $@; }
 sandbox_rup() { /bin/bash ../bin/git-release-deployed $@; }
 
-usage_head="++ /bin/bash ../bin/git-release-deployed
-Required parameter: Please enter the deploy tag released.
-
-usage : git-release-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
-
 describe "git-release-deployed - integration"
 
 after() {
@@ -30,8 +25,11 @@ it_will_fail_with_no_deployed_tag() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
-  test "$output" = "$usage_head"
+  # Ignore first "++ /bin/bash ../bin/git-release-deployed" line, as in git >= 1.8.5 it is "++/bin/bash ..."
+  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1 | tail -n 3 2>&1)
+  test "$output" = "Required parameter: Please enter the deploy tag released.
+
+usage : git-release-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 }
 
 it_will_display_error_when_no_git_directory_exists() {

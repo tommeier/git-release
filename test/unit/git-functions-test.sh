@@ -74,13 +74,33 @@ it_fails_on_ensure_git_is_clean_when_dirty(){
   touch 'AnyOldFile'
   should_fail $(ensure_git_is_clean)
 
-  test "$(ensure_git_is_clean)" = "Error - Current branch is in a dirty state, please commit your changes first.
+  local git_version=$(current_git_version)
+  local updated_git_output_version="1.8.5.3"
+
+  # 1.8.5.3 + git version has hash prefix on output lines, < (1.8.4.3) doesn't
+  if (( $(echo "$git_version $updated_git_output_version" | awk '{print ($1 < $2)}') )); then
+
+    local expected_git_output="Error - Current branch is in a dirty state, please commit your changes first.
 # On branch master
 # Untracked files:
 #   (use \"git add <file>...\" to include in what will be committed)
 #
 #"$'\t'"AnyOldFile
+nothing added to commit but untracked files present (use \"git add\" to track)";
+
+  else
+
+    local expected_git_output="Error - Current branch is in a dirty state, please commit your changes first.
+On branch master
+Untracked files:
+  (use \"git add <file>...\" to include in what will be committed)
+
+"$'\t'"AnyOldFile
+
 nothing added to commit but untracked files present (use \"git add\" to track)"
+  fi
+
+  test "$(ensure_git_is_clean)" = "${expected_git_output}"
 }
 
 it_passes_on_ensure_git_is_clean_when_clean(){
