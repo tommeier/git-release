@@ -6,12 +6,6 @@
 rup() { ./bin/git-release $@; }
 sandbox_rup() { /bin/bash ../bin/git-release $@; }
 
-usage_head="++ /bin/bash ../bin/git-release
-incorrect versioning type: ''
-Please set to one of 'major', 'minor' or 'patch'
-
-usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
-
 describe "git-release - integration"
 
 after() {
@@ -29,8 +23,13 @@ it_will_fail_with_no_versioning_type() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 5 2>&1)
-  test "$output" = "$usage_head"
+  # Ignore first "++ /bin/bash ../bin/git-release-deployed" line, as in git >= 1.8.5 it is "++/bin/bash ..."
+
+  local output=$(sandbox_rup 2>&1 | head -n 5 2>&1 | tail -n 4 2>&1)
+  test "$output" = "incorrect versioning type: ''
+Please set to one of 'major', 'minor' or 'patch'
+
+usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 }
 
 it_will_display_error_when_no_git_directory_exists() {

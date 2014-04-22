@@ -13,6 +13,20 @@ check_tag_exists() {
   fi;
 }
 
+current_git_version() {
+  local git_version="`git --version`"
+  local newline=$'\n'
+  regex=".*git version ([0-9\.]+).*$"
+
+  if [[ $git_version =~ $regex ]]; then
+    local full_version=$BASH_REMATCH
+    local version_number="${BASH_REMATCH[1]}"
+    echo "$version_number"
+  else
+    echo "Error - Unable to determine git version."
+  fi;
+}
+
 ensure_git_directory() {
   if [[ ! -d  '.git' ]]; then
     echo "Error - Not a git repository please run from the base of your git repo." >&2
