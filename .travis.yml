@@ -5,4 +5,5 @@ before_script:
 
 script:
     - echo $(bash --version)
+    - echo $(git --version)
     - test/bin/run_all
