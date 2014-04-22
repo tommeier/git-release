@@ -93,3 +93,40 @@ generate_sandbox_tags() {
     git tag "${tag_names[$i]}" &>/dev/null
   done;
 }
+
+# Stub bash commands and set arguments called with to STUB_LAST_CALLED_WITH
+# For example:
+#  * stub test_func
+#  * test_func 'arg1' 'arg2'
+#  * stub_last_called_with()
+#  * > test_func stub: arg1 arg2
+stub() {
+  local cmd="$1"
+  if [ "$2" == "STDERR" ]; then local redirect=" 1>&2"; fi
+
+  if [[ "$(type "$cmd" | head -1)" == *"is a function" ]]; then
+    local source="$(type "$cmd" | tail -n +2)"
+    source="${source/$cmd/original_${cmd}}"
+    eval "$source"
+  fi
+
+  eval "$(echo -e "${1}() {\n STUB_LAST_CALLED_WITH=\"$1 stub: \$@\"$redirect\n}")"
+}
+
+# Restore the original command/function that was stubbed with stub.
+unstub() {
+  local cmd="$1"
+  unset -f "$cmd"
+  if type "original_${cmd}" &>/dev/null; then
+    if [[ "$(type "original_${cmd}" | head -1)" == *"is a function" ]]; then
+      local source="$(type "original_$cmd" | tail -n +2)"
+      source="${source/original_${cmd}/$cmd}"
+      eval "$source"
+      unset -f "original_${cmd}"
+    fi
+  fi
+}
+
+stub_last_called_with() {
+  echo $STUB_LAST_CALLED_WITH;
+}

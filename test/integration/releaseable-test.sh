@@ -14,10 +14,17 @@ usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_
 
 describe "git-release - integration"
 
+before() {
+  #stub open_changelog_for_edit;
+  export STUB_ME="open_changelog_for_edit"
+}
+
 after() {
   if [[ $MAINTAIN_SANDBOX != true ]]; then
     remove_sandbox
   fi;
+  unstub open_changelog_for_edit;
+  unset STUB_ME
 }
 
 ### Failure Cases
@@ -406,4 +413,5 @@ $(changelog_footer)"
 #TODO
 # it_will_optionally_force_push_of_tag()
 
+# unstub open_changelog_for_edit
 

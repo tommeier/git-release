@@ -198,3 +198,25 @@ $existing_content" > $changelog_file;
       exit 1;;
   esac
 }
+
+# open_changelog_for_edit $EDITOR (eg. EDITOR='subl --wait')
+
+open_changelog_for_edit(){
+  if [[ $EDITOR ]]; then
+    echo ">> Editor present: Opening '$EDITOR' for any required $CHANGELOG_FILE modifications."
+    echo ">> - (set to wait to alter log before tagging. eg 'subl --wait')"
+
+    #Load changelog file for edit
+    _open_editor $CHANGELOG_FILE
+  else
+    echo ">> Editor not present. Set '\$EDITOR' for any inline changelog changes. Skipping..."
+  fi;
+}
+
+# private
+_open_editor(){
+  #Open any assigned editor
+  $EDITOR $@
+}
+
+
