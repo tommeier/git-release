@@ -30,27 +30,31 @@ $output
 $(changelog_divider)"
 }
 
+# Changelog individual lines must escape newlines to be able to loop over string array
+escape_newlines() {
+  local newline_escape="<#new_line#>"
+  local newline=$'\n'
+  echo "${1//$newline/$newline_escape}"
+}
+
+unescape_newlines() {
+  local newline_escape="<#new_line#>"
+  local newline=$'\n'
+  echo "${1//$newline_escape/$newline}"
+}
+
 get_changelog_text_for_commits() {
   #Pass in commits array of SHA's
-  #Return formatted changelog text, with tags handled
+  #Return formatted changelog text with default or custom format
   #Optional first argument for the format "--format=%H"
-  local previous_shopt_extglob=$(shopt -p extglob)
-  local existing_shopt_nocasematch=$(shopt -p nocasematch)
-  shopt -s nocasematch
-  shopt -s extglob
-
   local commit_shas=($@)
-
-  local feature_tag_lines=""
-  local bug_tag_lines=""
-  local security_tag_lines=""
-  local general_release_lines=""
-
   local log_format="--format=%s"
   local log_format_matcher="\-\-format\="
 
-  #Capture line by line unless first argument provides a custom format
+  #Capture line by line output with default or custom log format
   for i in "${!commit_shas[@]}"; do
+    # Optional - First argument
+    #   - --format=something (custom display log format)
     if [[ "${i}" = '0' ]]; then
       if echo "${commit_shas[$i]}" | grep -q "${log_format_matcher}"; then
         log_format="${commit_shas[$i]}";
@@ -58,10 +62,28 @@ get_changelog_text_for_commits() {
       fi;
     fi;
 
-    local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
-    local newline=$'\n'
-    regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
-    if [[ $body_result =~ $regex ]]; then
+    local raw_log_line=`git show -s ${log_format} ${commit_shas[$i]}`
+    local escaped_log_line=$(escape_newlines "$raw_log_line")
+    echo "$escaped_log_line"
+  done;
+}
+
+group_and_sort_changelog_lines() {
+  local previous_shopt_extglob=$(shopt -p extglob)
+  local existing_shopt_nocasematch=$(shopt -p nocasematch)
+  shopt -s nocasematch
+  shopt -s extglob
+
+  local feature_tag_lines=""
+  local bug_tag_lines=""
+  local security_tag_lines=""
+  local general_release_lines=""
+
+  local newline=$'\n'
+
+  while read -r line; do
+    local tag_regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
+    if [[ $line =~ $tag_regex ]]; then
       #Tagged entry
       local full_tag=$BASH_REMATCH
       local tag_type="${BASH_REMATCH[1]}"
@@ -69,6 +91,7 @@ get_changelog_text_for_commits() {
       local tag_content="${BASH_REMATCH[2]##*( )}"
       #Add leading 2 spaces with bullet point for tagged line prefix & remove trailing spaces
       tag_content="  ${tag_content%%*( )}${newline}"
+
       #Sort matching tags
       case "$tag_type" in
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
@@ -81,15 +104,12 @@ get_changelog_text_for_commits() {
               general_release_lines+="$tag_content";;
       esac;
     else
-      #Normal entry
-      general_release_lines+="$body_result${newline}"
+      #Normal non-tagged entry
+      general_release_lines+="${line}${newline}"
     fi;
-  done;
+  done <<< "$1";
 
-  #Return previous setup for bash
-  eval $previous_shopt_extglob
-  eval $existing_shopt_nocasematch
-
+  # Print out tagged content in order
   if [[ $feature_tag_lines != '' ]]; then
     echo "Features:
 ${feature_tag_lines}"
@@ -102,7 +122,11 @@ ${security_tag_lines}"
     echo "Bugs:
 ${bug_tag_lines}"
   fi;
-  echo "$general_release_lines"
+  echo "$general_release_lines${newline}"
+
+  #Return previous setup for bash
+  eval $previous_shopt_extglob
+  eval $existing_shopt_nocasematch
 }
 
 #generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
@@ -132,14 +156,21 @@ generate_changelog_content() {
   esac
 
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
-  local commit_output=$(get_changelog_text_for_commits "$changelog_format" $commits)
+
+  local formatted_commit_log=$(get_changelog_text_for_commits "$changelog_format" "$commits")
+  local grouped_commit_output=$(group_and_sort_changelog_lines "$formatted_commit_log")
+
+  local unescaped_content=$(unescape_newlines "$grouped_commit_output")
+
   local release_date=$(get_current_release_date)
 
   echo "$(changelog_divider)
 || Release: ${release_name}
 || Released on ${release_date}
 $(changelog_divider)
-${commit_output}
+
+${unescaped_content}
+
 $(changelog_divider)"
 }
 

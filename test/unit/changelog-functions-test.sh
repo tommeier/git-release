@@ -12,6 +12,47 @@ after() {
   fi;
 }
 
+#escape_newlines
+
+it_uses_escape_newlines_to_replace_all_newlines_in_single_line_string(){
+  local commit_message="Some single line"
+
+  output=$(escape_newlines "$commit_message")
+
+  test "$output" = "${commit_message}"
+}
+
+it_uses_escape_newlines_to_replace_all_newlines_in_multiline_string(){
+  local commit_message="Some line with
+with values
+across multiple lines
+and trailing
+"
+
+  output=$(escape_newlines "$commit_message")
+
+  test "$output" = "Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
+}
+
+unescape_newlines
+
+it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_no_wildcards(){
+  local commit_message="Unescaped single line"
+
+  output=$(unescape_newlines "$commit_message")
+
+  test "$output" = "${commit_message}"
+}
+it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_newlines_when_multiple_exist(){
+  local commit_message="Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
+
+  output=$(unescape_newlines "$commit_message")
+
+  test "$output" = "Some line with
+with values
+across multiple lines
+and trailing"
+}
 
 #get_changelog_text_for_commits
 
@@ -74,78 +115,50 @@ ${sha_array[1]}--${commit_message_2}
 ${sha_array[2]}--${commit_message_3}"
 }
 
-it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags() {
-  local tags=(
-    "releases/v0.0.3"
-    "releases/v0.0.4"
-    "releases/v0.1.4"
-    "releases/v1.1.4"
-    "releases/v1.1.5"
-    "releases/v1.1.6"
-  )
-  local commit_messages=(
-    "Start of the project"
-    "[bugs]Argh, I fixed a bug here"
-    "[feature] OMG. I had time to write something of use"
-    "[features]Its so exciting writing useful things!!"
-    "[bug] What comes up, must come down"
-    "Some random tweak fix"
-  )
-  generate_sandbox_tags tags[@] commit_messages[@]
-  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[5]}")
+#group_and_sort_changelog_lines
 
-  output=$(get_changelog_text_for_commits "$commit_shas")
+it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags() {
+  local commit_messages="Start of the project
+    [bugs]Argh, I fixed a bug here
+    [feature] OMG. I had time to write something of use
+    [features]Its so exciting writing useful things!!
+    [bug] What comes up, must come down
+    Some random tweak fix"
 
-  local sha_array=($commit_shas)
+  output=$(group_and_sort_changelog_lines "$commit_messages")
+
   test "$output" = "Features:
+  OMG. I had time to write something of use
   Its so exciting writing useful things!!
-  OMG. I had time to write something of use
 
 Bugs:
-  What comes up, must come down
   Argh, I fixed a bug here
+  What comes up, must come down
 
-Some random tweak fix
-Start of the project"
+Start of the project
+Some random tweak fix"
 }
 
-it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_case_insensitive() {
-  local tags=(
-    "releases/v0.0.3"
-    "releases/v1.1.5"
-    "releases/v1.1.6"
-  )
-  local commit_messages=(
-    "[Bug] Start of the project"
-    "[BUGS]   Argh, I fixed a bug here"
-    "[fEaTuRes]     OMG. I had time to write something of use"
-  )
-  generate_sandbox_tags tags[@] commit_messages[@]
-  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[2]}")
+it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags_case_insensitive() {
+  local commit_messages="[Bug] Start of the project
+    [BUGS]   Argh, I fixed a bug here
+    [fEaTuRes]     OMG. I had time to write something of use"
 
-  output=$(get_changelog_text_for_commits "$commit_shas")
+  output=$(group_and_sort_changelog_lines "$commit_messages")
 
   test "$output" = "Features:
   OMG. I had time to write something of use
 
 Bugs:
-  Argh, I fixed a bug here
-  Start of the project"
+  Start of the project
+  Argh, I fixed a bug here"
 }
 
-it_uses_get_changelog_text_for_commits_to_return_titles_grouped_by_tags_with_multiple_brackets() {
-  local tags=(
-    "releases/v0.0.3"
-    "releases/v1.1.6"
-  )
-  local commit_messages=(
-    "[BUGS] [QC Some Reference][More Custom References] Fixed the tagged bugs"
-    "[fEaTuRes][Additonal Tag one] Another referenced feature"
-  )
-  generate_sandbox_tags tags[@] commit_messages[@]
-  local commit_shas=$(get_commits_between_points "${tags[0]}" "${tags[1]}")
+it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags_with_multiple_brackets() {
+  local commit_messages="[BUGS] [QC Some Reference][More Custom References] Fixed the tagged bugs
+    [fEaTuRes][Additonal Tag one] Another referenced feature"
 
-  output=$(get_changelog_text_for_commits "$commit_shas")
+  output=$(group_and_sort_changelog_lines "$commit_messages")
 
   test "$output" = "Features:
   [Additonal Tag one] Another referenced feature
@@ -210,11 +223,13 @@ it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 ${commit_messages[3]}
 ${commit_messages[2]}
 ${commit_messages[1]}
 ${commit_messages[0]}
 $(get_commit_message_for_first_commit)
+
 $(changelog_divider)"
 }
 
@@ -241,8 +256,10 @@ it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 ${commit_messages[2]}
 ${commit_messages[1]}
+
 $(changelog_divider)"
 }
 
@@ -282,6 +299,7 @@ Fixing the login but no tag displayed."
 || Release: ${custom_release_name}
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Features:
   This is a pull request merging a feature across multiple
 lines and continuing
@@ -293,6 +311,7 @@ Bugs:
   Login field length
 
 Fixing the login but no tag displayed.
+
 $(changelog_divider)"
 }
 

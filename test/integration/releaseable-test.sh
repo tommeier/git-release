@@ -127,7 +127,9 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -156,9 +158,11 @@ it_will_generate_a_changelog_for_a_set_starting_point() {
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 Lots of changes in this commit for random commit 2
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -189,9 +193,11 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 Lots of changes in this commit for random commit 2
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -222,7 +228,9 @@ it_will_generate_files_with_optional_names() {
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -265,6 +273,7 @@ Fixing the login but no tag displayed."
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Features:
   This is a pull request merging a feature across multiple
 lines and continuing
@@ -276,6 +285,7 @@ Bugs:
   logout screen
 
 Fixing the login but no tag displayed.
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -302,8 +312,10 @@ it_will_overwrite_a_changelog_file_by_default() {
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
 Commit for last released start point 1.0.4
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -315,8 +327,10 @@ $(changelog_footer)"
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -341,7 +355,9 @@ it_will_append_to_a_changelog_optionally(){
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -353,13 +369,17 @@ $(changelog_footer)"
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Release : releases/v1.1.0
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -377,7 +397,9 @@ it_will_generate_in_an_opinionated_fashion(){
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -389,13 +411,17 @@ $(changelog_footer)"
 || Release: 1.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Release : releases/v0.1.0
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
