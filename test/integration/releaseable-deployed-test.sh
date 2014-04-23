@@ -146,8 +146,10 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 The last deployed release
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -158,8 +160,10 @@ $(changelog_footer)"
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 The last deployed release
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -184,10 +188,12 @@ it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
 commit message for 1.0.4
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -197,8 +203,10 @@ $(changelog_footer)"
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -223,8 +231,10 @@ it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
 commit message for 1.0.4
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -287,6 +297,7 @@ Fixing the login but no tag displayed."
 || Release: 0.0.1
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Features:
   This is a pull request merging a feature across multiple
 lines and continuing
@@ -298,6 +309,7 @@ Bugs:
   Login screen broken in firefox
 
 Fixing the login but no tag displayed.
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -322,8 +334,10 @@ it_will_append_to_a_deploy_changelog_optionally(){
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 commit message for 1.0.7
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -339,16 +353,20 @@ test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.8
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Merge tag 'deployed/releases/v1.0.7' into HEAD
 [Any Old] Message for 1.0.8
 Release deployed : releases/v1.0.7
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 commit message for 1.0.7
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 }
