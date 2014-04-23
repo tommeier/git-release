@@ -68,6 +68,78 @@ get_changelog_text_for_commits() {
   done;
 }
 
+get_github_repo_origin_url() {
+  # Capture remote
+  local remote_origin_url=$(git config --get remote.origin.url)
+
+  if [[ "$remote_origin_url" = '' ]]; then
+    echo "Error : Unable to determine the remote origin."
+    echo "      : Set origin url with 'git remote set-url origin git://new.url.here'"
+    exit 1
+  fi
+
+  local repo_regex="^(https?:\/\/|git:\/\/|git\@)?github\.com[:/]([^.]*)(.git)?$"
+  if [[ $remote_origin_url =~ $repo_regex ]]; then
+    local github_repo_url="https://github.com/${BASH_REMATCH[2]}"
+    echo "$github_repo_url"
+  else
+    echo "Error : Unable to determine the remote repo url with format: '${remote_origin_url}'."
+    exit 1
+  fi
+}
+
+# Loop over a list of commit shas and same ordered list of changelog formatted lines,
+# add a github url prefix to the line
+set_github_url_suffix_to_changelog_lines() {
+  local commit_shas=($1)
+  IFS=$'\n' read -rd '' -a changelog_lines <<<"$2"
+  local url_type="$3"
+
+  # Check to see if the commit message has a matching pull request
+   # local unformatted_commit="`git show -s ${commit_shas[$i]}`"
+   # pr_regex="Merge pull request #([0-9]+)"
+   # if [[ $unformatted_commit =~ $pr_regex ]]; then
+   #   local pr_url="${repo}/pull/${BASH_REMATCH[1]} - "
+   # fi
+
+  case "$url_type" in
+    ':commit_url' | 'commit_url' )
+      # Simple url for exact commit
+      #commit_filter=''
+      ;;
+    ':pull_url' | 'pull_url' )
+      # Pull request url
+
+      #Filter by merged pull requests only
+      #commit_filter=$'^Merge pull request #.* from .*';
+      #changelog_format="--format=%b"
+      ;; #use body of pull requests
+    * )
+      echo "Error : Url type required. Please specify :commit_url or :pull_url."
+      exit 1;;
+  esac
+
+  # Capture remote
+  local github_repo_url=$(get_github_repo_origin_url)
+
+  # populate an array from that variable, as delimited by the IFS
+  #local changelog_lines=($2)
+
+  for sha_line_number in "${!commit_shas[@]}"; do
+    #while read -r changelog_line; do
+
+    #for line_number in "${!changelog_lines[@]}"; do
+      local commit_sha="${commit_shas[$sha_line_number]}"
+      local changelog_line="${changelog_lines[$sha_line_number]}"
+
+      echo "$commit_sha::$changelog_line::$remote_origin_url"
+    #done;
+    #done <<< "$2"
+
+  done;
+
+}
+
 group_and_sort_changelog_lines() {
   local previous_shopt_extglob=$(shopt -p extglob)
   local existing_shopt_nocasematch=$(shopt -p nocasematch)
@@ -157,8 +229,11 @@ generate_changelog_content() {
 
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
 
-  local formatted_commit_log=$(get_changelog_text_for_commits "$changelog_format" "$commits")
-  local grouped_commit_output=$(group_and_sort_changelog_lines "$formatted_commit_log")
+  local escaped_commit_lines=$(get_changelog_text_for_commits "$changelog_format" "$commits")
+
+  # if the append url option set in method
+  #local escaped_commit_lines=$(set_github_url_suffix_to_changelog_lines "$commits" "$escaped_commit_lines" ":pull_url")
+  local grouped_commit_output=$(group_and_sort_changelog_lines "$escaped_commit_lines")
 
   local unescaped_content=$(unescape_newlines "$grouped_commit_output")
 

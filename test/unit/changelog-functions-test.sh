@@ -43,6 +43,7 @@ it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_no_wildcards()
 
   test "$output" = "${commit_message}"
 }
+
 it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_newlines_when_multiple_exist(){
   local commit_message="Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
 
@@ -53,6 +54,85 @@ with values
 across multiple lines
 and trailing"
 }
+
+#get_github_repo_origin_url
+
+it_uses_get_github_repo_origin_url_and_raises_error_with_no_remote_origin() {
+  generate_git_repo
+
+  should_fail $(get_github_repo_origin_url)
+
+  local output=$(get_github_repo_origin_url 2>&1)
+  local expected_error="Error : Unable to determine the remote origin."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote() {
+  generate_git_repo
+  git remote add origin git@github.com:tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_http_remote() {
+  generate_git_repo
+  git remote add origin http://github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_https_remote() {
+  generate_git_repo
+  git remote add origin https://github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote_with_no_host() {
+  generate_git_repo
+  git remote add origin github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote_with_no_git_suffix() {
+  generate_git_repo
+  git remote add origin https://github.com/tommeier/git-release
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_and_raises_error_with_invalid_remote_origin() {
+  generate_git_repo
+  git remote add origin unknown://github.com/tommeier/git-release
+
+  should_fail $(get_github_repo_origin_url)
+
+  local output=$(get_github_repo_origin_url 2>&1)
+  local expected_error="Error : Unable to determine the remote repo url with format: 'unknown://github.com/tommeier/git-release'."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+#set_github_url_suffix_to_changelog_lines
+
+# it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_incorrect_url_type()
+# it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_no_remote_origin()
+# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_commit_urls()
+# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_pull_request_urls()
+# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_urls_with_git_remote()
+# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_urls_with_https_remote()
 
 #get_changelog_text_for_commits
 
