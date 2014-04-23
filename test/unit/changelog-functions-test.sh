@@ -34,7 +34,7 @@ and trailing
   test "$output" = "Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
 }
 
-unescape_newlines
+#unescape_newlines
 
 it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_no_wildcards(){
   local commit_message="Unescaped single line"
