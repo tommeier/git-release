@@ -102,8 +102,8 @@ it_uses_check_tag_exists_to_return_false_if_no_tags_exist() {
 
 it_uses_check_tag_exists_to_return_false_if_it_doesnt_exist() {
   local tags=(
-    "releases/v1.0.5"
-    "releases/v1.0.6"
+    "release/v1.0.5"
+    "release/v1.0.6"
   )
   generate_sandbox_tags tags[@]
 
@@ -117,15 +117,15 @@ it_uses_check_tag_exists_to_return_false_if_it_doesnt_exist() {
 it_uses_check_tag_exists_to_return_true_if_tag_exists() {
 
   local tags=(
-    "releases/v1.0.5"
-    "releases/v1.0.6"
+    "release/v1.0.5"
+    "release/v1.0.6"
   )
   generate_sandbox_tags tags[@]
 
-  result=$(set +e ; check_tag_exists "releases/v1.0.5" ; echo $?)
+  result=$(set +e ; check_tag_exists "release/v1.0.5" ; echo $?)
   test 0 -eq $result
 
-  result=$(set +e ; check_tag_exists "releases/v1.0.6" ; echo $?)
+  result=$(set +e ; check_tag_exists "release/v1.0.6" ; echo $?)
   test 0 -eq $result
 }
 
@@ -199,16 +199,16 @@ it_uses_get_commits_between_points_to_list_all_commits_with_nothing_passed() {
 it_uses_get_commits_between_points_to_list_all_commits_from_a_start_point() {
   local tags=(
     "random_tag_1"
-    "releases/v1.0.5"
+    "release/v1.0.5"
     "random_tag_2"
-    "releases/v1.0.6"
+    "release/v1.0.6"
     "random_tag_3"
   )
   generate_sandbox_tags tags[@]
 
   local output=$(get_commits_between_points 'random_tag_2')
   test "$output" = "$(get_sha_for_tag_name 'random_tag_3')
-$(get_sha_for_tag_name 'releases/v1.0.6')
+$(get_sha_for_tag_name 'release/v1.0.6')
 $(get_sha_for_tag_name 'random_tag_2')"
 }
 
@@ -221,21 +221,21 @@ it_uses_get_commits_between_points_to_get_nothing_when_no_commits_exists() {
 it_uses_get_commits_between_points_to_return_commits_with_no_start_point() {
   local tags=(
     "random_tag_1"
-    "releases/v1.0.5"
+    "release/v1.0.5"
     "random_tag_2"
-    "releases/v1.0.6"
+    "release/v1.0.6"
     "random_tag_3"
   )
   generate_sandbox_tags tags[@]
 
   local start_point=""
-  local end_point="releases/v1.0.6"
+  local end_point="release/v1.0.6"
   local output=$(get_commits_between_points "$start_point" "$end_point")
 
   #Ordered by creation date
-  local target_tag_sha=$(get_sha_for_tag_name 'releases/v1.0.6')
+  local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
-  local older_sha_2=$(get_sha_for_tag_name 'releases/v1.0.5')
+  local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
   local older_sha_3=$(get_sha_for_tag_name 'random_tag_1')
   local initial_commit=$(get_sha_for_first_commit)
 
@@ -293,20 +293,20 @@ it_uses_get_commits_between_points_to_return_all_commits_with_no_start_point_wit
 it_uses_get_commits_between_points_to_return_all_commits_between_points() {
   local tags=(
     'random_tag_1'
-    'releases/v1.0.5'
+    'release/v1.0.5'
     'random_tag_2'
-    'releases/v1.0.6'
+    'release/v1.0.6'
   )
   generate_sandbox_tags tags[@]
 
-  local start_point="releases/v1.0.5"
-  local end_point="releases/v1.0.6"
+  local start_point="release/v1.0.5"
+  local end_point="release/v1.0.6"
   local output=$(get_commits_between_points "$start_point" "$end_point")
 
   #Ordered by creation date
-  local target_tag_sha=$(get_sha_for_tag_name 'releases/v1.0.6')
+  local target_tag_sha=$(get_sha_for_tag_name 'release/v1.0.6')
   local older_sha_1=$(get_sha_for_tag_name 'random_tag_2')
-  local older_sha_2=$(get_sha_for_tag_name 'releases/v1.0.5')
+  local older_sha_2=$(get_sha_for_tag_name 'release/v1.0.5')
 
   test "$output" = "$target_tag_sha
 $older_sha_1

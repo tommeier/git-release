@@ -35,11 +35,11 @@ The usage flow for this app is as follows:
 
   * Run `git-release` at the end of a release cycle defining whether it is a major, minor or patch release. This generates a `CHANGELOG` in the root of the projet, and a `VERSION` file with content. If you've released before, this will find the last release and generate changelog and version number accordingly. A tag will be generated for this release with the generated changelog.
 
-  * During the deploy of this release tag, run `git-release-deployed` on successful deployment. This will generate a new changelog, compared to the last deploy. The reason for this is simple. You may create many releases, but only some versions hit different environments. For example, you create release 0.0.1, deploy to staging, fix many issues, then deploy to production with all the additional fixes. The changelog for staging, for each release, is very different to that of production with all the changes grouped together.
+  * [Optional][Requires auto push to commit step] During the deploy of this release tag, run `git-release-deployed` on successful deployment. This will generate a new changelog, compared to the last deploy. The reason for this is simple. You may create many releases, but only some versions hit different environments. For example, you create release 0.0.1, deploy to staging, fix many issues, then deploy to production with all the additional fixes. The changelog for staging, for each release, is very different to that of production with all the changes grouped together.
 
 ## Version file
 
-This file simple contains the raw version number (e.g. `1.4.21`). Useful for parsing in a deployed app to display the current version number. In some applications I use this to provide a `meta` tag with the version information.
+This file simply contains the raw version number (e.g. `1.4.21`). Useful for parsing in a deployed app to display the current version number. In some applications I use this to provide a `meta` tag with the version information.
 
 ## Changelog file
 
@@ -67,7 +67,7 @@ $> git-release -v 'minor'
 ```
 Generates:
   * version file: `0.1.0`
-  * tag         : `releases/v0.1.0`
+  * tag         : `release/v0.1.0`
   * Changelog   : all commits text up until now
 
 ---
@@ -78,7 +78,7 @@ $> git-release -v 'major'
 ```
 Generates:
   * version file: `1.0.0`
-  * tag         : `releases/v1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all commits between last release and this one
 
 ---
@@ -89,8 +89,12 @@ $> git-release -v 'major' -P
 ```
 Generates:
   * version file: `1.0.0`
-  * tag         : `releases/v1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all merged pull requests and the body text of the merge commit
+
+### Additional options:
+
+  * `-U` : Append a github url to each entry in changelog. When combined with `-P` (pull requests) this will be the pull request url.
 
 (TODO: git-release-deployed info)
 
@@ -115,7 +119,6 @@ $> test/bin/run_all
 
 ## TODO
 
- - [ ] Merge capture and help text into language agnostic file, so ruby can load in ruby and return loaded ENV variables
  - [ ] Create remaining TODO items as issues in Github
  - [ ] Test mode should display processes it would run (--dry-run option)
  - [ ] Change output of script to hide most output (unless dry run activated)
@@ -130,20 +133,6 @@ $> test/bin/run_all
  - [ ] [potentially] Make CHANGELOG generation read in optional template, with wildcards to apply logic to view
  - [ ] [potentially] Work out how to test git push being fired, mocking a git command
  - [ ] [potentially] Use an left pad command to align help text correctly
- - [*] Add full examples to Readme
- - [*] Optionally force push of tags, otherwise ask for confirmation to send
- - [*] Remove the 'skip execute' code
- - [*] Create language maps (bash first, to make ruby only etc) for argument naming. Use everywhere in specs
- - [*] Make test helpers for setting argument mapping (for easily changing in other wrappers)
- - [*] Review argument naming and choose better letters
- - [*] Remove unnessary $(output)= statements in tests
- - [*] Update git-release to remove the division of release and version prefix, make just one prefix (simpler)
- - [*] Write success cases for git-release-deployed script
- - [*] Split up functions and specs into more logical divisions (changelog, git) rather than one large support file
- - [*] Remove *.sh filenames and rely on shebangs on each executable file. Support files keep for editors to use.
- - [*] Split into seperate github repo with migrated history
- - [*] Load Travis-CI
-
 
 
 
