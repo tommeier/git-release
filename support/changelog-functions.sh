@@ -30,27 +30,31 @@ $output
 $(changelog_divider)"
 }
 
+# Changelog individual lines must escape newlines to be able to loop over string array
+escape_newlines() {
+  local newline_escape="<#new_line#>"
+  local newline=$'\n'
+  echo "${1//$newline/$newline_escape}"
+}
+
+unescape_newlines() {
+  local newline_escape="<#new_line#>"
+  local newline=$'\n'
+  echo "${1//$newline_escape/$newline}"
+}
+
 get_changelog_text_for_commits() {
   #Pass in commits array of SHA's
-  #Return formatted changelog text, with tags handled
+  #Return formatted changelog text with default or custom format
   #Optional first argument for the format "--format=%H"
-  local previous_shopt_extglob=$(shopt -p extglob)
-  local existing_shopt_nocasematch=$(shopt -p nocasematch)
-  shopt -s nocasematch
-  shopt -s extglob
-
   local commit_shas=($@)
-
-  local feature_tag_lines=""
-  local bug_tag_lines=""
-  local security_tag_lines=""
-  local general_release_lines=""
-
   local log_format="--format=%s"
   local log_format_matcher="\-\-format\="
 
-  #Capture line by line unless first argument provides a custom format
+  #Capture line by line output with default or custom log format
   for i in "${!commit_shas[@]}"; do
+    # Optional - First argument
+    #   - --format=something (custom display log format)
     if [[ "${i}" = '0' ]]; then
       if echo "${commit_shas[$i]}" | grep -q "${log_format_matcher}"; then
         log_format="${commit_shas[$i]}";
@@ -58,10 +62,69 @@ get_changelog_text_for_commits() {
       fi;
     fi;
 
-    local body_result="`git show -s ${log_format} ${commit_shas[$i]}`"
-    local newline=$'\n'
-    regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
-    if [[ $body_result =~ $regex ]]; then
+    local raw_log_line=`git show -s ${log_format} ${commit_shas[$i]}`
+    local escaped_log_line=$(escape_newlines "$raw_log_line")
+    echo "$escaped_log_line"
+  done;
+}
+
+# Loop over a list of commit shas and ordered list of changelog formatted lines,
+# add a github url prefix to the line
+set_github_url_suffix_to_changelog_lines() {
+  local commit_shas=($1)
+  IFS=$'\n' read -d '' -a changelog_lines <<<"$2"
+  local url_type="$3"
+  local appended_lines=""
+
+  # Capture remote
+  local github_repo_url=$(get_github_repo_origin_url)
+
+  for sha_line_number in "${!commit_shas[@]}"; do
+    local commit_sha="${commit_shas[$sha_line_number]}"
+    local changelog_line="${changelog_lines[$sha_line_number]}"
+
+    case "$url_type" in
+      ':commit_urls' | 'commit_urls' )
+        local repo_url="$github_repo_url/commit/${commit_sha}"
+        ;;
+      ':pull_urls' | 'pull_urls' )
+        # Check to see if the commit title pull request number in details
+        local unformatted_commit="`git show -s ${commit_sha} --format=%s`"
+        local pull_request_regex="^Merge pull request #([0-9]+) from (.*)$"
+
+        if [[ $unformatted_commit =~ $pull_request_regex ]]; then
+          local repo_url="$github_repo_url/pull/${BASH_REMATCH[1]}"
+        else
+          # Default to commit if unable to match to Github PR
+          local repo_url="$github_repo_url/commit/${commit_sha}"
+        fi
+        ;;
+      * )
+        echo "Error : Url type required. Please specify :commit_urls or :pull_urls."
+        exit 1
+        ;;
+    esac
+    appended_lines+="${changelog_line} - ${repo_url}\n"
+  done;
+  echo -e $appended_lines
+}
+
+group_and_sort_changelog_lines() {
+  local previous_shopt_extglob=$(shopt -p extglob)
+  local existing_shopt_nocasematch=$(shopt -p nocasematch)
+  shopt -s nocasematch
+  shopt -s extglob
+
+  local feature_tag_lines=""
+  local bug_tag_lines=""
+  local security_tag_lines=""
+  local general_release_lines=""
+
+  local newline=$'\n'
+
+  while read -r line; do
+    local tag_regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
+    if [[ $line =~ $tag_regex ]]; then
       #Tagged entry
       local full_tag=$BASH_REMATCH
       local tag_type="${BASH_REMATCH[1]}"
@@ -69,6 +132,7 @@ get_changelog_text_for_commits() {
       local tag_content="${BASH_REMATCH[2]##*( )}"
       #Add leading 2 spaces with bullet point for tagged line prefix & remove trailing spaces
       tag_content="  ${tag_content%%*( )}${newline}"
+
       #Sort matching tags
       case "$tag_type" in
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
@@ -81,15 +145,12 @@ get_changelog_text_for_commits() {
               general_release_lines+="$tag_content";;
       esac;
     else
-      #Normal entry
-      general_release_lines+="$body_result${newline}"
+      #Normal non-tagged entry
+      general_release_lines+="${line}${newline}"
     fi;
-  done;
+  done <<< "$1";
 
-  #Return previous setup for bash
-  eval $previous_shopt_extglob
-  eval $existing_shopt_nocasematch
-
+  # Print out tagged content in order
   if [[ $feature_tag_lines != '' ]]; then
     echo "Features:
 ${feature_tag_lines}"
@@ -102,15 +163,21 @@ ${security_tag_lines}"
     echo "Bugs:
 ${bug_tag_lines}"
   fi;
-  echo "$general_release_lines"
+  echo "$general_release_lines${newline}"
+
+  #Return previous setup for bash
+  eval $previous_shopt_extglob
+  eval $existing_shopt_nocasematch
 }
 
-#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
+#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only" ":with_urls/:no_urls"
 generate_changelog_content() {
   local release_name="$1"
   local commit_filter="$2"         #all_commits or pulls_only
-  local starting_point="$3"        #optional
-  local end_point="$4"             #optional
+  local append_urls="$3"           #with_urls/no_urls
+  local starting_point="$4"        #optional
+  local end_point="$5"             #optional
+
   local changelog_format="--format=%s" #default -> display title
 
   if [[ "$release_name" = "" ]]; then
@@ -121,25 +188,54 @@ generate_changelog_content() {
   case "$commit_filter" in
     ':all_commits' | 'all_commits' )
       #No filter
-      commit_filter='';;
+      commit_filter=''
+      local url_type=":commit_urls"
+      ;;
     ':pulls_only' | 'pulls_only' )
       #Filter by merged pull requests only
       commit_filter=$'^Merge pull request #.* from .*';
-      changelog_format="--format=%b";; #use body of pull requests
+      changelog_format="--format=%b" #use body of pull requests
+      local url_type=":pull_urls"
+      ;;
     * )
       echo "Error : Commit filter required. Please specify :all or :pulls_only."
       exit 1;;
   esac
 
+  # Capture commits to generate log from
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
-  local commit_output=$(get_changelog_text_for_commits "$changelog_format" $commits)
+
+  # Capture content of changelog line items (escaped newlines to allow array)
+  local escaped_commit_lines=$(get_changelog_text_for_commits "$changelog_format" "$commits")
+
+  case "$append_urls" in
+    ':with_urls' | 'with_urls' )
+      #Append urls to changelog line items
+      escaped_commit_lines=$(set_github_url_suffix_to_changelog_lines "$commits" "$escaped_commit_lines" "$url_type")
+      ;;
+    ':no_urls' | 'no_urls' )
+      #Ignore, no need to do work
+      ;;
+    * )
+      echo "Error : Append url preference required. Please specify :with_urls or :no_urls."
+      exit 1;;
+  esac
+
+  # Group and sort changelog lines by any tags
+  local grouped_commit_output=$(group_and_sort_changelog_lines "$escaped_commit_lines")
+
+  # Unescape newlines
+  local unescaped_content=$(unescape_newlines "$grouped_commit_output")
+
   local release_date=$(get_current_release_date)
 
   echo "$(changelog_divider)
 || Release: ${release_name}
 || Released on ${release_date}
 $(changelog_divider)
-${commit_output}
+
+${unescaped_content}
+
 $(changelog_divider)"
 }
 

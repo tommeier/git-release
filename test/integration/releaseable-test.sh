@@ -6,12 +6,6 @@
 rup() { ./bin/git-release $@; }
 sandbox_rup() { /bin/bash ../bin/git-release $@; }
 
-usage_head="++ /bin/bash ../bin/git-release
-incorrect versioning type: ''
-Please set to one of 'major', 'minor' or 'patch'
-
-usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
-
 describe "git-release - integration"
 
 before() {
@@ -36,8 +30,13 @@ it_will_fail_with_no_versioning_type() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 5 2>&1)
-  test "$output" = "$usage_head"
+  # Ignore first "++ /bin/bash ../bin/git-release-deployed" line, as in git >= 1.8.5 it is "++/bin/bash ..."
+
+  local output=$(sandbox_rup 2>&1 | head -n 5 2>&1 | tail -n 4 2>&1)
+  test "$output" = "incorrect versioning type: ''
+Please set to one of 'major', 'minor' or 'patch'
+
+usage : git-release $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 }
 
 it_will_display_error_when_no_git_directory_exists() {
@@ -135,7 +134,9 @@ it_will_generate_files_by_default_from_last_tag_to_head() {
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -164,9 +165,11 @@ it_will_generate_a_changelog_for_a_set_starting_point() {
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 Lots of changes in this commit for random commit 2
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -197,15 +200,16 @@ it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 Lots of changes in this commit for random commit 2
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
   test "$(cat VERSION)" = "1.1.0"
 }
-
 
 it_will_generate_files_with_optional_names() {
   local tags=(
@@ -230,13 +234,14 @@ it_will_generate_files_with_optional_names() {
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
+
 $(changelog_divider)
 $(changelog_footer)"
 
   test "$(cat VERSION_NUMBER)" = "2.0.0"
 }
-
 
 it_will_generate_a_changelog_file_scoped_to_pull_requests() {
   local tags=(
@@ -273,6 +278,7 @@ Fixing the login but no tag displayed."
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Features:
   This is a pull request merging a feature across multiple
 lines and continuing
@@ -284,10 +290,83 @@ Bugs:
   logout screen
 
 Fixing the login but no tag displayed.
+
 $(changelog_divider)
 $(changelog_footer)"
 
   test "$(cat VERSION)" = "0.1.0"
+}
+
+it_will_generate_a_changelog_file_scoped_to_pull_requests_with_urls() {
+  local tags=(
+    'tag_with_pulls/1.0.0'
+    'tag_with_pulls/2.0.0'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from SomeOrg/bug/limit-payment-description-length
+
+[BUG] logout screen"
+    "Merge pull request #722 from SomeOrg/feature/running-balance-field (Bill Hoskings, 18 hours ago)
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    "Merge pull request #714 from SomeOrg/fix-login
+
+Fixing the login but no tag displayed."
+    "Merge pull request #685 from SomeOrg/bug/modal-new-login
+
+[Bug] Fix cookie storing sensitive data"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 0.1.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing - https://github.com/organisation/repo-name/pull/722
+
+Bugs:
+  Fix cookie storing sensitive data - https://github.com/organisation/repo-name/pull/685
+  logout screen - https://github.com/organisation/repo-name/pull/705
+
+Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
+
+$(changelog_divider)
+$(changelog_footer)"
+}
+
+it_will_generate_a_changelog_file_scoped_to_commits_with_urls() {
+  local tags=(
+    'releases/v1.0.5'
+    'releases/v1.0.6'
+  )
+  local commit_messages=(
+    '[Any Old] Message for 1.0.5'
+    'latest commit message to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+  local commit_sha=$(git log --format="%H" | head -1)
+
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 2.0.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+latest commit message to 1.0.6 - https://github.com/organisation/repo-name/commit/$commit_sha
+
+$(changelog_divider)
+$(changelog_footer)"
 }
 
 it_will_overwrite_a_changelog_file_by_default() {
@@ -310,8 +389,10 @@ it_will_overwrite_a_changelog_file_by_default() {
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
 Commit for last released start point 1.0.4
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -323,8 +404,10 @@ $(changelog_footer)"
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -349,7 +432,9 @@ it_will_append_to_a_changelog_optionally(){
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -361,19 +446,22 @@ $(changelog_footer)"
 || Release: 2.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Release : releases/v1.1.0
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 1.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 
   test "$(cat VERSION)" = "2.0.0"
 }
-
 
 it_will_generate_in_an_opinionated_fashion(){
   #using defaults other than append
@@ -385,7 +473,9 @@ it_will_generate_in_an_opinionated_fashion(){
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -397,13 +487,17 @@ $(changelog_footer)"
 || Release: 1.0.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Release : releases/v0.1.0
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 0.1.0
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 

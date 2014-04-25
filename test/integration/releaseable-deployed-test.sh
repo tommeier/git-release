@@ -6,11 +6,6 @@
 rup() { ./bin/git-release-deployed $@; }
 sandbox_rup() { /bin/bash ../bin/git-release-deployed $@; }
 
-usage_head="++ /bin/bash ../bin/git-release-deployed
-Required parameter: Please enter the deploy tag released.
-
-usage : git-release-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
-
 describe "git-release-deployed - integration"
 
 after() {
@@ -30,8 +25,11 @@ it_will_fail_with_no_deployed_tag() {
 it_will_display_help_text_on_fail() {
   generate_git_repo
 
-  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1)
-  test "$output" = "$usage_head"
+  # Ignore first "++ /bin/bash ../bin/git-release-deployed" line, as in git >= 1.8.5 it is "++/bin/bash ..."
+  local output=$(sandbox_rup 2>&1 | head -n 4 2>&1 | tail -n 3 2>&1)
+  test "$output" = "Required parameter: Please enter the deploy tag released.
+
+usage : git-release-deployed $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]"
 }
 
 it_will_display_error_when_no_git_directory_exists() {
@@ -148,8 +146,10 @@ it_will_genereate_a_new_deploy_tag_for_next_release_with_defaults() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 The last deployed release
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -160,8 +160,10 @@ $(changelog_footer)"
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 The last deployed release
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -186,10 +188,12 @@ it_will_generate_a_deploy_changelog_for_a_set_starting_point() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
 commit message for 1.0.4
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -199,8 +203,10 @@ $(changelog_footer)"
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 latest commit message to 1.0.6
 [Any Old] Message for 1.0.5
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -225,8 +231,10 @@ it_will_generate_a_deploy_changelog_for_a_set_range_with_start_and_end() {
 || Release: 1.0.6
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 [Any Old] Message for 1.0.5
 commit message for 1.0.4
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -289,6 +297,7 @@ Fixing the login but no tag displayed."
 || Release: 0.0.1
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Features:
   This is a pull request merging a feature across multiple
 lines and continuing
@@ -300,6 +309,84 @@ Bugs:
   Login screen broken in firefox
 
 Fixing the login but no tag displayed.
+
+$(changelog_divider)
+$(changelog_footer)"
+}
+
+it_will_generate_a_changelog_file_scoped_to_pull_requests_with_urls() {
+  local tags=(
+    'tag_with_pulls/1.0.0'
+    'tag_with_pulls/2.0.0'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from SomeOrg/bug/limit-payment-description-length
+
+[BUG] logout screen"
+    "Merge pull request #722 from SomeOrg/feature/running-balance-field (Bill Hoskings, 18 hours ago)
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    "Merge pull request #714 from SomeOrg/fix-login
+
+Fixing the login but no tag displayed."
+    "Merge pull request #685 from SomeOrg/bug/modal-new-login
+
+[Bug] Fix cookie storing sensitive data"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'tag_with_pulls/4.0.0') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 4.0.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing - https://github.com/organisation/repo-name/pull/722
+
+Bugs:
+  Fix cookie storing sensitive data - https://github.com/organisation/repo-name/pull/685
+  logout screen - https://github.com/organisation/repo-name/pull/705
+
+Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
+
+$(changelog_divider)
+$(changelog_footer)"
+}
+
+it_will_generate_a_changelog_file_scoped_to_commits_with_urls() {
+  local tags=(
+    'releases/v1.0.5'
+    'releases/v1.0.6'
+  )
+  local commit_messages=(
+    '[Any Old] Message for 1.0.5'
+    'latest commit message to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+  local commit_sha=$(git log --format="%H" | head -1)
+
+  local commit_sha_list=$(get_commits_between_points "" "releases/v1.0.6")
+  local commit_shas=($commit_sha_list)
+
+  sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.6') $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 1.0.6
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+latest commit message to 1.0.6 - https://github.com/organisation/repo-name/commit/${commit_shas[0]}
+[Any Old] Message for 1.0.5 - https://github.com/organisation/repo-name/commit/${commit_shas[1]}
+Initial Commit - https://github.com/organisation/repo-name/commit/${commit_shas[2]}
+
 $(changelog_divider)
 $(changelog_footer)"
 }
@@ -324,8 +411,10 @@ it_will_append_to_a_deploy_changelog_optionally(){
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 commit message for 1.0.7
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 
@@ -341,16 +430,20 @@ test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.8
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 Merge tag 'deployed/releases/v1.0.7' into HEAD
 [Any Old] Message for 1.0.8
 Release deployed : releases/v1.0.7
+
 $(changelog_divider)
 $(changelog_divider)
 || Release: 1.0.7
 || Released on $(get_current_release_date)
 $(changelog_divider)
+
 commit message for 1.0.7
 Initial Commit
+
 $(changelog_divider)
 $(changelog_footer)"
 }

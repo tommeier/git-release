@@ -16,6 +16,7 @@ CHANGELOG_FILE='CHANGELOG'
 VERSION_FILE='VERSION'
 CHANGELOG_SCOPE=':all_commits'
 CHANGELOG_STRATEGY=':overwrite'
+CHANGELOG_DISPLAY_URLS=':no_urls'
 
 START_POINT=''
 END_POINT=''
@@ -25,7 +26,9 @@ END_POINT=''
 
 USAGE_OUTPUT="
 usage : $(basename "$0") $(arg_for $ARG_VERSION '<version>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]
-                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')] [$(arg_for $ARG_VERSION_FILE '<version_file>')]
+                         [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_VERSION_FILE '<version_file>')]
+                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
+                         [$(arg_for $ARG_DISPLAY_URLS)]
                          [$(arg_for $ARG_HELP_TEXT)]
                          --- create git release tag with changelog
 
@@ -34,13 +37,14 @@ options:
     $(arg_for $ARG_VERSION '<version>')  set the software versioning type (major or minor or patch)
   optional:
     [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] set the release prefix (default: '${RELEASE_PREFIX}')
-    [$(arg_for $ARG_FORCE)]            force push of new tags (default: commit changes but do not push)
+    [$(arg_for $ARG_FORCE)]             force push of new tags (default: commit changes but do not push)
   changelog:
-    [$(arg_for $ARG_START '<start>')]  set the start point (default: the last tag name that matches the prefix)
+    [$(arg_for $ARG_START '<start>')]   set the start point (default: the last tag name that matches the prefix)
     [$(arg_for $ARG_FINISH '<finish>')] set the end/finish point (default: HEAD)
     [$(arg_for $ARG_APPEND)]            append to changelog (default: ${CHANGELOG_STRATEGY})
-    [$(arg_for $ARG_PULL_REQUESTS)]            set to only pull requests (default: ${CHANGELOG_SCOPE})
-    [$(arg_for $ARG_CHANGELOG '<changelog_file>')] set the changelog filename (default: ${CHANGELOG_FILE})
+    [$(arg_for $ARG_PULL_REQUESTS)]                 set to only pull requests (default: ${CHANGELOG_SCOPE})
+    [$(arg_for $ARG_DISPLAY_URLS)]                  set to display each commit/pull url in changelog (default: ${CHANGELOG_DISPLAY_URLS})
+    [$(arg_for $ARG_CHANGELOG '<changelog_file>')]  set the changelog filename (default: ${CHANGELOG_FILE})
     [$(arg_for $ARG_VERSION_FILE '<version_file>')] set the version file name (default: ${VERSION_FILE})
   general:
     $(arg_for $ARG_HELP_TEXT)  show this help text
@@ -57,9 +61,9 @@ usage examples:
     Version file contains   : 1.1.4
     CHANGELOG file contains : commit information for all commits between last release and HEAD
 
-  2) Pull requests only (changelog generated only with body of pull request titles)
+  2) Pull requests only with their urls (changelog generated only with body of pull request titles)
 
-    $(basename "$0") $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_PULL_REQUESTS)
+    $(basename "$0") $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
 
   3) Generate custom changelog and version file
 
@@ -71,7 +75,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
+while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DISPLAY_URLS""$ARG_VERSION":"$ARG_START":"$ARG_FINISH":"$ARG_RELEASE_PREFIX":"$ARG_CHANGELOG":"$ARG_VERSION_FILE": option
 do
   case "${option}"
   in
@@ -88,6 +92,7 @@ do
     $ARG_FINISH) END_POINT="$OPTARG";;
     $ARG_CHANGELOG) CHANGELOG_FILE="$OPTARG";;
     $ARG_VERSION_FILE) VERSION_FILE="$OPTARG";;
+    $ARG_DISPLAY_URLS) CHANGELOG_DISPLAY_URLS=':with_urls';;
 
     ?)
       printf "illegal option: '%s'\n" "$OPTARG" >&2
@@ -119,7 +124,7 @@ next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_n
 next_tag_name="${RELEASE_PREFIX}${next_version_number}"
 generate_version_file "$next_version_number" "$VERSION_FILE"
 
-changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT")
+changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$CHANGELOG_DISPLAY_URLS" "$START_POINT" "$END_POINT")
 
 generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 

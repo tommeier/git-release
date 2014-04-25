@@ -11,6 +11,85 @@ after() {
   fi;
 }
 
+#get_github_repo_origin_url
+
+it_uses_get_github_repo_origin_url_and_raises_error_with_no_remote_origin() {
+  generate_git_repo
+  git remote remove origin
+
+  should_fail $(get_github_repo_origin_url)
+
+  local output=$(get_github_repo_origin_url 2>&1)
+  local expected_error="Error : Unable to determine the remote origin."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin git@github.com:tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_http_remote() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin http://github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_https_remote() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin https://github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote_with_no_host() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin github.com/tommeier/git-release.git
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_with_git_remote_with_no_git_suffix() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin https://github.com/tommeier/git-release
+
+  local output=$(get_github_repo_origin_url)
+
+  test "$output" = "https://github.com/tommeier/git-release"
+}
+
+it_uses_get_github_repo_origin_url_and_raises_error_with_invalid_remote_origin() {
+  generate_git_repo
+  git remote remove origin
+  git remote add origin unknown://github.com/tommeier/git-release
+
+  should_fail $(get_github_repo_origin_url)
+
+  local output=$(get_github_repo_origin_url 2>&1)
+  local expected_error="Error : Unable to determine the remote repo url with format: 'unknown://github.com/tommeier/git-release'."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+#check_tag_exists
+
 it_uses_check_tag_exists_to_return_false_if_no_tags_exist() {
   generate_git_repo
 
@@ -74,13 +153,33 @@ it_fails_on_ensure_git_is_clean_when_dirty(){
   touch 'AnyOldFile'
   should_fail $(ensure_git_is_clean)
 
-  test "$(ensure_git_is_clean)" = "Error - Current branch is in a dirty state, please commit your changes first.
+  local git_version=$(current_git_version)
+  local updated_git_output_version="1.8.5.3"
+
+  # 1.8.5.3 + git version has hash prefix on output lines, < (1.8.4.3) doesn't
+  if (( $(echo "$git_version $updated_git_output_version" | awk '{print ($1 < $2)}') )); then
+
+    local expected_git_output="Error - Current branch is in a dirty state, please commit your changes first.
 # On branch master
 # Untracked files:
 #   (use \"git add <file>...\" to include in what will be committed)
 #
 #"$'\t'"AnyOldFile
+nothing added to commit but untracked files present (use \"git add\" to track)";
+
+  else
+
+    local expected_git_output="Error - Current branch is in a dirty state, please commit your changes first.
+On branch master
+Untracked files:
+  (use \"git add <file>...\" to include in what will be committed)
+
+"$'\t'"AnyOldFile
+
 nothing added to commit but untracked files present (use \"git add\" to track)"
+  fi
+
+  test "$(ensure_git_is_clean)" = "${expected_git_output}"
 }
 
 it_passes_on_ensure_git_is_clean_when_clean(){

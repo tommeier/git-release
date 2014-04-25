@@ -4,12 +4,46 @@
 #####                GIT FUNCTIONS                     #####
 ############################################################
 
+get_github_repo_origin_url() {
+  # Capture remote
+  local remote_origin_url=$(git config --get remote.origin.url)
+
+  if [[ "$remote_origin_url" = '' ]]; then
+    echo "Error : Unable to determine the remote origin."
+    echo "      : Set origin url with 'git remote set-url origin git://new.url.here'"
+    exit 1;
+  else
+    local repo_regex="^(https?:\/\/|git:\/\/|git\@)?github\.com[:/]([^.]*)(.git)?$"
+    if [[ $remote_origin_url =~ $repo_regex ]]; then
+      local github_repo_url="https://github.com/${BASH_REMATCH[2]}"
+      echo "$github_repo_url";
+    else
+      echo "Error : Unable to determine the remote repo url with format: '${remote_origin_url}'."
+      exit 1;
+    fi
+  fi
+}
+
 check_tag_exists() {
   local tag_find=$(git tag -l "$1")
   if [[ "$tag_find" = '' ]]; then
     return 1;
   else
     return 0;
+  fi;
+}
+
+current_git_version() {
+  local git_version="`git --version`"
+  local newline=$'\n'
+  regex=".*git version ([0-9\.]+).*$"
+
+  if [[ $git_version =~ $regex ]]; then
+    local full_version=$BASH_REMATCH
+    local version_number="${BASH_REMATCH[1]}"
+    echo "$version_number"
+  else
+    echo "Error - Unable to determine git version."
   fi;
 }
 

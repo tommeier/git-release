@@ -15,6 +15,7 @@ DEPLOYED_PREFIX='deployed/'
 CHANGELOG_FILE='CHANGELOG'
 CHANGELOG_SCOPE=':all_commits'
 CHANGELOG_STRATEGY=':overwrite'
+CHANGELOG_DISPLAY_URLS=':no_urls'
 
 START_POINT=''
 END_POINT=''
@@ -24,7 +25,9 @@ END_POINT=''
 
 USAGE_OUTPUT="
 usage : $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG '<deployed_tag>') [$(arg_for $ARG_RELEASE_PREFIX '<prefix>')] [$(arg_for $ARG_START '<start>')] [$(arg_for $ARG_FINISH '<finish>')]
-                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_PULL_REQUESTS)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
+                         [$(arg_for $ARG_FORCE)] [$(arg_for $ARG_CHANGELOG '<changelog_file>')]
+                         [$(arg_for $ARG_APPEND)] [$(arg_for $ARG_PULL_REQUESTS)]
+                         [$(arg_for $ARG_DISPLAY_URLS)]
                          [$(arg_for $ARG_HELP_TEXT)]
                          --- create git release tag for a deployed release with a generated changelog.
 
@@ -39,6 +42,7 @@ options:
     [$(arg_for $ARG_FINISH '<finish>')]     set the end/finish point (default: HEAD)
     [$(arg_for $ARG_APPEND)]                append to changelog (default: ${CHANGELOG_STRATEGY})
     [$(arg_for $ARG_PULL_REQUESTS)]                set to only pull requests (default: ${CHANGELOG_SCOPE})
+    [$(arg_for $ARG_DISPLAY_URLS)]                  set to display each commit/pull url in changelog (default: ${CHANGELOG_DISPLAY_URLS})
     [$(arg_for $ARG_CHANGELOG '<changelog_file>')]   set the changelog filename (default: ${CHANGELOG_FILE})
   general:
     [$(arg_for $ARG_HELP_TEXT)]  show this help text
@@ -54,9 +58,9 @@ usage examples:
     Tag generated           : deploys/staging/our-releases/REL1.1.4
     CHANGELOG file contains : commit information for all commits between last deployed version and current release
 
-  2) Pull requests only (changelog generated only with body of pull request titles)
+  2) Pull requests only with urls (changelog generated only with body of pull request titles)
 
-    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.4') $(arg_for $ARG_PULL_REQUESTS)
+    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.4') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
 
   3) Generate custom changelog for deployed versions
 
@@ -68,7 +72,7 @@ usage examples:
 #####                  INPUT CAPTURE                   #####
 ############################################################
 
-while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
+while getopts "$ARG_FORCE""$ARG_HELP_TEXT""$ARG_APPEND""$ARG_PULL_REQUESTS""$ARG_DISPLAY_URLS""$ARG_DEPLOYED_TAG":"$ARG_START":"$ARG_CHANGELOG":"$ARG_FINISH":"$ARG_RELEASE_PREFIX": option
 do
   case "${option}"
   in
@@ -80,6 +84,7 @@ do
     $ARG_FORCE) FORCE_PUSH='true';;
     $ARG_PULL_REQUESTS) CHANGELOG_SCOPE=":pulls_only";;
     $ARG_CHANGELOG) CHANGELOG_FILE="$OPTARG";;
+    $ARG_DISPLAY_URLS) CHANGELOG_DISPLAY_URLS=':with_urls';;
     $ARG_HELP_TEXT)
       echo "$USAGE_OUTPUT" >&2
       exit 0
@@ -125,7 +130,7 @@ if [[ "$START_POINT" = '' ]]; then
   START_POINT=$last_tag_name
 fi;
 
-changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$START_POINT" "$END_POINT" )
+changelog_content=$( generate_changelog_content "$deployed_version_number" "$CHANGELOG_SCOPE" "$CHANGELOG_DISPLAY_URLS" "$START_POINT" "$END_POINT" )
 
 generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
