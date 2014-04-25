@@ -68,26 +68,6 @@ get_changelog_text_for_commits() {
   done;
 }
 
-get_github_repo_origin_url() {
-  # Capture remote
-  local remote_origin_url=$(git config --get remote.origin.url)
-
-  if [[ "$remote_origin_url" = '' ]]; then
-    echo "Error : Unable to determine the remote origin."
-    echo "      : Set origin url with 'git remote set-url origin git://new.url.here'"
-    exit 1;
-  else
-    local repo_regex="^(https?:\/\/|git:\/\/|git\@)?github\.com[:/]([^.]*)(.git)?$"
-    if [[ $remote_origin_url =~ $repo_regex ]]; then
-      local github_repo_url="https://github.com/${BASH_REMATCH[2]}"
-      echo "$github_repo_url";
-    else
-      echo "Error : Unable to determine the remote repo url with format: '${remote_origin_url}'."
-      exit 1;
-    fi
-  fi
-}
-
 # Loop over a list of commit shas and same ordered list of changelog formatted lines,
 # add a github url prefix to the line
 set_github_url_suffix_to_changelog_lines() {
