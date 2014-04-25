@@ -34,7 +34,7 @@ and trailing
   test "$output" = "Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
 }
 
-unescape_newlines
+#unescape_newlines
 
 it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_no_wildcards(){
   local commit_message="Unescaped single line"
@@ -43,6 +43,7 @@ it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_no_wildcards()
 
   test "$output" = "${commit_message}"
 }
+
 it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_newlines_when_multiple_exist(){
   local commit_message="Some line with<#new_line#>with values<#new_line#>across multiple lines<#new_line#>and trailing<#new_line#>"
 
@@ -52,6 +53,75 @@ it_uses_unescape_newlines_to_replace_all_wildcards_in_string_with_newlines_when_
 with values
 across multiple lines
 and trailing"
+}
+
+#set_github_url_suffix_to_changelog_lines
+
+it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_incorrect_url_type() {
+  should_fail $(set_github_url_suffix_to_changelog_lines "12345" "any message" ":unknown_url_format")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "12345" "any message" ":unknown_url_format" 2>&1 | tail -n 1)
+  local expected_error="Error : Url type required. Please specify :commit_urls or :pull_urls."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+it_uses_set_github_url_suffix_to_changelog_lines_and_appends_commit_urls() {
+  local tags=(
+    'normal-tag/2.0.0'
+    'normal-tag/3.0.0'
+    'normal-tag/4.0.0'
+  )
+  local commit_messages=(
+    "commit message for 2.0.0"
+    "[Any Old] Message for 3.0.0"
+    "[Feature] Rails upgrade to 4.0.0"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "normal-tag/2.0.0" "normal-tag/4.0.0")
+
+  local commit_shas=($commit_sha_list)
+  local commit_message_list=$(IFS=$'\n'; echo "${commit_messages[*]}")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "$commit_sha_list" "$commit_message_list" ":commit_urls")
+
+  test "$output" = "commit message for 2.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[0]}
+[Any Old] Message for 3.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[1]}
+[Feature] Rails upgrade to 4.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[2]}"
+}
+
+it_uses_set_github_url_suffix_to_changelog_lines_and_appends_pull_urls() {
+   local tags=(
+    'tag_with_pulls/2.0.0'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
+  )
+  local commit_messages=(
+    "Merge pull request #722 from SomeOrg/feature/running-balance-field
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    "Merge pull request #714 from SomeOrg/fix-login
+
+Fixing the login but no tag displayed."
+    "Merge pull request #685 from SomeOrg/bug/modal-new-login
+
+[Security] Commit fixing the modal with security flaw"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "tag_with_pulls/2.0.0" "tag_with_pulls/4.0.0")
+  # Capture changelog text in same manner as core
+  local commit_message_list=$(get_changelog_text_for_commits "--format=%b" "$commit_sha_list")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "$commit_sha_list" "$commit_message_list" ":pull_urls")
+
+  test "$output" = "[Security] Commit fixing the modal with security flaw - https://github.com/organisation/repo-name/pull/685
+Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
+[Features] This is a pull request merging a feature across multiple<#new_line#>lines and continuing - https://github.com/organisation/repo-name/pull/722"
 }
 
 #get_changelog_text_for_commits
@@ -184,20 +254,31 @@ it_uses_generate_changelog_content_to_exit_with_errors_with_invalid_commit_filte
   should_fail $(generate_changelog_content 'AnyOldReleaseName' ':unknown')
   should_fail $(generate_changelog_content 'AnyOldReleaseName' ':anything')
 
-  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits')
-  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':pulls_only')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':no_urls')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':pulls_only' ':no_urls')
+}
+
+it_uses_generate_changelog_content_to_exit_with_errors_with_invalid_url_preference() {
+  generate_git_repo
+
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' '')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':unknown')
+
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':no_urls')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':with_urls')
 }
 
 it_uses_generate_changelog_content_to_succeed_without_a_startpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' '' 'releases/end/v02.34')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' '' 'releases/end/v02.34')
 }
 
 it_uses_generate_changelog_content_to_succeed_without_an_endpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' 'releases/v1.0.45')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' 'releases/v1.0.45')
 }
 
 it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
@@ -217,7 +298,7 @@ it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog_content "$custom_release_name" ':all_commits')
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -250,7 +331,7 @@ it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' 'releases/v1.0.5' 'random_tag_2')
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls' 'releases/v1.0.5' 'random_tag_2')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -293,7 +374,7 @@ Fixing the login but no tag displayed."
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v2.0.5"
-  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only')
+  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only' ':no_urls')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -311,6 +392,69 @@ Bugs:
   Login field length
 
 Fixing the login but no tag displayed.
+
+$(changelog_divider)"
+}
+
+it_uses_generate_changelog_content_to_list_pull_requests_with_urls(){
+  local tags=(
+    'tag_with_pulls_1'
+    'tag_with_pulls_2'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from SomeOrg/bug/change-field-length
+
+[BUG] Login field length"
+    "Merge pull request #722 from SomeOrg/feature/login-firefox-fix
+
+[Features] This is yet another pull request"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local custom_release_name="v2.0.5"
+  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only' ':with_urls')
+
+  test "$output" = "$(changelog_divider)
+|| Release: ${custom_release_name}
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+Features:
+  This is yet another pull request - https://github.com/organisation/repo-name/pull/722
+
+Bugs:
+  Login field length - https://github.com/organisation/repo-name/pull/705
+
+$(changelog_divider)"
+}
+
+it_uses_generate_changelog_content_to_list_commits_with_urls(){
+  local tags=(
+    'releases/v1.0.5'
+    'releases/v1.0.6'
+  )
+  local commit_messages=(
+    '[Any Old] Message for 1.0.5'
+    'latest release to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "releases/v1.0.5" "releases/v1.0.6")
+  local commit_shas=($commit_sha_list)
+
+  local custom_release_name="v1.0.7"
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':with_urls')
+
+  test "$output" = "$(changelog_divider)
+|| Release: ${custom_release_name}
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+${commit_messages[1]} - https://github.com/organisation/repo-name/commit/${commit_shas[0]}
+${commit_messages[0]} - https://github.com/organisation/repo-name/commit/${commit_shas[1]}
+$(get_commit_message_for_first_commit) - https://github.com/organisation/repo-name/commit/$(get_sha_for_first_commit)
 
 $(changelog_divider)"
 }

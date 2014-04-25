@@ -68,6 +68,47 @@ get_changelog_text_for_commits() {
   done;
 }
 
+# Loop over a list of commit shas and ordered list of changelog formatted lines,
+# add a github url prefix to the line
+set_github_url_suffix_to_changelog_lines() {
+  local commit_shas=($1)
+  IFS=$'\n' read -d '' -a changelog_lines <<<"$2"
+  local url_type="$3"
+  local appended_lines=""
+
+  # Capture remote
+  local github_repo_url=$(get_github_repo_origin_url)
+
+  for sha_line_number in "${!commit_shas[@]}"; do
+    local commit_sha="${commit_shas[$sha_line_number]}"
+    local changelog_line="${changelog_lines[$sha_line_number]}"
+
+    case "$url_type" in
+      ':commit_urls' | 'commit_urls' )
+        local repo_url="$github_repo_url/commit/${commit_sha}"
+        ;;
+      ':pull_urls' | 'pull_urls' )
+        # Check to see if the commit title pull request number in details
+        local unformatted_commit="`git show -s ${commit_sha} --format=%s`"
+        local pull_request_regex="^Merge pull request #([0-9]+) from (.*)$"
+
+        if [[ $unformatted_commit =~ $pull_request_regex ]]; then
+          local repo_url="$github_repo_url/pull/${BASH_REMATCH[1]}"
+        else
+          # Default to commit if unable to match to Github PR
+          local repo_url="$github_repo_url/commit/${commit_sha}"
+        fi
+        ;;
+      * )
+        echo "Error : Url type required. Please specify :commit_urls or :pull_urls."
+        exit 1
+        ;;
+    esac
+    appended_lines+="${changelog_line} - ${repo_url}\n"
+  done;
+  echo -e $appended_lines
+}
+
 group_and_sort_changelog_lines() {
   local previous_shopt_extglob=$(shopt -p extglob)
   local existing_shopt_nocasematch=$(shopt -p nocasematch)
@@ -129,12 +170,14 @@ ${bug_tag_lines}"
   eval $existing_shopt_nocasematch
 }
 
-#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
+#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only" ":with_urls/:no_urls"
 generate_changelog_content() {
   local release_name="$1"
   local commit_filter="$2"         #all_commits or pulls_only
-  local starting_point="$3"        #optional
-  local end_point="$4"             #optional
+  local append_urls="$3"           #with_urls/no_urls
+  local starting_point="$4"        #optional
+  local end_point="$5"             #optional
+
   local changelog_format="--format=%s" #default -> display title
 
   if [[ "$release_name" = "" ]]; then
@@ -145,21 +188,43 @@ generate_changelog_content() {
   case "$commit_filter" in
     ':all_commits' | 'all_commits' )
       #No filter
-      commit_filter='';;
+      commit_filter=''
+      local url_type=":commit_urls"
+      ;;
     ':pulls_only' | 'pulls_only' )
       #Filter by merged pull requests only
       commit_filter=$'^Merge pull request #.* from .*';
-      changelog_format="--format=%b";; #use body of pull requests
+      changelog_format="--format=%b" #use body of pull requests
+      local url_type=":pull_urls"
+      ;;
     * )
       echo "Error : Commit filter required. Please specify :all or :pulls_only."
       exit 1;;
   esac
 
+  # Capture commits to generate log from
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
 
-  local formatted_commit_log=$(get_changelog_text_for_commits "$changelog_format" "$commits")
-  local grouped_commit_output=$(group_and_sort_changelog_lines "$formatted_commit_log")
+  # Capture content of changelog line items (escaped newlines to allow array)
+  local escaped_commit_lines=$(get_changelog_text_for_commits "$changelog_format" "$commits")
 
+  case "$append_urls" in
+    ':with_urls' | 'with_urls' )
+      #Append urls to changelog line items
+      escaped_commit_lines=$(set_github_url_suffix_to_changelog_lines "$commits" "$escaped_commit_lines" "$url_type")
+      ;;
+    ':no_urls' | 'no_urls' )
+      #Ignore, no need to do work
+      ;;
+    * )
+      echo "Error : Append url preference required. Please specify :with_urls or :no_urls."
+      exit 1;;
+  esac
+
+  # Group and sort changelog lines by any tags
+  local grouped_commit_output=$(group_and_sort_changelog_lines "$escaped_commit_lines")
+
+  # Unescape newlines
   local unescaped_content=$(unescape_newlines "$grouped_commit_output")
 
   local release_date=$(get_current_release_date)

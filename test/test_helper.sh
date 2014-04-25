@@ -57,6 +57,8 @@ generate_git_repo() {
   touch 'commit_1'
   git add -A
   git commit -am "Initial Commit"
+
+  git remote add origin git@github.com:organisation/repo-name.git
 }
 
 generate_sandbox_tags() {

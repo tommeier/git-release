@@ -204,7 +204,6 @@ $(changelog_footer)"
   test "$(cat VERSION)" = "1.1.0"
 }
 
-
 it_will_generate_files_with_optional_names() {
   local tags=(
     'releases/v1.0.5'
@@ -236,7 +235,6 @@ $(changelog_footer)"
 
   test "$(cat VERSION_NUMBER)" = "2.0.0"
 }
-
 
 it_will_generate_a_changelog_file_scoped_to_pull_requests() {
   local tags=(
@@ -290,6 +288,78 @@ $(changelog_divider)
 $(changelog_footer)"
 
   test "$(cat VERSION)" = "0.1.0"
+}
+
+it_will_generate_a_changelog_file_scoped_to_pull_requests_with_urls() {
+  local tags=(
+    'tag_with_pulls/1.0.0'
+    'tag_with_pulls/2.0.0'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from SomeOrg/bug/limit-payment-description-length
+
+[BUG] logout screen"
+    "Merge pull request #722 from SomeOrg/feature/running-balance-field (Bill Hoskings, 18 hours ago)
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    "Merge pull request #714 from SomeOrg/fix-login
+
+Fixing the login but no tag displayed."
+    "Merge pull request #685 from SomeOrg/bug/modal-new-login
+
+[Bug] Fix cookie storing sensitive data"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  sandbox_rup $(arg_for $ARG_VERSION 'minor') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 0.1.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing - https://github.com/organisation/repo-name/pull/722
+
+Bugs:
+  Fix cookie storing sensitive data - https://github.com/organisation/repo-name/pull/685
+  logout screen - https://github.com/organisation/repo-name/pull/705
+
+Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
+
+$(changelog_divider)
+$(changelog_footer)"
+}
+
+it_will_generate_a_changelog_file_scoped_to_commits_with_urls() {
+  local tags=(
+    'releases/v1.0.5'
+    'releases/v1.0.6'
+  )
+  local commit_messages=(
+    '[Any Old] Message for 1.0.5'
+    'latest commit message to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+  local commit_sha=$(git log --format="%H" | head -1)
+
+  sandbox_rup $(arg_for $ARG_VERSION 'major') $(arg_for $ARG_DISPLAY_URLS)
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 2.0.0
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+latest commit message to 1.0.6 - https://github.com/organisation/repo-name/commit/$commit_sha
+
+$(changelog_divider)
+$(changelog_footer)"
 }
 
 it_will_overwrite_a_changelog_file_by_default() {
@@ -385,7 +455,6 @@ $(changelog_footer)"
 
   test "$(cat VERSION)" = "2.0.0"
 }
-
 
 it_will_generate_in_an_opinionated_fashion(){
   #using defaults other than append
