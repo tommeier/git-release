@@ -75,16 +75,16 @@ get_github_repo_origin_url() {
   if [[ "$remote_origin_url" = '' ]]; then
     echo "Error : Unable to determine the remote origin."
     echo "      : Set origin url with 'git remote set-url origin git://new.url.here'"
-    exit 1
-  fi
-
-  local repo_regex="^(https?:\/\/|git:\/\/|git\@)?github\.com[:/]([^.]*)(.git)?$"
-  if [[ $remote_origin_url =~ $repo_regex ]]; then
-    local github_repo_url="https://github.com/${BASH_REMATCH[2]}"
-    echo "$github_repo_url"
+    exit 1;
   else
-    echo "Error : Unable to determine the remote repo url with format: '${remote_origin_url}'."
-    exit 1
+    local repo_regex="^(https?:\/\/|git:\/\/|git\@)?github\.com[:/]([^.]*)(.git)?$"
+    if [[ $remote_origin_url =~ $repo_regex ]]; then
+      local github_repo_url="https://github.com/${BASH_REMATCH[2]}"
+      echo "$github_repo_url";
+    else
+      echo "Error : Unable to determine the remote repo url with format: '${remote_origin_url}'."
+      exit 1;
+    fi
   fi
 }
 
@@ -92,52 +92,41 @@ get_github_repo_origin_url() {
 # add a github url prefix to the line
 set_github_url_suffix_to_changelog_lines() {
   local commit_shas=($1)
-  IFS=$'\n' read -rd '' -a changelog_lines <<<"$2"
+  IFS=$'\n' read -d '' -a changelog_lines <<<"$2"
   local url_type="$3"
-
-  # Check to see if the commit message has a matching pull request
-   # local unformatted_commit="`git show -s ${commit_shas[$i]}`"
-   # pr_regex="Merge pull request #([0-9]+)"
-   # if [[ $unformatted_commit =~ $pr_regex ]]; then
-   #   local pr_url="${repo}/pull/${BASH_REMATCH[1]} - "
-   # fi
-
-  case "$url_type" in
-    ':commit_url' | 'commit_url' )
-      # Simple url for exact commit
-      #commit_filter=''
-      ;;
-    ':pull_url' | 'pull_url' )
-      # Pull request url
-
-      #Filter by merged pull requests only
-      #commit_filter=$'^Merge pull request #.* from .*';
-      #changelog_format="--format=%b"
-      ;; #use body of pull requests
-    * )
-      echo "Error : Url type required. Please specify :commit_url or :pull_url."
-      exit 1;;
-  esac
+  local appended_lines=""
 
   # Capture remote
   local github_repo_url=$(get_github_repo_origin_url)
 
-  # populate an array from that variable, as delimited by the IFS
-  #local changelog_lines=($2)
-
   for sha_line_number in "${!commit_shas[@]}"; do
-    #while read -r changelog_line; do
+    local commit_sha="${commit_shas[$sha_line_number]}"
+    local changelog_line="${changelog_lines[$sha_line_number]}"
 
-    #for line_number in "${!changelog_lines[@]}"; do
-      local commit_sha="${commit_shas[$sha_line_number]}"
-      local changelog_line="${changelog_lines[$sha_line_number]}"
+    case "$url_type" in
+      ':commit_urls' | 'commit_urls' )
+        local repo_url="$github_repo_url/commit/${commit_sha}"
+        ;;
+      ':pull_urls' | 'pull_urls' )
+        # Check to see if the commit title pull request number in details
+        local unformatted_commit="`git show -s ${commit_sha} --format=%s`"
+        local pull_request_regex="^Merge pull request #([0-9]+) from (.*)$"
 
-      echo "$commit_sha::$changelog_line::$remote_origin_url"
-    #done;
-    #done <<< "$2"
-
+        if [[ $unformatted_commit =~ $pull_request_regex ]]; then
+          local repo_url="$github_repo_url/pull/${BASH_REMATCH[1]}"
+        else
+          # Default to commit if unable to match to Github PR
+          local repo_url="$github_repo_url/commit/${commit_sha}"
+        fi
+        ;;
+      * )
+        echo "Error : Url type required. Please specify :commit_urls or :pull_urls."
+        exit 1
+        ;;
+    esac
+    appended_lines+="${changelog_line} - ${repo_url}\n"
   done;
-
+  echo -e $appended_lines
 }
 
 group_and_sort_changelog_lines() {

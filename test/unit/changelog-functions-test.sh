@@ -59,6 +59,7 @@ and trailing"
 
 it_uses_get_github_repo_origin_url_and_raises_error_with_no_remote_origin() {
   generate_git_repo
+  git remote remove origin
 
   should_fail $(get_github_repo_origin_url)
 
@@ -70,6 +71,7 @@ it_uses_get_github_repo_origin_url_and_raises_error_with_no_remote_origin() {
 
 it_uses_get_github_repo_origin_url_with_git_remote() {
   generate_git_repo
+  git remote remove origin
   git remote add origin git@github.com:tommeier/git-release.git
 
   local output=$(get_github_repo_origin_url)
@@ -79,6 +81,7 @@ it_uses_get_github_repo_origin_url_with_git_remote() {
 
 it_uses_get_github_repo_origin_url_with_http_remote() {
   generate_git_repo
+  git remote remove origin
   git remote add origin http://github.com/tommeier/git-release.git
 
   local output=$(get_github_repo_origin_url)
@@ -88,6 +91,7 @@ it_uses_get_github_repo_origin_url_with_http_remote() {
 
 it_uses_get_github_repo_origin_url_with_https_remote() {
   generate_git_repo
+  git remote remove origin
   git remote add origin https://github.com/tommeier/git-release.git
 
   local output=$(get_github_repo_origin_url)
@@ -97,6 +101,7 @@ it_uses_get_github_repo_origin_url_with_https_remote() {
 
 it_uses_get_github_repo_origin_url_with_git_remote_with_no_host() {
   generate_git_repo
+  git remote remove origin
   git remote add origin github.com/tommeier/git-release.git
 
   local output=$(get_github_repo_origin_url)
@@ -106,6 +111,7 @@ it_uses_get_github_repo_origin_url_with_git_remote_with_no_host() {
 
 it_uses_get_github_repo_origin_url_with_git_remote_with_no_git_suffix() {
   generate_git_repo
+  git remote remove origin
   git remote add origin https://github.com/tommeier/git-release
 
   local output=$(get_github_repo_origin_url)
@@ -115,6 +121,7 @@ it_uses_get_github_repo_origin_url_with_git_remote_with_no_git_suffix() {
 
 it_uses_get_github_repo_origin_url_and_raises_error_with_invalid_remote_origin() {
   generate_git_repo
+  git remote remove origin
   git remote add origin unknown://github.com/tommeier/git-release
 
   should_fail $(get_github_repo_origin_url)
@@ -127,12 +134,72 @@ it_uses_get_github_repo_origin_url_and_raises_error_with_invalid_remote_origin()
 
 #set_github_url_suffix_to_changelog_lines
 
-# it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_incorrect_url_type()
-# it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_no_remote_origin()
-# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_commit_urls()
-# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_pull_request_urls()
-# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_urls_with_git_remote()
-# it_uses_set_github_url_suffix_to_changelog_lines_and_appends_urls_with_https_remote()
+it_uses_set_github_url_suffix_to_changelog_lines_and_raises_error_with_incorrect_url_type() {
+  should_fail $(set_github_url_suffix_to_changelog_lines "12345" "any message" ":unknown_url_format")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "12345" "any message" ":unknown_url_format" 2>&1 | tail -n 1)
+  local expected_error="Error : Url type required. Please specify :commit_urls or :pull_urls."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+it_uses_set_github_url_suffix_to_changelog_lines_and_appends_commit_urls() {
+  local tags=(
+    'normal-tag/2.0.0'
+    'normal-tag/3.0.0'
+    'normal-tag/4.0.0'
+  )
+  local commit_messages=(
+    "commit message for 2.0.0"
+    "[Any Old] Message for 3.0.0"
+    "[Feature] Rails upgrade to 4.0.0"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "normal-tag/2.0.0" "normal-tag/4.0.0")
+
+  local commit_shas=($commit_sha_list)
+  local commit_message_list=$(IFS=$'\n'; echo "${commit_messages[*]}")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "$commit_sha_list" "$commit_message_list" ":commit_urls")
+
+  test "$output" = "commit message for 2.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[0]}
+[Any Old] Message for 3.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[1]}
+[Feature] Rails upgrade to 4.0.0 - https://github.com/organisation/repo-name/commit/${commit_shas[2]}"
+}
+
+it_uses_set_github_url_suffix_to_changelog_lines_and_appends_pull_urls() {
+   local tags=(
+    'tag_with_pulls/2.0.0'
+    'tag_with_pulls/3.0.0'
+    'tag_with_pulls/4.0.0'
+  )
+  local commit_messages=(
+    "Merge pull request #722 from SomeOrg/feature/running-balance-field
+
+[Features] This is a pull request merging a feature across multiple
+lines and continuing"
+    "Merge pull request #714 from SomeOrg/fix-login
+
+Fixing the login but no tag displayed."
+    "Merge pull request #685 from SomeOrg/bug/modal-new-login
+
+[Security] Commit fixing the modal with security flaw"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "tag_with_pulls/2.0.0" "tag_with_pulls/4.0.0")
+  # Capture changelog text in same manner as core
+  local commit_message_list=$(get_changelog_text_for_commits "--format=%b" "$commit_sha_list")
+
+  local output=$(set_github_url_suffix_to_changelog_lines "$commit_sha_list" "$commit_message_list" ":pull_urls")
+
+  test "$output" = "[Security] Commit fixing the modal with security flaw - https://github.com/organisation/repo-name/pull/685
+Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
+[Features] This is a pull request merging a feature across multiple<#new_line#>lines and continuing - https://github.com/organisation/repo-name/pull/722"
+}
 
 #get_changelog_text_for_commits
 
