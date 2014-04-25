@@ -129,9 +129,9 @@ Fixing the login but no tag displayed. - https://github.com/organisation/repo-na
 it_uses_get_changelog_text_for_commits_to_return_titles_by_default() {
   local tags=(
     'random_tag_1'
-    'releases/v1.0.5'
+    'release/v1.0.5'
     'random_tag_2'
-    'releases/v1.0.6'
+    'release/v1.0.6'
   )
 
   local commit_message_1="Release 1.0.6"
@@ -146,7 +146,7 @@ it_uses_get_changelog_text_for_commits_to_return_titles_by_default() {
   )
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  local commit_shas=$(get_commits_between_points "releases/v1.0.5" "releases/v1.0.6")
+  local commit_shas=$(get_commits_between_points "release/v1.0.5" "release/v1.0.6")
 
   output=$(get_changelog_text_for_commits "$commit_shas")
 
@@ -158,9 +158,9 @@ ${commit_message_3}"
 it_uses_get_changelog_text_for_commits_to_return_titles_with_a_custom_format() {
   local tags=(
     'random_tag_1'
-    'releases/v1.0.5'
+    'release/v1.0.5'
     'random_tag_2'
-    'releases/v1.0.6'
+    'release/v1.0.6'
   )
 
   local commit_message_1="Release 1.0.6"
@@ -175,7 +175,7 @@ it_uses_get_changelog_text_for_commits_to_return_titles_with_a_custom_format() {
   )
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  local commit_shas=$(get_commits_between_points "releases/v1.0.5" "releases/v1.0.6")
+  local commit_shas=$(get_commits_between_points "release/v1.0.5" "release/v1.0.6")
   local sha_array=($commit_shas)
 
   output=$(get_changelog_text_for_commits "--format=%H--%s" "$commit_shas")
@@ -278,15 +278,15 @@ it_uses_generate_changelog_content_to_succeed_without_a_startpoint() {
 it_uses_generate_changelog_content_to_succeed_without_an_endpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' 'releases/v1.0.45')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' 'release/v1.0.45')
 }
 
 it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
   local tags=(
     'random_tag_1'
-    'releases/v1.0.5'
+    'release/v1.0.5'
     'random_tag_2'
-    'releases/v1.0.6'
+    'release/v1.0.6'
   )
   local commit_messages=(
     'Message For Random Tag 1'
@@ -317,9 +317,9 @@ $(changelog_divider)"
 it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(){
   local tags=(
     'random_tag_1'
-    'releases/v1.0.5'
+    'release/v1.0.5'
     'random_tag_2'
-    'releases/v1.0.6'
+    'release/v1.0.6'
   )
   local commit_messages=(
     'Message For Random Tag 1'
@@ -331,7 +331,7 @@ it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls' 'releases/v1.0.5' 'random_tag_2')
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls' 'release/v1.0.5' 'random_tag_2')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -431,8 +431,8 @@ $(changelog_divider)"
 
 it_uses_generate_changelog_content_to_list_commits_with_urls(){
   local tags=(
-    'releases/v1.0.5'
-    'releases/v1.0.6'
+    'release/v1.0.5'
+    'release/v1.0.6'
   )
   local commit_messages=(
     '[Any Old] Message for 1.0.5'
@@ -441,7 +441,7 @@ it_uses_generate_changelog_content_to_list_commits_with_urls(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
-  local commit_sha_list=$(get_commits_between_points "releases/v1.0.5" "releases/v1.0.6")
+  local commit_sha_list=$(get_commits_between_points "release/v1.0.5" "release/v1.0.6")
   local commit_shas=($commit_sha_list)
 
   local custom_release_name="v1.0.7"

@@ -67,7 +67,7 @@ $> git-release -v 'minor'
 ```
 Generates:
   * version file: `0.1.0`
-  * tag         : `releases/v0.1.0`
+  * tag         : `release/v0.1.0`
   * Changelog   : all commits text up until now
 
 ---
@@ -78,7 +78,7 @@ $> git-release -v 'major'
 ```
 Generates:
   * version file: `1.0.0`
-  * tag         : `releases/v1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all commits between last release and this one
 
 ---
@@ -89,7 +89,7 @@ $> git-release -v 'major' -P
 ```
 Generates:
   * version file: `1.0.0`
-  * tag         : `releases/v1.0.0`
+  * tag         : `release/v1.0.0`
   * Changelog   : all merged pull requests and the body text of the merge commit
 
 ### Additional options:
