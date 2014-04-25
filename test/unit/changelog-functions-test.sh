@@ -254,20 +254,31 @@ it_uses_generate_changelog_content_to_exit_with_errors_with_invalid_commit_filte
   should_fail $(generate_changelog_content 'AnyOldReleaseName' ':unknown')
   should_fail $(generate_changelog_content 'AnyOldReleaseName' ':anything')
 
-  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits')
-  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':pulls_only')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':no_urls')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':pulls_only' ':no_urls')
+}
+
+it_uses_generate_changelog_content_to_exit_with_errors_with_invalid_url_preference() {
+  generate_git_repo
+
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' '')
+  should_fail $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':unknown')
+
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':no_urls')
+  should_succeed $(generate_changelog_content 'AnyOldReleaseName' ':all_commits' ':with_urls')
 }
 
 it_uses_generate_changelog_content_to_succeed_without_a_startpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' '' 'releases/end/v02.34')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' '' 'releases/end/v02.34')
 }
 
 it_uses_generate_changelog_content_to_succeed_without_an_endpoint() {
   generate_git_repo
 
-  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' 'releases/v1.0.45')
+  should_succeed $(generate_changelog_content 'v0.0.5' ':all_commits' ':no_urls' 'releases/v1.0.45')
 }
 
 it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
@@ -287,7 +298,7 @@ it_uses_generate_changelog_content_to_generate_with_all_commit_messages(){
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog_content "$custom_release_name" ':all_commits')
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -320,7 +331,7 @@ it_uses_generate_changelog_content_to_generate_with_commit_messages_for_a_range(
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v1.0.7"
-  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' 'releases/v1.0.5' 'random_tag_2')
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':no_urls' 'releases/v1.0.5' 'random_tag_2')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -363,7 +374,7 @@ Fixing the login but no tag displayed."
   generate_sandbox_tags tags[@] commit_messages[@]
 
   local custom_release_name="v2.0.5"
-  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only')
+  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only' ':no_urls')
 
   test "$output" = "$(changelog_divider)
 || Release: ${custom_release_name}
@@ -381,6 +392,69 @@ Bugs:
   Login field length
 
 Fixing the login but no tag displayed.
+
+$(changelog_divider)"
+}
+
+it_uses_generate_changelog_content_to_list_pull_requests_with_urls(){
+  local tags=(
+    'tag_with_pulls_1'
+    'tag_with_pulls_2'
+  )
+  local commit_messages=(
+    "Merge pull request #705 from SomeOrg/bug/change-field-length
+
+[BUG] Login field length"
+    "Merge pull request #722 from SomeOrg/feature/login-firefox-fix
+
+[Features] This is yet another pull request"
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local custom_release_name="v2.0.5"
+  local output=$(generate_changelog_content "$custom_release_name" ':pulls_only' ':with_urls')
+
+  test "$output" = "$(changelog_divider)
+|| Release: ${custom_release_name}
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+Features:
+  This is yet another pull request - https://github.com/organisation/repo-name/pull/722
+
+Bugs:
+  Login field length - https://github.com/organisation/repo-name/pull/705
+
+$(changelog_divider)"
+}
+
+it_uses_generate_changelog_content_to_list_commits_with_urls(){
+  local tags=(
+    'releases/v1.0.5'
+    'releases/v1.0.6'
+  )
+  local commit_messages=(
+    '[Any Old] Message for 1.0.5'
+    'latest release to 1.0.6'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  local commit_sha_list=$(get_commits_between_points "releases/v1.0.5" "releases/v1.0.6")
+  local commit_shas=($commit_sha_list)
+
+  local custom_release_name="v1.0.7"
+  local output=$(generate_changelog_content "$custom_release_name" ':all_commits' ':with_urls')
+
+  test "$output" = "$(changelog_divider)
+|| Release: ${custom_release_name}
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+${commit_messages[1]} - https://github.com/organisation/repo-name/commit/${commit_shas[0]}
+${commit_messages[0]} - https://github.com/organisation/repo-name/commit/${commit_shas[1]}
+$(get_commit_message_for_first_commit) - https://github.com/organisation/repo-name/commit/$(get_sha_for_first_commit)
 
 $(changelog_divider)"
 }

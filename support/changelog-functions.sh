@@ -68,7 +68,7 @@ get_changelog_text_for_commits() {
   done;
 }
 
-# Loop over a list of commit shas and same ordered list of changelog formatted lines,
+# Loop over a list of commit shas and ordered list of changelog formatted lines,
 # add a github url prefix to the line
 set_github_url_suffix_to_changelog_lines() {
   local commit_shas=($1)
@@ -170,12 +170,14 @@ ${bug_tag_lines}"
   eval $existing_shopt_nocasematch
 }
 
-#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only"
+#generate_changelog_content "$last_tag_name" "$next_tag_name" ":all/:pulls_only" ":with_urls/:no_urls"
 generate_changelog_content() {
   local release_name="$1"
   local commit_filter="$2"         #all_commits or pulls_only
-  local starting_point="$3"        #optional
-  local end_point="$4"             #optional
+  local append_urls="$3"           #with_urls/no_urls
+  local starting_point="$4"        #optional
+  local end_point="$5"             #optional
+
   local changelog_format="--format=%s" #default -> display title
 
   if [[ "$release_name" = "" ]]; then
@@ -186,24 +188,43 @@ generate_changelog_content() {
   case "$commit_filter" in
     ':all_commits' | 'all_commits' )
       #No filter
-      commit_filter='';;
+      commit_filter=''
+      local url_type=":commit_urls"
+      ;;
     ':pulls_only' | 'pulls_only' )
       #Filter by merged pull requests only
       commit_filter=$'^Merge pull request #.* from .*';
-      changelog_format="--format=%b";; #use body of pull requests
+      changelog_format="--format=%b" #use body of pull requests
+      local url_type=":pull_urls"
+      ;;
     * )
       echo "Error : Commit filter required. Please specify :all or :pulls_only."
       exit 1;;
   esac
 
+  # Capture commits to generate log from
   local commits=$(get_commits_between_points "$starting_point" "$end_point" "$commit_filter")
 
+  # Capture content of changelog line items (escaped newlines to allow array)
   local escaped_commit_lines=$(get_changelog_text_for_commits "$changelog_format" "$commits")
 
-  # if the append url option set in method
-  #local escaped_commit_lines=$(set_github_url_suffix_to_changelog_lines "$commits" "$escaped_commit_lines" ":pull_url")
+  case "$append_urls" in
+    ':with_urls' | 'with_urls' )
+      #Append urls to changelog line items
+      escaped_commit_lines=$(set_github_url_suffix_to_changelog_lines "$commits" "$escaped_commit_lines" "$url_type")
+      ;;
+    ':no_urls' | 'no_urls' )
+      #Ignore, no need to do work
+      ;;
+    * )
+      echo "Error : Append url preference required. Please specify :with_urls or :no_urls."
+      exit 1;;
+  esac
+
+  # Group and sort changelog lines by any tags
   local grouped_commit_output=$(group_and_sort_changelog_lines "$escaped_commit_lines")
 
+  # Unescape newlines
   local unescaped_content=$(unescape_newlines "$grouped_commit_output")
 
   local release_date=$(get_current_release_date)
