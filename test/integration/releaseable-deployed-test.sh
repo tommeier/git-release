@@ -42,7 +42,7 @@ it_will_display_error_when_no_git_directory_exists() {
 }
 
 it_will_error_if_git_is_in_a_dirty_state() {
-  local tag_name='Myrelease/v1.0.3'
+  local tag_name='MyRelease/v1.0.3'
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
@@ -58,7 +58,7 @@ it_will_error_if_git_is_in_a_dirty_state() {
 }
 
 it_will_forcibly_replace_existing_deploy_tags() {
-  local tag_name="Myrelease/v1.0.3"
+  local tag_name="MyRelease/v1.0.3"
   local tags=("${tag_name}")
   generate_sandbox_tags tags[@]
 
@@ -73,7 +73,7 @@ it_will_forcibly_replace_existing_deploy_tags() {
   file_should_exist "CHANGELOG2"
 
   #Explicitly checkout the deploy tag in current state
-  git checkout -f -B "deployed/Myrelease/v1.0.3"
+  git checkout -f -B "deployed/MyRelease/v1.0.3"
 
   file_should_not_exist "CHANGELOG"
   file_should_exist "CHANGELOG2"
