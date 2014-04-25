@@ -204,7 +204,6 @@ $(changelog_footer)"
   test "$(cat VERSION)" = "1.1.0"
 }
 
-
 it_will_generate_files_with_optional_names() {
   local tags=(
     'releases/v1.0.5'
