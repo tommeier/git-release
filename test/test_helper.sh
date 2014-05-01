@@ -134,6 +134,13 @@ stub_last_called_with() {
   echo "$STUB_LAST_CALLED_WITH";
 }
 
+# Stub script variables to find out what was passed to them
+# For example:
+#     - $EDITOR = 'subl --wait'
+#     - stub_script_variable EDITOR
+#     - Script runs, and an action sends "$EDITOR 'some_file_name'"
+#     - stubbed_script_variable_last_called_with will return:
+#         - stub: $EDITOR. Received: Arg 1: some_file_name.
 stub_script_variable() {
   STUBBED_VARIABLE_NAME="$1"
   STUBBED_VARIABLE_VALUE=$(eval "echo -e \$$STUBBED_VARIABLE_NAME")
