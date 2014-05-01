@@ -16,6 +16,8 @@ Everything is configurable via command line parameters. Run with help command (`
   * Git
   * Bash (Mac OSX / *nix )
   * Grep
+    * Optional:
+      * `$EDITOR` set to your editor (eg: `subl --wait`) to edit changelog before tag generated
 
 ## Installation
 
