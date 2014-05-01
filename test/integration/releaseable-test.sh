@@ -9,16 +9,16 @@ sandbox_rup() { /bin/bash ../bin/git-release $@; }
 describe "git-release - integration"
 
 before() {
-  #stub open_changelog_for_edit;
-  export STUB_ME="open_changelog_for_edit"
+  # Prevent editor loading
+  ORIGINAL_EDITOR="$EDITOR"
+  unset EDITOR
 }
 
 after() {
+  EDITOR="$ORIGINAL_EDITOR"
   if [[ $MAINTAIN_SANDBOX != true ]]; then
     remove_sandbox
   fi;
-  unstub open_changelog_for_edit;
-  unset STUB_ME
 }
 
 ### Failure Cases
@@ -506,6 +506,3 @@ $(changelog_footer)"
 
 #TODO
 # it_will_optionally_force_push_of_tag()
-
-# unstub open_changelog_for_edit
-

@@ -129,7 +129,7 @@ changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELO
 generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
 if [[ "$FORCE_PUSH" != 'true' ]]; then
-  open_changelog_for_edit
+  open_changelog_for_edit "$CHANGELOG_FILE"
 fi;
 
 set +e #Allow commit to fail if no files have changed
