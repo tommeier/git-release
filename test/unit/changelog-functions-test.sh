@@ -651,5 +651,3 @@ it_uses_open_changelog_for_edit_by_passing_changelog_file_to_editor() {
 
   test "$stub_output" = "stub: \$EDITOR. Received: Arg 1: NEW_CHANGELOG_FILE."
 }
-
-

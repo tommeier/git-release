@@ -321,5 +321,3 @@ _open_editor(){
   #Open any assigned editor
   $EDITOR $@
 }
-
-
