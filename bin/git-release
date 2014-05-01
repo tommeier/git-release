@@ -11,7 +11,7 @@ set -e
 #####                   DEFAULTS                       #####
 ############################################################
 
-RELEASE_PREFIX='release/v'
+RELEASE_PREFIX='releases/v'
 CHANGELOG_FILE='CHANGELOG'
 VERSION_FILE='VERSION'
 CHANGELOG_SCOPE=':all_commits'

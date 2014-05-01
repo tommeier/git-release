@@ -74,35 +74,35 @@ release/production/v3.0.9"
 
 it_uses_get_release_tags_to_return_tags_matching_a_given_pattern_with_10_boundaries() {
   local tags=(
-    "release/v0.2.9"
-    "release/v0.2.10"
-    "release/v0.2.11"
-    "release/v0.2.12"
+    "releases/v0.2.9"
+    "releases/v0.2.10"
+    "releases/v0.2.11"
+    "releases/v0.2.12"
   )
   generate_sandbox_tags tags[@]
 
-  local output=$(get_release_tags release/v)
-  test "$output" = "release/v0.2.9
-release/v0.2.10
-release/v0.2.11
-release/v0.2.12"
+  local output=$(get_release_tags releases/v)
+  test "$output" = "releases/v0.2.9
+releases/v0.2.10
+releases/v0.2.11
+releases/v0.2.12"
 }
 
 #TODO: KNOWN ISSUE: Fix this to handle multi-digit major versions
 it_uses_get_release_tags_to_return_tags_matching_a_given_pattern_with_10_boundaries_on_majors() {
   local tags=(
-    "release/v11.0.0"
-    "release/v9.0.0"
-    "release/v10.0.0"
-    "release/v12.0.0"
+    "releases/v11.0.0"
+    "releases/v9.0.0"
+    "releases/v10.0.0"
+    "releases/v12.0.0"
   )
   generate_sandbox_tags tags[@]
 
-  local output=$(get_release_tags 'release/v')
-  test "$output" = "release/v10.0.0
-release/v11.0.0
-release/v12.0.0
-release/v9.0.0"
+  local output=$(get_release_tags 'releases/v')
+  test "$output" = "releases/v10.0.0
+releases/v11.0.0
+releases/v12.0.0
+releases/v9.0.0"
 #TODO: 9 should be returned first.
 # We need to strip the prefix before sorting, or add zero padding to the numbers
 # for accurate numerical sort
@@ -138,14 +138,14 @@ it_uses_get_last_tag_name_to_return_nothing_with_no_matches() {
 
 it_uses_get_last_tag_name_to_return_over_a_10_boundry() {
   local tags=(
-    "release/v0.2.9",
-    "release/v0.2.10",
-    "release/v0.2.11"
+    "releases/v0.2.9",
+    "releases/v0.2.10",
+    "releases/v0.2.11"
   )
   generate_sandbox_tags tags[@]
 
-  local output=$(get_last_tag_name "release/v")
-  test "$output" = "release/v0.2.11"
+  local output=$(get_last_tag_name "releases/v")
+  test "$output" = "releases/v0.2.11"
 }
 
 #get_versioning_prefix_from_tag()
@@ -165,7 +165,7 @@ it_uses_get_versioning_prefix_from_tag_with_an_invalid_tag_name() {
 it_uses_get_versioning_prefix_from_tag_to_succeed_capturing_version_prefix() {
   test "$(get_versioning_prefix_from_tag 'releases/2.1.3')" = "releases/"
   test "$(get_versioning_prefix_from_tag 'r/v/2.1.3')" = "r/v/"
-  test "$(get_versioning_prefix_from_tag 'some/old/release/v1.0.40')" = "some/old/release/v"
+  test "$(get_versioning_prefix_from_tag 'some/old/releases/v1.0.40')" = "some/old/releases/v"
 }
 
 #get_version_number_from_tag()
@@ -181,7 +181,7 @@ it_uses_get_version_number_from_tag_to_error_with_an_invalid_tag_name() {
 }
 
 it_uses_get_version_number_from_tag_to_succeed_capturing_version_numbers() {
-  test "$(get_version_number_from_tag 'release/v102.29.20')" = "102.29.20"
+  test "$(get_version_number_from_tag 'releases/v102.29.20')" = "102.29.20"
   test "$(get_version_number_from_tag '1.22.33')" = "1.22.33"
   test "$(get_version_number_from_tag 'Release with Spaces40.50.60')" = "40.50.60"
 }
@@ -207,7 +207,7 @@ it_uses_get_next_version_number_from_tag_to_succeed_with_no_existing_tags() {
 }
 
 it_uses_get_next_version_number_from_tag_to_succeed_with_no_matching_tags() {
-  local output=$(get_next_version_number_from_tag major some/old/release/v1.0.40)
+  local output=$(get_next_version_number_from_tag major some/old/releases/v1.0.40)
   test $output = "2.0.0"
 }
 
@@ -228,6 +228,6 @@ it_uses_get_next_version_number_from_tag_to_succeed_incrementing_each_type() {
   local output=$(get_next_version_number_from_tag minor release/staging/v2.0.3)
   test $output = "2.1.0"
 
-  local output=$(get_next_version_number_from_tag patch release/v0.2.11)
+  local output=$(get_next_version_number_from_tag patch releases/v0.2.11)
   test $output = "0.2.12"
 }
