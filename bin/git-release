@@ -128,6 +128,10 @@ changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELO
 
 generate_changelog_file "$changelog_content" "$CHANGELOG_STRATEGY" "$CHANGELOG_FILE"
 
+if [[ "$FORCE_PUSH" != 'true' ]]; then
+  open_changelog_for_edit "$CHANGELOG_FILE"
+fi;
+
 set +e #Allow commit to fail if no files have changed
 git add -A
 git commit -m "Release : ${next_tag_name}"
@@ -138,3 +142,6 @@ git tag $next_tag_name
 if [[ "$FORCE_PUSH" = 'true' ]]; then
   git push $next_tag_name
 fi;
+
+echo
+echo ">> Tag '$next_tag_name' generated with '$CHANGELOG_FILE' and '$VERSION_FILE' ($next_version_number)."

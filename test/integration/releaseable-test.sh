@@ -8,7 +8,14 @@ sandbox_rup() { /bin/bash ../bin/git-release $@; }
 
 describe "git-release - integration"
 
+before() {
+  # Prevent editor loading
+  ORIGINAL_EDITOR="$EDITOR"
+  unset EDITOR
+}
+
 after() {
+  EDITOR="$ORIGINAL_EDITOR"
   if [[ $MAINTAIN_SANDBOX != true ]]; then
     remove_sandbox
   fi;
@@ -499,5 +506,3 @@ $(changelog_footer)"
 
 #TODO
 # it_will_optionally_force_push_of_tag()
-
-

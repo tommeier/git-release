@@ -601,3 +601,53 @@ $(changelog_footer)"
 Original Content
 $(changelog_footer)"
 }
+
+# open_changelog_for_edit
+
+it_uses_open_changelog_for_edit_to_open_specific_changelog_file() {
+  stub _open_editor
+
+  # Ensure editor variable is set
+  EDITOR=${EDITOR:-"vim"}
+
+  local changelog_file="SOME_CHANGELOG_FILE"
+  local output=$(open_changelog_for_edit "$changelog_file"; stub_last_called_with)
+  local stub_output=$(echo "$output" | tail -n 1)
+
+  unstub _open_editor
+
+  test "$stub_output" = "Stub: _open_editor. Received: SOME_CHANGELOG_FILE"
+}
+
+it_uses_open_changelog_for_edit_to_raise_an_error_with_no_changelog_file_set() {
+  should_fail $(open_changelog_for_edit)
+
+  local output=$(open_changelog_for_edit 2>&1 | tail -n 2)
+  local expected_error="Error : Changelog file location must be set."
+
+  test $(search_substring "$output" "$expected_error") = 'found'
+}
+
+it_uses_open_changelog_for_edit_to_skip_sending_changelog_file_when_no_editor_set() {
+  local original_editor="$EDITOR"
+  unset EDITOR
+
+  should_succeed $(open_changelog_for_edit 'CHANGELOG')
+  local output=$(open_changelog_for_edit 'CHANGELOG' 2>&1 | tail -n 1)
+
+  EDITOR="$original_editor"
+
+  test "$output" = ">> Editor not present. Set '\$EDITOR' for any inline changelog changes."
+}
+
+it_uses_open_changelog_for_edit_by_passing_changelog_file_to_editor() {
+  stub_script_variable EDITOR
+
+  local changelog_file="NEW_CHANGELOG_FILE"
+  open_changelog_for_edit "$changelog_file"
+  local stub_output=$(stubbed_script_variable_last_called_with)
+
+  unstub_script_variable
+
+  test "$stub_output" = "stub: \$EDITOR. Received: Arg 1: NEW_CHANGELOG_FILE."
+}
