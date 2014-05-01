@@ -607,6 +607,9 @@ $(changelog_footer)"
 it_uses_open_changelog_for_edit_to_open_specific_changelog_file() {
   stub _open_editor
 
+  # Ensure editor variable is set
+  EDITOR=${EDITOR:-"vim"}
+
   local changelog_file="SOME_CHANGELOG_FILE"
   local output=$(open_changelog_for_edit "$changelog_file"; stub_last_called_with)
   local stub_output=$(echo "$output" | tail -n 1)
