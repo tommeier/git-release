@@ -134,16 +134,9 @@ stub_last_called_with() {
   echo "$STUB_LAST_CALLED_WITH";
 }
 
-# VAR=$(eval "$(echo -e "some_func() {\n echo \"Within some_func: \$@\"; \n}; some_func")")
-# result=$(echo $VAR 'something')
-# echo $result
-# ~/src/personal/git-release edit-file-on-tag-generation(☠) $ echo $result
-# Within some_func: something
-
 stub_script_variable() {
   STUBBED_VARIABLE_NAME="$1"
   STUBBED_VARIABLE_VALUE=$(eval "echo -e \$$STUBBED_VARIABLE_NAME")
-  export STUBBED_VARIABLE_CALLED_WITH="";
 
   eval "$STUBBED_VARIABLE_NAME='test/support/capture_script_variable_stub $STUBBED_VARIABLE_NAME'"
 }
@@ -160,8 +153,3 @@ stubbed_script_variable_last_called_with() {
   local stub_content=`cat ./test/support/.captured_variable_stub_arguments`
   echo "$stub_content"
 }
-# TEST="some_script --with-args"
-# stub_variable_name TEST
-# $TEST 'something ' 'with multiple ' 'args' .travis.yml
-# echo $STUBBED_VARIABLE_LAST_CALLED_WITH
-# cat test/support/.captured_variable_stub_arguments
