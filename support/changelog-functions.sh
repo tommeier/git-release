@@ -298,14 +298,21 @@ $existing_content" > $changelog_file;
 # open_changelog_for_edit $EDITOR (eg. EDITOR='subl --wait')
 
 open_changelog_for_edit(){
+  local changelog_file="$1"
+
+  if [[ "$changelog_file" = "" ]]; then
+    echo "Error : Changelog file location must be set."
+    exit 1;
+  fi;
+
   if [[ $EDITOR ]]; then
-    echo ">> Editor present: Opening '$EDITOR' for any required $CHANGELOG_FILE modifications."
+    echo ">> \$EDITOR present: Opening '$EDITOR' for any required $changelog_file modifications."
     echo ">> - (set to wait to alter log before tagging. eg 'subl --wait')"
 
     #Load changelog file for edit
-    _open_editor $CHANGELOG_FILE
+    _open_editor $changelog_file
   else
-    echo ">> Editor not present. Set '\$EDITOR' for any inline changelog changes. Skipping..."
+    echo ">> Editor not present. Set '\$EDITOR' for any inline changelog changes."
   fi;
 }
 

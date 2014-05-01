@@ -1,0 +1,26 @@
+# Stub variable assignments
+# For exampe: $EDITOR could be a bash script like 'subl --wait',
+#             replace $EDITOR with this bash script to know what
+#             subsequent args were sent to this variable
+#echo "In here, called with : $@"
+# Save stub args to file
+function save_arguments_to_file(){
+  local arguments_captured=($@)
+  local output=""
+
+  for i in "${!arguments_captured[@]}"; do
+    # First argument == variable name
+    if [[ "${i}" = '0' ]]; then
+      output+="stub: \$${arguments_captured[$i]}. Received:"
+    else
+      output+=" Arg ${i}: ${arguments_captured[$i]}."
+    fi;
+  done;
+  echo "$output" > ./test/support/.captured_variable_stub_arguments
+}
+
+save_arguments_to_file $@
+
+
+
+
