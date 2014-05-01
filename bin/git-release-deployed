@@ -51,20 +51,20 @@ options:
 usage examples:
 
   1) Basic usage with defaults
-    Given the last deployed release was 'release/v1.1.4' :
+    Given the last deployed release was 'releases/v1.1.4' :
 
-    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'release/v1.1.4') $(arg_for $ARG_RELEASE_PREFIX 'deploys/staging')
+    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.1.4') $(arg_for $ARG_RELEASE_PREFIX 'deploys/staging')
 
     Tag generated           : deploys/staging/our-releases/REL1.1.4
     CHANGELOG file contains : commit information for all commits between last deployed version and current release
 
   2) Pull requests only with urls (changelog generated only with body of pull request titles)
 
-    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.4') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
+    $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.4') $(arg_for $ARG_PULL_REQUESTS) $(arg_for $ARG_DISPLAY_URLS)
 
   3) Generate custom changelog for deployed versions
 
-   $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'release/v1.0.4') $(arg_for $ARG_CHANGELOG 'DEPLOYEDCHANGELOG')
+   $(basename "$0") $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.4') $(arg_for $ARG_CHANGELOG 'DEPLOYEDCHANGELOG')
 
 "
 
