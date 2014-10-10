@@ -14,6 +14,7 @@ Everything is configurable via command line parameters. Run with help command (`
 ## Dependencies
 
   * Git
+    * Must be > 2.0 to ensure accurate version sorting
   * Bash (Mac OSX / *nix )
   * Grep
     * Optional:
