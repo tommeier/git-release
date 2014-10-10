@@ -45,24 +45,69 @@ validate_deploy_tag() {
 get_release_tags() {
   local filter=""
   local tag_names=""
+  local tag_prefix="$1"
+  local sorted_tags=""
 
-  if [[ $1 ]]; then
-    local tag_pattern=$1
-    filter="${tag_pattern}*"
+  if [[ "$tag_prefix" != '' ]]; then
+    filter="${tag_prefix}*"
   fi;
   tag_names=$(git tag -l $filter)
 
+  if [[ "$tag_prefix" != '' ]]; then
+    # Strip tag prefix before sorting
+    # Otherwise bash is unable to sort 0 leading padded versions and 0.x.10 boundaries
+    local sortable_tag_lines=""
+    IFS=$'\n'
+    for tag_name in $tag_names
+    do
+      local version_without_prefix="${tag_name#$tag_prefix}"
+      if [[ "$sortable_tag_lines" != "" ]]; then
+          sortable_tag_lines="$sortable_tag_lines$IFS" # Add newline except on first item
+        fi;
+      sortable_tag_lines="$sortable_tag_lines${version_without_prefix}"
+    done
+    #sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4
+    #gsort -V
+    sorted_tag_versions=$(echo -e "$sortable_tag_lines" | gsort -V) #sort by number
+    for sorted_tag_version in $sorted_tag_versions
+    do
+      if [[ "$sorted_tags" != "" ]]; then
+        sorted_tags="$sorted_tags$IFS" # Add newline except on first item
+      fi;
+      sorted_tags="$sorted_tags${tag_prefix}${sorted_tag_version}" #reappend tag prefix
+    done
+    # sorted_tags="${sorted_tags%$'\n'}" #remove last newline
+  else
+    # -n -t. -k1,1 -k2,2 -k3,3
+    sorted_tags=$(echo -e "$tag_names" | gsort -V) #sort by number
+  fi;
+  # echo "Sorted:"
+  # echo "$sorted_tags"
+
+
+  # for tag_name in $tag_names
+  # do
+  #   sortable_tag_lines="$sortable_tag_lines${tag_name#filter}\n"
+  # done
   #<ref> tags/<release_prefix><version_number>
+
+#   for item in `cat list.txt`
+# do
+#         echo "Item: $item"
+# done
   # Sort by base version numbers (known issue with non-zero padded majors)
   # TODO: Remove 'filter' text before sorting, then reappend for accurate sort
-  echo -e "$tag_names" | sort -n -t. -k1,1 -k2,2 -k3,3
+  echo -e "$sorted_tags"
+  # | gsort -V
+  # sort -n -t. -k1,1 -k2,2 -k3,3
+  #
 }
 
 get_last_tag_name() {
   local versioning_prefix=$1
 
-  local tags=$(get_release_tags $versioning_prefix)
-  echo "$tags" | tail -1
+  local tags=$(get_release_tags "$versioning_prefix")
+  echo -e "$tags" | tail -1
 }
 
 get_versioning_prefix_from_tag() {

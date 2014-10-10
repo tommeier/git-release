@@ -178,14 +178,14 @@ $(changelog_footer)"
 
 it_will_generate_a_changelog_for_a_set_starting_point_when_other_versions_exist() {
   local tags=(
+    'releases/v0.5.7'
     'releases/v0.5.8'
     'releases/v1.0.0'
-    'releases/v0.5.7'
   )
   local commit_messages=(
+    'Release v0.5.7'
     'Release v0.5.8'
     'Release v1.0.0'
-    'Release v0.5.7'
   )
 
   generate_sandbox_tags tags[@] commit_messages[@]
@@ -197,9 +197,7 @@ it_will_generate_a_changelog_for_a_set_starting_point_when_other_versions_exist(
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-releases/v0.5.8
-releases/v0.5.8
-releases/v1.0.0
+Release v1.0.0
 
 $(changelog_divider)
 $(changelog_footer)"

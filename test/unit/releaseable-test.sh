@@ -57,6 +57,7 @@ it_uses_get_release_tags_to_return_tags_matching_a_given_pattern() {
     "random_tag_1"
     "random_tag_2"
     "random_tag_3"
+    "release/production/v0.5.8"
     "release/production/v1.0.9"
     "release/production/v3.0.9"
   )
@@ -68,7 +69,8 @@ random_tag_2
 random_tag_3"
 
   local output=$(get_release_tags release/production)
-  test "$output" = "release/production/v1.0.9
+  test "$output" = "release/production/v0.5.8
+release/production/v1.0.9
 release/production/v3.0.9"
 }
 
@@ -88,24 +90,22 @@ releases/v0.2.11
 releases/v0.2.12"
 }
 
-#TODO: KNOWN ISSUE: Fix this to handle multi-digit major versions
 it_uses_get_release_tags_to_return_tags_matching_a_given_pattern_with_10_boundaries_on_majors() {
   local tags=(
     "releases/v11.0.0"
     "releases/v9.0.0"
     "releases/v10.0.0"
+    "releases/v0.2.5"
     "releases/v12.0.0"
   )
   generate_sandbox_tags tags[@]
 
   local output=$(get_release_tags 'releases/v')
-  test "$output" = "releases/v10.0.0
+  test "$output" = "releases/v0.2.5
+releases/v9.0.0
+releases/v10.0.0
 releases/v11.0.0
-releases/v12.0.0
-releases/v9.0.0"
-#TODO: 9 should be returned first.
-# We need to strip the prefix before sorting, or add zero padding to the numbers
-# for accurate numerical sort
+releases/v12.0.0"
 }
 
 #get_last_tag_name()
