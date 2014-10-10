@@ -176,6 +176,37 @@ $(changelog_footer)"
   test "$(cat VERSION)" = "1.0.7"
 }
 
+it_will_generate_a_changelog_for_a_set_starting_point_when_other_versions_exist() {
+  local tags=(
+    'releases/v0.5.8'
+    'releases/v1.0.0'
+    'releases/v0.5.7'
+  )
+  local commit_messages=(
+    'Release v0.5.8'
+    'Release v1.0.0'
+    'Release v0.5.7'
+  )
+
+  generate_sandbox_tags tags[@] commit_messages[@]
+
+  sandbox_rup $(arg_for $ARG_VERSION 'patch') $(arg_for $ARG_RELEASE_PREFIX 'releases/v') $(arg_for $ARG_START 'releases/v1.0.0')
+
+  test "$(cat CHANGELOG)" = "$(changelog_divider)
+|| Release: 1.0.1
+|| Released on $(get_current_release_date)
+$(changelog_divider)
+
+releases/v0.5.8
+releases/v0.5.8
+releases/v1.0.0
+
+$(changelog_divider)
+$(changelog_footer)"
+
+  test "$(cat VERSION)" = "1.0.1"
+}
+
 it_will_generate_a_changelog_for_a_set_range_with_start_and_end() {
   local tags=(
     'releases/v1.0.4'
