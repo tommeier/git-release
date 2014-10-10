@@ -44,25 +44,21 @@ validate_deploy_tag() {
 
 get_release_tags() {
   local filter=""
-  local tag_names=""
+  local sorted_tag_names=""
+  local tag_prefix="$1"
 
-  if [[ $1 ]]; then
-    local tag_pattern=$1
-    filter="${tag_pattern}*"
+  if [[ "$tag_prefix" != '' ]]; then
+    filter="${tag_prefix}*"
   fi;
-  tag_names=$(git tag -l $filter)
-
-  #<ref> tags/<release_prefix><version_number>
-  # Sort by base version numbers (known issue with non-zero padded majors)
-  # TODO: Remove 'filter' text before sorting, then reappend for accurate sort
-  echo -e "$tag_names" | sort -n -t. -k1,1 -k2,2 -k3,3
+  sorted_tag_names=$(git tag -l --sort=version:refname $filter)
+  echo -e "$sorted_tag_names"
 }
 
 get_last_tag_name() {
   local versioning_prefix=$1
 
-  local tags=$(get_release_tags $versioning_prefix)
-  echo "$tags" | tail -1
+  local tags=$(get_release_tags "$versioning_prefix")
+  echo -e "$tags" | tail -1
 }
 
 get_versioning_prefix_from_tag() {

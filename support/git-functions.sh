@@ -47,6 +47,19 @@ current_git_version() {
   fi;
 }
 
+# We must ensure 2+ git version to allow for git tag sorting
+# Its the only cross platform way to be sure of accurate sort
+# Mac can `gsort -V`, others can `sort -V` but requires specific versions
+ensure_git_version() {
+  local git_version=$(current_git_version)
+  local minimum_git_version="2.0.0"
+
+  if (( $(echo "$git_version $minimum_git_version" | awk '{print ($1 < $2)}') )); then
+    echo "Error - Minimum git version required for accurate version numbering is ${minimum_git_version}. Your version: $git_version" >&2
+    exit 1
+  fi;
+}
+
 ensure_git_directory() {
   if [[ ! -d  '.git' ]]; then
     echo "Error - Not a git repository please run from the base of your git repo." >&2

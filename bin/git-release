@@ -110,19 +110,27 @@ shift $((OPTIND - 1))
 validate_version_type "$VERSION_TYPE" "$USAGE_OUTPUT"
 ensure_git_directory
 ensure_git_is_clean
+ensure_git_version
 
 ############################################################
 #####                   RELEASE                        #####
 ############################################################
-last_tag_name=$(get_last_tag_name $RELEASE_PREFIX);
+last_tag_name=$(get_last_tag_name "$RELEASE_PREFIX");
 
-if [[ "$START_POINT" = '' ]]; then
+if [[ "$START_POINT" = "" ]]; then
   START_POINT=$last_tag_name
 fi;
 
 next_version_number=$(get_next_version_number_from_tag $VERSION_TYPE $last_tag_name)
 next_tag_name="${RELEASE_PREFIX}${next_version_number}"
 generate_version_file "$next_version_number" "$VERSION_FILE"
+
+# echo "VERSION_TYPE: $VERSION_TYPE"
+# echo "last_tag_name: $last_tag_name"
+# echo "next_version_number: $next_version_number"
+# echo "next_tag_name: $next_tag_name"
+# echo "START_POINT: $START_POINT"
+# echo "END_POINT: $END_POINT"
 
 changelog_content=$(generate_changelog_content "$next_version_number" "$CHANGELOG_SCOPE" "$CHANGELOG_DISPLAY_URLS" "$START_POINT" "$END_POINT")
 
