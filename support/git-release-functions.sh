@@ -43,14 +43,15 @@ validate_deploy_tag() {
 ############################################################
 
 get_release_tags() {
-  local filter=""
   local sorted_tag_names=""
   local tag_prefix="$1"
 
   if [[ "$tag_prefix" != '' ]]; then
-    filter="${tag_prefix}*"
+    sorted_tag_names=$(git tag -l --sort=version:refname "$tag_prefix*")
+  else
+    sorted_tag_names=$(git tag -l --sort=version:refname)
   fi;
-  sorted_tag_names=$(git tag -l --sort=version:refname $filter)
+
   echo -e "$sorted_tag_names"
 }
 
