@@ -298,15 +298,15 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is a pull request merging a feature across multiple
-lines and continuing
-
 Security:
   Commit fixing the modal with security flaw
 
 Bugs:
   Login screen broken in firefox
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing
 
 Fixing the login but no tag displayed.
 
@@ -346,13 +346,13 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is a pull request merging a feature across multiple
-lines and continuing - https://github.com/organisation/repo-name/pull/722
-
 Bugs:
   Fix cookie storing sensitive data - https://github.com/organisation/repo-name/pull/685
   logout screen - https://github.com/organisation/repo-name/pull/705
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing - https://github.com/organisation/repo-name/pull/722
 
 Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
 
@@ -405,11 +405,12 @@ it_will_append_to_a_deploy_changelog_optionally(){
 
   generate_sandbox_tags tags[@] commit_messages[@]
 
+  local first_release_time=$(get_current_release_date)
   sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.7')
 
   test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.7
-|| Released on $(get_current_release_date)
+|| Released on ${first_release_time}
 $(changelog_divider)
 
 commit message for 1.0.7
@@ -424,11 +425,12 @@ $(changelog_footer)"
   git tag -f releases/v1.0.8
   git checkout master
 
+  local second_release_time=$(get_current_release_date)
   sandbox_rup $(arg_for $ARG_DEPLOYED_TAG 'releases/v1.0.8') $(arg_for $ARG_APPEND)
 
 test "$(cat CHANGELOG)" = "$(changelog_divider)
 || Release: 1.0.8
-|| Released on $(get_current_release_date)
+|| Released on ${second_release_time}
 $(changelog_divider)
 
 Merge tag 'deployed/releases/v1.0.7' into HEAD
@@ -438,7 +440,7 @@ Release deployed : releases/v1.0.7
 $(changelog_divider)
 $(changelog_divider)
 || Release: 1.0.7
-|| Released on $(get_current_release_date)
+|| Released on ${first_release_time}
 $(changelog_divider)
 
 commit message for 1.0.7

@@ -308,15 +308,15 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is a pull request merging a feature across multiple
-lines and continuing
-
 Security:
   Commit fixing the modal with security flaw
 
 Bugs:
   logout screen
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing
 
 Fixing the login but no tag displayed.
 
@@ -358,13 +358,13 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is a pull request merging a feature across multiple
-lines and continuing - https://github.com/organisation/repo-name/pull/722
-
 Bugs:
   Fix cookie storing sensitive data - https://github.com/organisation/repo-name/pull/685
   logout screen - https://github.com/organisation/repo-name/pull/705
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing - https://github.com/organisation/repo-name/pull/722
 
 Fixing the login but no tag displayed. - https://github.com/organisation/repo-name/pull/714
 

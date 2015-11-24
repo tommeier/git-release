@@ -50,11 +50,13 @@ Generation is based on all git commits between a start and end point ordered by 
 
 Developers that follow feature branches can pass an optional parameter to generate the changelog only on the pull requests merged in (the 'epics') providing a much cleaner list of content.
 
-Tagged content of the changelog is limited at the moment, I'm looking at ways to make this dynamic. But right now, any commit with the following prefixes (ignoring spaces and case) will group the commits in the `CHANGELOG` and present under ordered headings:
+Tagged content of the changelog is limited at the moment, I'm looking at ways to make this dynamic. But right now, any commit with the following prefixes (ignoring spaces and case) will group the commits in the `CHANGELOG` and present under ordered (case insensitive) headings:
 
-   * `[feature]`
-   * `[security]`
-   * `[bug]`
+   * `[Security]`
+   * `[Bug]` or `[Bugs]`
+   * `[UI Enhancement]` or `[UI Enhancements]`
+   * `[Engineering Enhancement]` or `[Engineering Enhancements]`
+   * `[Feature]` or `[Features]`
 
 ## Deploy
 

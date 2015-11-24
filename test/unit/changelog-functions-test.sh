@@ -197,13 +197,13 @@ it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags() {
 
   output=$(group_and_sort_changelog_lines "$commit_messages")
 
-  test "$output" = "Features:
-  OMG. I had time to write something of use
-  Its so exciting writing useful things!!
-
-Bugs:
+  test "$output" = "Bugs:
   Argh, I fixed a bug here
   What comes up, must come down
+
+Features:
+  OMG. I had time to write something of use
+  Its so exciting writing useful things!!
 
 Start of the project
 Some random tweak fix"
@@ -212,16 +212,40 @@ Some random tweak fix"
 it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags_case_insensitive() {
   local commit_messages="[Bug] Start of the project
     [BUGS]   Argh, I fixed a bug here
-    [fEaTuRes]     OMG. I had time to write something of use"
+    [EngineerIng EnhanceMENTs] I made the developers future life better
+    [fEaTuRes]     OMG. I had time to write something of use
+    [EngineerIng EnhanceMENT] Releasing became less of a stressful episode of despair
+    [Qc Defect] [QC2487] Some defect to fix
+    [UI EnHanceMent] I changed a pixel
+    [DefecT] [QC2930] A single pain
+    Untagged Commit
+    [UI EnHanceMentS] I changed the colour
+    [QC DEFECTS] Another defect"
 
   output=$(group_and_sort_changelog_lines "$commit_messages")
 
-  test "$output" = "Features:
+  test "$output" = "Bugs:
+  Start of the project
+  Argh, I fixed a bug here
+
+Defects:
+  [QC2487] Some defect to fix
+  [QC2930] A single pain
+  Another defect
+
+UI Enhancements:
+  I changed a pixel
+  I changed the colour
+
+Engineering Enhancements:
+  I made the developers future life better
+  Releasing became less of a stressful episode of despair
+
+Features:
   OMG. I had time to write something of use
 
-Bugs:
-  Start of the project
-  Argh, I fixed a bug here"
+Untagged Commit"
+
 }
 
 it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags_with_multiple_brackets() {
@@ -230,11 +254,12 @@ it_uses_group_and_sort_changelog_lines_to_return_titles_grouped_by_tags_with_mul
 
   output=$(group_and_sort_changelog_lines "$commit_messages")
 
-  test "$output" = "Features:
-  [Additonal Tag one] Another referenced feature
+  test "$output" = "Bugs:
+  [QC Some Reference][More Custom References] Fixed the tagged bugs
 
-Bugs:
-  [QC Some Reference][More Custom References] Fixed the tagged bugs"
+Features:
+  [Additonal Tag one] Another referenced feature"
+
 }
 
 #generate_changelog_content
@@ -381,15 +406,15 @@ Fixing the login but no tag displayed."
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is a pull request merging a feature across multiple
-lines and continuing
-
 Security:
   Commit fixing the modal with security flaw
 
 Bugs:
   Login field length
+
+Features:
+  This is a pull request merging a feature across multiple
+lines and continuing
 
 Fixing the login but no tag displayed.
 
@@ -420,11 +445,11 @@ it_uses_generate_changelog_content_to_list_pull_requests_with_urls(){
 || Released on $(get_current_release_date)
 $(changelog_divider)
 
-Features:
-  This is yet another pull request - https://github.com/organisation/repo-name/pull/722
-
 Bugs:
   Login field length - https://github.com/organisation/repo-name/pull/705
+
+Features:
+  This is yet another pull request - https://github.com/organisation/repo-name/pull/722
 
 $(changelog_divider)"
 }
