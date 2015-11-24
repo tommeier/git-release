@@ -118,12 +118,31 @@ group_and_sort_changelog_lines() {
   local feature_tag_lines=""
   local bug_tag_lines=""
   local security_tag_lines=""
+  local defect_lines=""
+  local ui_enhancement_lines=""
+  local engineering_enhancement_lines=""
+
   local general_release_lines=""
+
+# Bugs:
+#  < Stuff that we've found >
+
+# QC Defects:
+#  < Stuff that they've found >
+
+# UI Enhancements:
+#  < Stuff we made better that you can see >
+
+# Engineering enhancements:
+#  < Stuff we made better that you can't see >
+
+# Features:
+#  < New things >
 
   local newline=$'\n'
 
   while read -r line; do
-    local tag_regex="^\s*\[(features?|bugs?|security)\]\s*(.*)\s*$"
+    local tag_regex="^\s*\[(features?|bugs?|security|qc defects?|defects?|ui enhancements?|engineering enhancements?)\]\s*(.*)\s*$"
     if [[ $line =~ $tag_regex ]]; then
       #Tagged entry
       local full_tag=$BASH_REMATCH
@@ -135,6 +154,12 @@ group_and_sort_changelog_lines() {
 
       #Sort matching tags
       case "$tag_type" in
+          [qQ][cC][\ ][dD][eE][fF][eE][cC][tT] | [qQ][cC][\ ][dD][eE][fF][eE][cC][tT][sS] | [dD][eE][fF][eE][cC][tT] | [dD][eE][fF][eE][cC][tT][sS] )
+              defect_lines+="$tag_content";;
+          [uU][iI][\ ][eE][nN][hH][aA][nN][cC][eE][mM][eE][nN][tT] | [uU][iI][\ ][eE][nN][hH][aA][nN][cC][eE][mM][eE][nN][tT][sS] )
+              ui_enhancement_lines+="$tag_content";;
+          [eE][nN][gG][iI][nN][eE][eE][rR][iI][nN][gG][\ ][eE][nN][hH][aA][nN][cC][eE][mM][eE][nN][tT] | [eE][nN][gG][iI][nN][eE][eE][rR][iI][nN][gG][\ ][eE][nN][hH][aA][nN][cC][eE][mM][eE][nN][tT][sS] )
+              engineering_enhancement_lines+="$tag_content";;
           [fF][eE][aA][tT][uU][rR][eE] | [fF][eE][aA][tT][uU][rR][eE][sS] )
               feature_tag_lines+="${tag_content}";;
           [bB][uU][gG] | [bB][uU][gG][sS] )
@@ -151,11 +176,7 @@ group_and_sort_changelog_lines() {
   done <<< "$1";
 
   # Print out tagged content in order
-  if [[ $feature_tag_lines != '' ]]; then
-    echo "Features:
-${feature_tag_lines}"
-  fi;
-  if [[ $security_tag_lines != '' ]]; then
+    if [[ $security_tag_lines != '' ]]; then
     echo "Security:
 ${security_tag_lines}"
   fi;
@@ -163,6 +184,23 @@ ${security_tag_lines}"
     echo "Bugs:
 ${bug_tag_lines}"
   fi;
+  if [[ $defect_lines != '' ]]; then
+    echo "Defects:
+${defect_lines}"
+  fi;
+  if [[ $ui_enhancement_lines != '' ]]; then
+    echo "UI Enhancements:
+${ui_enhancement_lines}"
+  fi;
+  if [[ $engineering_enhancement_lines != '' ]]; then
+    echo "Engineering Enhancements:
+${engineering_enhancement_lines}"
+  fi;
+  if [[ $feature_tag_lines != '' ]]; then
+    echo "Features:
+${feature_tag_lines}"
+  fi;
+
   echo "$general_release_lines${newline}"
 
   #Return previous setup for bash
